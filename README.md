@@ -39,7 +39,7 @@ Want to add a binding for your language? See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Reference Implementation
 
-The Python reference implementation is available at [cooperative-coding-python](https://github.com/<owner>/cooperative-coding-python) — includes a CLI (`ccoding`), an Obsidian canvas plugin, and a Claude Code skill.
+The Python reference implementation is available at [cooperative-coding-python](https://github.com/giosullutrone/cooperative-coding-python) — includes a CLI (`ccoding`), an Obsidian canvas plugin, and a Claude Code skill.
 
 ## Contributing
 

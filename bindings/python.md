@@ -9,7 +9,7 @@
 **Status:** Reference binding
 **Python version:** 3.11+
 
-This binding is used by the [cooperative-coding-python](https://github.com/<owner>/cooperative-coding-python) reference implementation.
+This binding is used by the [cooperative-coding-python](https://github.com/giosullutrone/cooperative-coding-python) reference implementation.
 
 ---
 
@@ -472,7 +472,7 @@ The Python type `bool` was translated back to the canvas type `Boolean`, and `Fa
 
 ## 7. Reference Implementation
 
-The full working implementation is available at [cooperative-coding-python](https://github.com/<owner>/cooperative-coding-python). The repository contains the sync engine, code parser, code generator, and docstring mapping logic that this appendix describes.
+The full working implementation is available at [cooperative-coding-python](https://github.com/giosullutrone/cooperative-coding-python). The repository contains the sync engine, code parser, code generator, and docstring mapping logic that this appendix describes.
 
 Key modules:
 
