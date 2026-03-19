@@ -485,6 +485,7 @@ Key modules:
 
 The reference implementation also includes:
 
-- **Type mapper** (`ccoding/code/types.py`) — translates between canvas language-neutral types and Python type annotations, including generic types and union syntax.
-- **Import resolver** (`ccoding/code/imports.py`) — generates correct import statements from `ccoding.qualifiedName` values, stereotype requirements, and type annotation dependencies.
-- **Canvas CRUD** (`ccoding/canvas/crud.py`) — reads and writes JSON Canvas files, preserving all standard fields and `ccoding` metadata through round-trips.
+- **Type mapper** (`ccoding/code/types.py`) — translates between canvas language-neutral types and Python type annotations, including generic types and union syntax. *(Planned — not yet implemented)*
+- **Import resolver** (`ccoding/code/imports.py`) — generates correct import statements from `ccoding.qualifiedName` values, stereotype requirements, and type annotation dependencies. *(Planned — not yet implemented)*
+- **Canvas reader** (`ccoding/canvas/reader.py`) — reads JSON Canvas files into the internal model, preserving all standard fields and `ccoding` metadata.
+- **Canvas writer** (`ccoding/canvas/writer.py`) — writes the internal model back to JSON Canvas files, preserving all standard fields and `ccoding` metadata through round-trips.
