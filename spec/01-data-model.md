@@ -48,6 +48,28 @@ All CooperativeCoding code-element nodes use the `"text"` node type. The standar
 
 CooperativeCoding adds the `ccoding` object to both nodes and edges. Implementations MUST NOT remove or alter any standard JSON Canvas fields when reading and writing canvas files. Unknown fields outside the `ccoding` namespace MUST be preserved through read/write cycles.
 
+### Canvas-Level Metadata
+
+In addition to node-level and edge-level `ccoding` objects, a canvas file MAY include a top-level `ccoding` object alongside the `nodes` and `edges` arrays. This provides canvas-wide defaults and compatibility information.
+
+| Field | Required | Description |
+|---|---|---|
+| `specVersion` | RECOMMENDED | The CooperativeCoding spec version this canvas conforms to (e.g., `"1.0.0"`). Tools SHOULD use this for compatibility detection. |
+| `language` | OPTIONAL | Default programming language for all nodes in this canvas (e.g., `"python"`). Individual nodes MAY override this with their own `ccoding.language` field. |
+
+```json
+{
+  "ccoding": {
+    "specVersion": "1.0.0",
+    "language": "python"
+  },
+  "nodes": [...],
+  "edges": [...]
+}
+```
+
+Tools that do not recognize the top-level `ccoding` object MUST preserve it through read/write cycles.
+
 ---
 
 ## 3. Node Metadata Schema
@@ -88,7 +110,7 @@ The `ccoding` object on a node carries the semantic identity, language mapping, 
 | `source` | OPTIONAL | Relative file path (e.g., `src/parsers/document.py`) | Path to the source file this node maps to, relative to the project root. Used by the sync engine to locate the corresponding code. Implementations MUST treat this as a project-relative path, never absolute. |
 | `qualifiedName` | RECOMMENDED | Dot-notation identifier (e.g., `parsers.document.DocumentParser`) | Fully qualified name in the target language's namespace. This is the stable identity link between a canvas node and its code counterpart. The sync engine uses this value — not the node `id` — to match canvas elements to code elements. Implementations SHOULD include `qualifiedName` on all code-element nodes. |
 | `status` | REQUIRED for tracked nodes | `accepted`, `proposed`, `rejected`, `stale` | Current lifecycle status. Governs whether the element is synced to code, awaiting review, or flagged for attention. See Section 4 and [Lifecycle](02-lifecycle.md) for full semantics. |
-| `proposedBy` | OPTIONAL | `"agent"`, `"human"`, or `null` | Who created this element as a proposal. MUST be set when `status` is `"proposed"`. SHOULD be `null` or omitted when `status` is `"accepted"`. |
+| `proposedBy` | OPTIONAL | `"agent"`, `"human"`, or `null` | Who created this element as a proposal. MUST be set when `status` is `"proposed"`. MAY be preserved after acceptance for audit trail purposes, or MAY be cleared (set to `null`). |
 | `proposalRationale` | OPTIONAL | String or `null` | Free-text explanation for why this element was proposed. Intended for human review — the agent explains its reasoning, or the human explains their tentative idea. SHOULD be present when `proposedBy` is `"agent"`. |
 
 ### Kind Semantics
@@ -147,9 +169,8 @@ The element's corresponding code was deleted, moved, or renamed in a way the syn
 proposed  ──accept──▸  accepted
 proposed  ──reject──▸  rejected
 accepted  ──stale───▸  stale      (detected by sync)
-stale     ──restore─▸  accepted   (human action)
-stale     ──delete──▸  (removed from canvas)
-rejected  ──reopen──▸  proposed   (human reconsideration)
+stale     ──restore─▸  accepted   (human or sync action)
+rejected  ──reconsider──▸  proposed   (human reconsideration)
 ```
 
 ---

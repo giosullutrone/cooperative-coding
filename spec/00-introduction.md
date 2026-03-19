@@ -16,9 +16,9 @@ Code design and code implementation are different skills that benefit from diffe
 
 CooperativeCoding separates these concerns:
 
-- **The human works on a visual canvas** — a simplified UML where classes, interfaces, methods, fields, and their relationships are first-class objects. Each element carries a documentation block with its responsibility and pseudo code. The canvas shows what truly matters: the architecture, the contracts, the design intent.
-- **The agent works on the code** — it reads the canvas design, proposes improvements as ghost nodes, implements the underlying source code, and keeps canvas and code in bidirectional sync.
-- **They cooperate** — the agent doesn't just execute orders. It proposes design changes (ghost nodes on the canvas), flags architectural issues, and suggests alternatives. The human remains the design authority — accepting, rejecting, or modifying proposals before anything gets implemented.
+- **Both work on a visual canvas** — a simplified UML where classes, interfaces, methods, fields, and their relationships are first-class objects. Each element carries a documentation block with its responsibility and pseudo code. The canvas shows what truly matters: the architecture, the contracts, the design intent. Both humans and agents create, modify, and connect elements on this canvas.
+- **The agent also works on the code** — it reads the canvas design, implements the underlying source code, and keeps canvas and code in bidirectional sync.
+- **They cooperate** — either party can propose architectural changes. Agent-created elements appear as ghost proposals (awaiting human review). The human remains the final design authority — accepting, rejecting, or modifying proposals before anything gets implemented.
 
 ---
 
@@ -38,7 +38,7 @@ Concrete implementations require three things:
 
 ### 1. Design Authority is Human
 
-Software architecture is a discipline of tradeoffs — performance versus readability, flexibility versus simplicity, speed-to-market versus long-term maintainability. These tradeoffs require judgment that emerges from business context, team culture, and lived experience. No agent has that context. In CooperativeCoding, the human always has final say on architecture. The agent proposes, the human disposes. No design change — no new class, no new relationship, no restructured inheritance hierarchy — is applied without explicit human approval. Agents MUST express design ideas as ghost proposals and MUST NOT modify accepted nodes without going through the proposal workflow.
+Software architecture is a discipline of tradeoffs — performance versus readability, flexibility versus simplicity, speed-to-market versus long-term maintainability. These tradeoffs require judgment that emerges from business context, team culture, and lived experience. Agents can contribute valuable design ideas, but lack the full picture of these constraints. In CooperativeCoding, the human always has final say on architecture. The agent proposes, the human disposes. No design change — no new class, no new relationship, no restructured inheritance hierarchy — is applied without explicit human approval. Agents MUST express design ideas as ghost proposals and MUST NOT modify accepted nodes without going through the proposal workflow.
 
 ### 2. Progressive Detail
 
