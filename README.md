@@ -3,7 +3,7 @@
 > Current agentic coding treats software as text to be generated.
 > CooperativeCoding treats it as architecture to be negotiated.
 
-AI agents can write code, but they can't share architectural intent with humans. The result is drift, loss of design coherence, and humans reduced to code reviewers. CooperativeCoding is an open standard that fixes this by giving architecture a machine-readable, tool-agnostic home — where humans design and agents implement, with a shared source of truth between them.
+AI agents can write code, but they can't share architectural intent with humans. The result is drift, loss of design coherence, and humans reduced to code reviewers. CooperativeCoding is an open standard that fixes this by giving architecture a machine-readable, tool-agnostic home — where humans and agents co-design, with a shared source of truth between them.
 
 ## What is CooperativeCoding?
 
@@ -13,11 +13,10 @@ The spec is language-agnostic and tool-agnostic. It can be implemented for any p
 
 ## How It Works
 
-1. **Human designs** — creates architectural nodes on a visual canvas (classes, interfaces, packages) with responsibilities, fields, methods, and relationships
-2. **Agent proposes** — analyzes the design and proposes improvements as *ghost nodes* (dashed borders, awaiting review)
-3. **Human reviews** — accepts, rejects, or modifies proposals. The human is always the design authority.
-4. **Agent implements** — generates source code from accepted canvas nodes, following the documentation contracts
-5. **Sync keeps truth** — bidirectional sync ensures canvas and code stay aligned as both evolve
+1. **Design** — either the human or the agent creates architectural nodes on a visual canvas (classes, interfaces, packages) with responsibilities, fields, methods, and relationships. Agent-created nodes appear as *ghost proposals* (dashed borders, awaiting review).
+2. **Review** — the human reviews proposals — accepting, rejecting, or modifying them. The human is always the final design authority.
+3. **Implement** — the agent generates source code from accepted canvas nodes, following the documentation contracts
+4. **Sync** — bidirectional sync ensures canvas and code stay aligned as both evolve
 
 ## The Specification
 

@@ -6,7 +6,7 @@
 
 > Current agentic coding treats software as text to be generated. CooperativeCoding treats it as architecture to be negotiated.
 
-AI agents can write code, but they can't share architectural intent with humans. The result is drift, loss of design coherence, and humans reduced to code reviewers. CooperativeCoding is an open standard that fixes this by giving architecture a machine-readable, tool-agnostic home — where humans design and agents implement, with a shared source of truth between them.
+AI agents can write code, but they can't share architectural intent with humans. The result is drift, loss of design coherence, and humans reduced to code reviewers. CooperativeCoding is an open standard that fixes this by giving architecture a machine-readable, tool-agnostic home — where humans and agents co-design, with a shared source of truth between them.
 
 ---
 
