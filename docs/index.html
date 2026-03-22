@@ -1,0 +1,1805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CooperativeCoding: An open specification for human-AI collaborative software design built on JSON Canvas v1.0">
+    <meta name="theme-color" content="#faf8f5">
+    <title>CooperativeCoding — Open Specification for Human-AI Collaborative Software Design</title>
+
+    <!-- Google Fonts: preconnect + load -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet">
+
+    <style>
+        /* ============================================================
+           RESET & BASE
+           ============================================================ */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
+        body {
+            font-family: "Source Serif 4", "Georgia", serif;
+            background-color: #faf8f5;
+            color: #1a1f36;
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* ============================================================
+           GRAPH PAPER BACKGROUND
+           Two layers of grid lines for a drafting paper feel.
+           Major grid: every 40px. Minor grid: every 10px.
+           ============================================================ */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            background-image:
+                /* Major grid lines (every 40px) */
+                linear-gradient(to right, rgba(160, 150, 140, 0.15) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(160, 150, 140, 0.15) 1px, transparent 1px),
+                /* Minor grid lines (every 10px) */
+                linear-gradient(to right, rgba(160, 150, 140, 0.06) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(160, 150, 140, 0.06) 1px, transparent 1px);
+            background-size:
+                40px 40px,
+                40px 40px,
+                10px 10px,
+                10px 10px;
+        }
+
+        /* ============================================================
+           TYPOGRAPHY
+           ============================================================ */
+        h1, h2, h3, h4 {
+            font-family: "Instrument Serif", "Georgia", serif;
+            font-weight: 400;
+            line-height: 1.2;
+        }
+
+        a {
+            color: #d94f30;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        a:hover {
+            color: #b83d22;
+        }
+
+        code {
+            font-family: "JetBrains Mono", "Menlo", monospace;
+            font-size: 0.88em;
+            background: rgba(226, 221, 213, 0.5);
+            padding: 0.15em 0.45em;
+            border-radius: 4px;
+            color: #3d6b99;
+        }
+
+        /* ============================================================
+           LAYOUT
+           ============================================================ */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        section {
+            padding: 6rem 0;
+        }
+
+        /* ============================================================
+           CARDS
+           ============================================================ */
+        .card {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 6px 16px rgba(0,0,0,0.04);
+            border: 1px solid #e2ddd5;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08), 0 12px 28px rgba(0,0,0,0.06);
+        }
+
+        /* ============================================================
+           HEADER & NAV
+           Sticky, transparent -> solid on scroll.
+           ============================================================ */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(250, 248, 245, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid transparent;
+            transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        header.scrolled {
+            background: rgba(250, 248, 245, 0.97);
+            border-bottom-color: #e2ddd5;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
+            padding: 0 2rem;
+        }
+
+        .logo-text {
+            font-family: "Instrument Serif", "Georgia", serif;
+            font-size: 1.4rem;
+            color: #1a1f36;
+            letter-spacing: -0.01em;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            font-family: "Instrument Sans", "Helvetica Neue", sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #6b6560;
+            text-decoration: none;
+            transition: color 0.2s ease;
+            position: relative;
+            padding-bottom: 2px;
+        }
+
+        .nav-links a::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -2px;
+            width: 0;
+            height: 2px;
+            background: #d94f30;
+            transition: width 0.25s ease;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #1a1f36;
+        }
+
+        .nav-links a:hover::after,
+        .nav-links a.active::after {
+            width: 100%;
+        }
+
+        /* Mobile hamburger */
+        .nav-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .nav-toggle span {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: #1a1f36;
+            margin: 5px 0;
+            transition: 0.2s;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 64px;
+                left: 0;
+                right: 0;
+                background: rgba(250, 248, 245, 0.98);
+                flex-direction: column;
+                padding: 1rem 2rem 1.5rem;
+                gap: 1rem;
+                border-bottom: 1px solid #e2ddd5;
+            }
+
+            .nav-links.open {
+                display: flex;
+            }
+
+            .nav-toggle {
+                display: block;
+            }
+
+            nav {
+                padding: 0 1rem;
+            }
+        }
+
+        /* ============================================================
+           HERO SECTION
+           Full-viewport height, graph paper visible, animated
+           SVG blueprint schematic in background.
+           ============================================================ */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding: 6rem 2rem;
+        }
+
+        /* Blueprint SVG sits behind the text */
+        .hero-blueprint {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            opacity: 0.35;
+        }
+
+        .hero-blueprint svg {
+            width: 100%;
+            max-width: 900px;
+            height: auto;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 720px;
+        }
+
+        .hero-content h1 {
+            font-size: 4.5rem;
+            color: #1a1f36;
+            margin-bottom: 1rem;
+            opacity: 0;
+            animation: fadeUp 0.8s ease forwards 0.3s;
+        }
+
+        .hero-subtitle {
+            font-family: "Source Serif 4", "Georgia", serif;
+            font-size: 1.3rem;
+            color: #6b6560;
+            margin-bottom: 1.8rem;
+            font-style: italic;
+            opacity: 0;
+            animation: fadeUp 0.8s ease forwards 0.5s;
+        }
+
+        .version-badge {
+            display: inline-block;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 0.8rem;
+            color: #6b6560;
+            background: #ffffff;
+            border: 1px solid #e2ddd5;
+            padding: 0.35rem 1rem;
+            border-radius: 20px;
+            margin-bottom: 2.2rem;
+            opacity: 0;
+            animation: fadeUp 0.8s ease forwards 0.65s;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            opacity: 0;
+            animation: fadeUp 0.8s ease forwards 0.8s;
+        }
+
+        .btn {
+            font-family: "Instrument Sans", "Helvetica Neue", sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 0.85rem 2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            display: inline-block;
+            border: 2px solid transparent;
+        }
+
+        .btn-filled {
+            background: #d94f30;
+            color: #fff;
+            border-color: #d94f30;
+        }
+
+        .btn-filled:hover {
+            background: #c24428;
+            border-color: #c24428;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(217, 79, 48, 0.25);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #d94f30;
+            border-color: #d94f30;
+        }
+
+        .btn-outline:hover {
+            background: #d94f30;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-content h1 {
+                font-size: 2.8rem;
+            }
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-content h1 {
+                font-size: 2.2rem;
+            }
+        }
+
+        /* ============================================================
+           HERO SVG ANIMATIONS
+           Nodes fade in sequentially, edges draw themselves,
+           connection points pulse.
+           ============================================================ */
+
+        /* Nodes fade in with stagger */
+        .bp-node {
+            opacity: 0;
+            animation: bpNodeIn 0.7s ease forwards;
+        }
+        .bp-node:nth-child(1) { animation-delay: 0.4s; }
+        .bp-node:nth-child(2) { animation-delay: 0.7s; }
+        .bp-node:nth-child(3) { animation-delay: 1.0s; }
+        .bp-node:nth-child(4) { animation-delay: 1.3s; }
+        .bp-node:nth-child(5) { animation-delay: 1.6s; }
+        .bp-node:nth-child(6) { animation-delay: 1.9s; }
+        .bp-node:nth-child(7) { animation-delay: 2.2s; }
+
+        @keyframes bpNodeIn {
+            from { opacity: 0; transform: scale(0.92); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        /* Edges draw in */
+        .bp-edge {
+            stroke-dasharray: 300;
+            stroke-dashoffset: 300;
+            animation: bpEdgeDraw 1s ease forwards;
+        }
+        .bp-edge:nth-child(8)  { animation-delay: 1.8s; }
+        .bp-edge:nth-child(9)  { animation-delay: 2.0s; }
+        .bp-edge:nth-child(10) { animation-delay: 2.2s; }
+        .bp-edge:nth-child(11) { animation-delay: 2.4s; }
+        .bp-edge:nth-child(12) { animation-delay: 2.6s; }
+        .bp-edge:nth-child(13) { animation-delay: 2.8s; }
+        .bp-edge:nth-child(14) { animation-delay: 3.0s; }
+        .bp-edge:nth-child(15) { animation-delay: 3.2s; }
+
+        @keyframes bpEdgeDraw {
+            to { stroke-dashoffset: 0; }
+        }
+
+        /* Pulse on connection dots */
+        .bp-dot {
+            opacity: 0;
+            animation: bpDotPulse 2s ease-in-out infinite;
+        }
+        .bp-dot:nth-child(16) { animation-delay: 2.5s; }
+        .bp-dot:nth-child(17) { animation-delay: 2.7s; }
+        .bp-dot:nth-child(18) { animation-delay: 2.9s; }
+        .bp-dot:nth-child(19) { animation-delay: 3.1s; }
+        .bp-dot:nth-child(20) { animation-delay: 3.3s; }
+        .bp-dot:nth-child(21) { animation-delay: 3.5s; }
+        .bp-dot:nth-child(22) { animation-delay: 3.7s; }
+        .bp-dot:nth-child(23) { animation-delay: 3.9s; }
+
+        @keyframes bpDotPulse {
+            0%, 100% { opacity: 0.4; r: 3; }
+            50% { opacity: 1; r: 5; }
+        }
+
+        /* ============================================================
+           SECTION HEADINGS
+           ============================================================ */
+        .section-heading {
+            font-size: 2.6rem;
+            color: #1a1f36;
+            margin-bottom: 1rem;
+        }
+
+        .section-lead {
+            color: #6b6560;
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+            max-width: 700px;
+        }
+
+        /* ============================================================
+           SECTION 3: OVERVIEW
+           ============================================================ */
+        .overview-section {
+            padding-bottom: 4rem;
+        }
+
+        .overview-blockquote {
+            border-left: 4px solid #d94f30;
+            padding: 1.5rem 2rem;
+            margin: 0 0 2.5rem 0;
+            font-style: italic;
+            font-size: 1.2rem;
+            color: #1a1f36;
+            line-height: 1.7;
+            background: rgba(217, 79, 48, 0.04);
+            border-radius: 0 6px 6px 0;
+        }
+
+        .overview-columns {
+            columns: 2;
+            column-gap: 3rem;
+        }
+
+        .overview-columns p {
+            margin-bottom: 1.2rem;
+            break-inside: avoid;
+        }
+
+        @media (max-width: 768px) {
+            .overview-columns {
+                columns: 1;
+            }
+        }
+
+        /* ============================================================
+           SECTION 4: SEVEN PRINCIPLES
+           ============================================================ */
+        .principles-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .principle-card {
+            padding: 2rem;
+            position: relative;
+        }
+
+        .principle-card .p-number {
+            font-family: "JetBrains Mono", monospace;
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #d94f30;
+            margin-bottom: 0.6rem;
+            display: block;
+        }
+
+        .principle-card h3 {
+            font-family: "Instrument Serif", "Georgia", serif;
+            font-size: 1.25rem;
+            color: #1a1f36;
+            margin-bottom: 0.6rem;
+        }
+
+        .principle-card p {
+            color: #6b6560;
+            font-size: 0.95rem;
+            line-height: 1.65;
+        }
+
+        /* Stagger scroll animations */
+        .principle-card {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .principle-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .principle-card:nth-child(1) { transition-delay: 0s; }
+        .principle-card:nth-child(2) { transition-delay: 0.08s; }
+        .principle-card:nth-child(3) { transition-delay: 0.16s; }
+        .principle-card:nth-child(4) { transition-delay: 0.24s; }
+        .principle-card:nth-child(5) { transition-delay: 0.32s; }
+        .principle-card:nth-child(6) { transition-delay: 0.40s; }
+        .principle-card:nth-child(7) { transition-delay: 0.48s; }
+
+        @media (max-width: 768px) {
+            .principles-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ============================================================
+           SECTION 5: THE COOPERATION LOOP
+           ============================================================ */
+        .loop-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: start;
+        }
+
+        .loop-diagram-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loop-diagram-container svg {
+            width: 100%;
+            max-width: 420px;
+            height: auto;
+        }
+
+        .loop-phases {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .loop-phase {
+            padding: 1.5rem 0;
+            border-bottom: 1px solid #e2ddd5;
+        }
+
+        .loop-phase:last-child {
+            border-bottom: none;
+        }
+
+        .loop-phase-name {
+            font-family: "JetBrains Mono", monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.4rem;
+        }
+
+        .loop-phase-name.design { color: #3d6b99; }
+        .loop-phase-name.review { color: #4a7c6f; }
+        .loop-phase-name.implement { color: #d94f30; }
+        .loop-phase-name.sync { color: #1a1f36; }
+
+        .loop-phase p {
+            color: #6b6560;
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 768px) {
+            .loop-layout {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+        }
+
+        /* ============================================================
+           SECTION 6: DATA MODEL
+           ============================================================ */
+        .data-model-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+        }
+
+        .data-model-col h3 {
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+            color: #1a1f36;
+        }
+
+        /* Node kind cards */
+        .node-kind {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .node-kind-chip {
+            flex-shrink: 0;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 0.82rem;
+            font-weight: 500;
+            padding: 0.4rem 0.8rem;
+            background: #fff;
+            border: 1px solid #e2ddd5;
+            border-left: 3px solid;
+            border-radius: 4px;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .node-kind-chip.kind-class     { border-left-color: #3d6b99; color: #3d6b99; }
+        .node-kind-chip.kind-method    { border-left-color: #d94f30; color: #d94f30; }
+        .node-kind-chip.kind-field     { border-left-color: #4a7c6f; color: #4a7c6f; }
+        .node-kind-chip.kind-package   { border-left-color: #1a1f36; color: #1a1f36; }
+        .node-kind-chip.kind-test      { border-left-color: #8a6dbf; color: #8a6dbf; }
+        .node-kind-chip.kind-interface { border-left-color: #3d6b99; color: #3d6b99; }
+        .node-kind-chip.kind-module    { border-left-color: #6b6560; color: #6b6560; }
+
+        .node-kind-desc {
+            color: #6b6560;
+            font-size: 0.92rem;
+            line-height: 1.55;
+            padding-top: 0.25rem;
+        }
+
+        /* Edge relation lines */
+        .edge-relation {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .edge-line-sample {
+            flex-shrink: 0;
+            width: 60px;
+            height: 20px;
+            position: relative;
+        }
+
+        .edge-line-sample svg {
+            width: 60px;
+            height: 20px;
+        }
+
+        .edge-label {
+            font-family: "JetBrains Mono", monospace;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: #3d6b99;
+            min-width: 80px;
+        }
+
+        .edge-desc {
+            color: #6b6560;
+            font-size: 0.92rem;
+            line-height: 1.55;
+        }
+
+        .stereotype-note {
+            background: rgba(61, 107, 153, 0.06);
+            border-left: 3px solid #3d6b99;
+            padding: 1.2rem 1.5rem;
+            border-radius: 0 6px 6px 0;
+            margin-top: 2rem;
+            font-size: 0.95rem;
+            color: #6b6560;
+        }
+
+        .stereotype-note strong {
+            color: #3d6b99;
+        }
+
+        @media (max-width: 768px) {
+            .data-model-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ============================================================
+           SECTION 7: STATUS LIFECYCLE
+           ============================================================ */
+        .lifecycle-diagram-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 3rem;
+        }
+
+        .lifecycle-diagram-container svg {
+            width: 100%;
+            max-width: 640px;
+            height: auto;
+        }
+
+        .status-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .status-item {
+            padding: 1.5rem;
+        }
+
+        .status-item .status-name {
+            font-family: "JetBrains Mono", monospace;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+        }
+
+        .status-item .status-desc {
+            color: #6b6560;
+            font-size: 0.92rem;
+        }
+
+        .status-proposed .status-name { color: #6b6560; }
+        .status-accepted .status-name { color: #4a7c6f; }
+        .status-rejected .status-name { color: #999; }
+        .status-stale .status-name    { color: #c08b30; }
+
+        @media (max-width: 768px) {
+            .status-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ============================================================
+           SECTION 8: BIDIRECTIONAL SYNC
+           ============================================================ */
+        .sync-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .sync-box {
+            padding: 2rem;
+        }
+
+        .sync-box h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1.2rem;
+            color: #1a1f36;
+        }
+
+        .sync-list {
+            list-style: none;
+        }
+
+        .sync-list li {
+            padding: 0.5rem 0 0.5rem 2rem;
+            position: relative;
+            color: #6b6560;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .sync-list li::before {
+            position: absolute;
+            left: 0;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .sync-yes li::before {
+            content: "\2713"; /* checkmark */
+            color: #4a7c6f;
+        }
+
+        .sync-no li::before {
+            content: "\2717"; /* x mark */
+            color: #d94f30;
+        }
+
+        .conflict-callout {
+            background: rgba(192, 139, 48, 0.08);
+            border: 1px solid rgba(192, 139, 48, 0.25);
+            border-left: 4px solid #c08b30;
+            padding: 1.5rem 2rem;
+            border-radius: 0 6px 6px 0;
+            font-size: 0.95rem;
+            color: #6b6560;
+        }
+
+        .conflict-callout strong {
+            color: #c08b30;
+        }
+
+        @media (max-width: 768px) {
+            .sync-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ============================================================
+           SECTION 9: GETTING STARTED
+           ============================================================ */
+        .timeline {
+            position: relative;
+            padding-left: 3rem;
+        }
+
+        /* Connecting line */
+        .timeline::before {
+            content: "";
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e2ddd5;
+        }
+
+        .timeline-step {
+            position: relative;
+            margin-bottom: 2.5rem;
+        }
+
+        .timeline-step:last-child {
+            margin-bottom: 0;
+        }
+
+        .timeline-number {
+            position: absolute;
+            left: -3rem;
+            top: 0;
+            width: 32px;
+            height: 32px;
+            background: #d94f30;
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 1;
+        }
+
+        .timeline-step h3 {
+            font-family: "Instrument Serif", serif;
+            font-size: 1.3rem;
+            margin-bottom: 0.4rem;
+            color: #1a1f36;
+        }
+
+        .timeline-step p {
+            color: #6b6560;
+            font-size: 0.95rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .timeline-step a.step-cta {
+            font-family: "Instrument Sans", sans-serif;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #d94f30;
+        }
+
+        .timeline-step a.step-cta:hover {
+            text-decoration: underline;
+        }
+
+        /* ============================================================
+           SECTION 10: SPECIFICATION DOCUMENTS
+           ============================================================ */
+        .docs-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .doc-card {
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .doc-card .doc-filename {
+            font-family: "JetBrains Mono", monospace;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #3d6b99;
+            margin-bottom: 0.8rem;
+        }
+
+        .doc-card p {
+            color: #6b6560;
+            font-size: 0.92rem;
+            flex-grow: 1;
+            margin-bottom: 1.2rem;
+        }
+
+        .doc-card .doc-link {
+            font-family: "Instrument Sans", sans-serif;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #d94f30;
+            align-self: flex-start;
+        }
+
+        .doc-card .doc-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .docs-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .docs-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* ============================================================
+           FOOTER
+           ============================================================ */
+        footer {
+            background: #f0ede8;
+            padding: 4rem 0 2rem;
+            margin-top: 2rem;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-col h4 {
+            font-family: "Instrument Sans", sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #1a1f36;
+            margin-bottom: 1rem;
+        }
+
+        .footer-col p,
+        .footer-col a {
+            color: #6b6560;
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+
+        .footer-col a {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #6b6560;
+        }
+
+        .footer-col a:hover {
+            color: #d94f30;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #e2ddd5;
+            padding-top: 2rem;
+            text-align: center;
+        }
+
+        .footer-logo {
+            font-family: "Instrument Serif", serif;
+            font-size: 1.3rem;
+            color: #1a1f36;
+        }
+
+        .footer-copyright {
+            font-family: "Instrument Sans", sans-serif;
+            font-size: 0.8rem;
+            color: #6b6560;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ============================================================
+           SCROLL ANIMATION (generic)
+           ============================================================ */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.55s ease, transform 0.55s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ============================================================
+           RESPONSIVE CONTAINER
+           ============================================================ */
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 1rem;
+            }
+            section {
+                padding: 3.5rem 0;
+            }
+            .section-heading {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ================================================================
+         HEADER / NAV
+         ================================================================ -->
+    <header id="site-header">
+        <nav>
+            <a href="#" class="logo-text">CooperativeCoding</a>
+            <button class="nav-toggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-links">
+                <li><a href="#overview" class="nav-link">Overview</a></li>
+                <li><a href="#principles" class="nav-link">Principles</a></li>
+                <li><a href="#loop" class="nav-link">Loop</a></li>
+                <li><a href="#data-model" class="nav-link">Data Model</a></li>
+                <li><a href="#lifecycle" class="nav-link">Lifecycle</a></li>
+                <li><a href="#sync" class="nav-link">Sync</a></li>
+                <li><a href="#getting-started" class="nav-link">Get Started</a></li>
+                <li><a href="https://github.com/giosullutrone/cooperative-coding" target="_blank" class="nav-link">GitHub</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- ================================================================
+         HERO SECTION
+         ================================================================ -->
+    <section class="hero" id="hero">
+
+        <!-- Animated blueprint schematic background -->
+        <div class="hero-blueprint">
+            <svg viewBox="0 0 900 500" xmlns="http://www.w3.org/2000/svg" fill="none">
+                <defs>
+                    <marker id="bp-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                        <path d="M0 0 L8 3 L0 6Z" fill="#3d6b99"/>
+                    </marker>
+                </defs>
+
+                <!-- Node rectangles (rounded) -->
+                <g class="bp-node">
+                    <rect x="60" y="80" width="140" height="60" rx="6" stroke="#3d6b99" stroke-width="1.5" fill="none"/>
+                    <text x="130" y="115" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#3d6b99">DocumentParser</text>
+                </g>
+                <g class="bp-node">
+                    <rect x="320" y="40" width="130" height="55" rx="6" stroke="#3d6b99" stroke-width="1.5" fill="none"/>
+                    <text x="385" y="72" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#3d6b99">TokenStream</text>
+                </g>
+                <g class="bp-node">
+                    <rect x="320" y="140" width="130" height="55" rx="6" stroke="#4a7c6f" stroke-width="1.5" fill="none"/>
+                    <text x="385" y="172" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#4a7c6f">PluginManager</text>
+                </g>
+                <g class="bp-node">
+                    <rect x="580" y="80" width="120" height="55" rx="6" stroke="#d94f30" stroke-width="1.5" fill="none"/>
+                    <text x="640" y="112" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#d94f30">ASTNode</text>
+                </g>
+                <g class="bp-node">
+                    <rect x="120" y="280" width="140" height="55" rx="6" stroke="#1a1f36" stroke-width="1.2" fill="none"/>
+                    <text x="190" y="312" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#1a1f36">parsers</text>
+                </g>
+                <g class="bp-node">
+                    <rect x="580" y="250" width="150" height="55" rx="6" stroke="#3d6b99" stroke-width="1.5" stroke-dasharray="5 3" fill="none"/>
+                    <text x="655" y="282" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#3d6b99" opacity="0.6">ErrorHandler</text>
+                </g>
+                <g class="bp-node">
+                    <rect x="350" y="340" width="130" height="55" rx="6" stroke="#8a6dbf" stroke-width="1.5" fill="none"/>
+                    <text x="415" y="372" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#8a6dbf">TestParser</text>
+                </g>
+
+                <!-- Edges (lines with arrows) -->
+                <line class="bp-edge" x1="200" y1="110" x2="318" y2="67" stroke="#3d6b99" stroke-width="1.2" marker-end="url(#bp-arrow)"/>
+                <line class="bp-edge" x1="200" y1="110" x2="318" y2="167" stroke="#4a7c6f" stroke-width="1.2" marker-end="url(#bp-arrow)"/>
+                <line class="bp-edge" x1="450" y1="67" x2="578" y2="100" stroke="#3d6b99" stroke-width="1.2" marker-end="url(#bp-arrow)"/>
+                <line class="bp-edge" x1="450" y1="167" x2="578" y2="107" stroke="#d94f30" stroke-width="1.2" marker-end="url(#bp-arrow)"/>
+                <line class="bp-edge" x1="190" y1="280" x2="130" y2="142" stroke="#1a1f36" stroke-width="1" stroke-dasharray="4 3"/>
+                <line class="bp-edge" x1="700" y1="107" x2="700" y2="248" stroke="#3d6b99" stroke-width="1" stroke-dasharray="5 3" marker-end="url(#bp-arrow)"/>
+                <line class="bp-edge" x1="415" y1="340" x2="190" y2="142" stroke="#8a6dbf" stroke-width="1" marker-end="url(#bp-arrow)"/>
+                <line class="bp-edge" x1="350" y1="365" x2="262" y2="310" stroke="#1a1f36" stroke-width="1" stroke-dasharray="4 3"/>
+
+                <!-- Connection dots at junctions -->
+                <circle class="bp-dot" cx="200" cy="110" r="3" fill="#3d6b99"/>
+                <circle class="bp-dot" cx="318" cy="67" r="3" fill="#3d6b99"/>
+                <circle class="bp-dot" cx="318" cy="167" r="3" fill="#4a7c6f"/>
+                <circle class="bp-dot" cx="450" cy="67" r="3" fill="#3d6b99"/>
+                <circle class="bp-dot" cx="578" cy="100" r="3" fill="#d94f30"/>
+                <circle class="bp-dot" cx="450" cy="167" r="3" fill="#d94f30"/>
+                <circle class="bp-dot" cx="700" cy="107" r="3" fill="#3d6b99"/>
+                <circle class="bp-dot" cx="415" cy="340" r="3" fill="#8a6dbf"/>
+            </svg>
+        </div>
+
+        <div class="hero-content">
+            <h1>Cooperative Coding</h1>
+            <p class="hero-subtitle">An Open Specification for Human--AI Collaborative Software Design</p>
+            <div class="version-badge">v1.0.0 &middot; CC-BY-4.0</div>
+            <div class="hero-cta">
+                <a href="../spec/00-introduction.md" class="btn btn-filled">Read the Spec</a>
+                <a href="#getting-started" class="btn btn-outline">Get Started</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================================
+         SECTION 3: OVERVIEW
+         ================================================================ -->
+    <section class="overview-section" id="overview">
+        <div class="container">
+            <h2 class="section-heading">What is CooperativeCoding?</h2>
+
+            <blockquote class="overview-blockquote">
+                Current agentic coding treats software as text to be generated. CooperativeCoding treats it as architecture to be negotiated.
+            </blockquote>
+
+            <div class="overview-columns">
+                <p>
+                    CooperativeCoding is an open standard for human-agent collaborative software design. It provides a shared data model built on <a href="https://jsoncanvas.org" target="_blank">JSON Canvas v1.0</a> where architectural elements &mdash; classes, methods, fields, packages, and their relationships &mdash; are first-class objects of collaborative design stored in a <code>ccoding</code> metadata namespace.
+                </p>
+                <p>
+                    Code design and code implementation are different skills that benefit from different tools. Humans excel at architectural thinking &mdash; defining responsibilities, drawing boundaries, seeing the big picture. Agents excel at translating precise specifications into correct, complete code. Today, both activities happen in the same text editor, forcing the human to think at the wrong level of abstraction and the agent to guess at the right one.
+                </p>
+                <p>
+                    CooperativeCoding separates these concerns. Both human and agent work on a visual canvas &mdash; a simplified UML where design elements carry documentation contracts. The agent also works on the code, implementing the canvas design and keeping canvas and code in bidirectional sync. They cooperate through ghost proposals: agent-created elements appear as tentative suggestions that the human reviews, accepts, or rejects before anything gets implemented.
+                </p>
+                <p>
+                    The specification is <code>language-agnostic</code> and <code>tool-agnostic</code>. It extends JSON Canvas with typed nodes, semantic edges, a status lifecycle, and sync rules. Concrete implementations require a canvas tool plugin, a language binding, and an agent integration &mdash; but the core spec defines the universal contract that all of them share.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================================
+         SECTION 4: SEVEN PRINCIPLES
+         ================================================================ -->
+    <section id="principles">
+        <div class="container">
+            <h2 class="section-heading">Seven Principles</h2>
+            <p class="section-lead">The foundation of human-AI collaborative design.</p>
+
+            <div class="principles-grid">
+                <div class="principle-card card">
+                    <span class="p-number">01</span>
+                    <h3>Design Authority is Human</h3>
+                    <p>Software architecture demands judgment that emerges from business context, team culture, and lived experience. The human always has final say. The agent proposes, the human disposes. No design change is applied without explicit human approval.</p>
+                </div>
+
+                <div class="principle-card card">
+                    <span class="p-number">02</span>
+                    <h3>Progressive Detail</h3>
+                    <p>Not everything deserves the same level of attention. Class nodes give the overview; only architecturally significant methods and fields are promoted to their own detail nodes. The canvas highlights what matters, not every line of code.</p>
+                </div>
+
+                <div class="principle-card card">
+                    <span class="p-number">03</span>
+                    <h3>Documentation as Contract</h3>
+                    <p>The documentation block is the bridge between canvas and code. Responsibility statements, pseudo code, and constraints form the contract that the agent implements against and the sync engine uses to detect drift.</p>
+                </div>
+
+                <div class="principle-card card">
+                    <span class="p-number">04</span>
+                    <h3>Bidirectional Truth</h3>
+                    <p>Canvas and code are two views of the same system. Neither is primary. Changes in either propagate through the sync engine. When they disagree, conflict detection ensures a human decides &mdash; no silent overwrites.</p>
+                </div>
+
+                <div class="principle-card card">
+                    <span class="p-number">05</span>
+                    <h3>Visual Simplicity</h3>
+                    <p>The canvas shows a simplified UML focused on architectural thinking. A handful of node kinds, a handful of edge relations, and structured markdown for content. A place to see the shape of the system at a glance.</p>
+                </div>
+
+                <div class="principle-card card">
+                    <span class="p-number">06</span>
+                    <h3>Any Entry Point</h3>
+                    <p>Sketch on a blank canvas. Describe a system in natural language and let the agent propose the design. Import existing code and let the sync engine generate the canvas. The paradigm meets you where you are.</p>
+                </div>
+
+                <div class="principle-card card">
+                    <span class="p-number">07</span>
+                    <h3>Language-Agnostic, Tool-Agnostic</h3>
+                    <p>Nodes, edges, ghost proposals, and the cooperation lifecycle are universal. Each programming language gets a binding, each canvas tool gets an implementation, each agent gets an integration. The core spec defines the contract; bindings fulfill it.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================================
+         SECTION 5: THE COOPERATION LOOP
+         ================================================================ -->
+    <section id="loop" style="background: rgba(240, 237, 232, 0.4);">
+        <div class="container">
+            <h2 class="section-heading">The Cooperation Loop</h2>
+            <p class="section-lead">A continuous cycle where human intent and agent capability meet.</p>
+
+            <div class="loop-layout">
+                <!-- Inline SVG circular diagram -->
+                <div class="loop-diagram-container">
+                    <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" fill="none">
+                        <defs>
+                            <marker id="loop-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                                <path d="M0 0 L8 3 L0 6Z" fill="#6b6560"/>
+                            </marker>
+                        </defs>
+
+                        <!-- Connecting arc (subtle circle) -->
+                        <circle cx="200" cy="200" r="120" stroke="#e2ddd5" stroke-width="1.5" fill="none"/>
+
+                        <!-- Design (top) -->
+                        <rect x="140" y="40" width="120" height="48" rx="6" fill="#fff" stroke="#3d6b99" stroke-width="2"/>
+                        <text x="200" y="70" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#3d6b99" font-weight="600">DESIGN</text>
+
+                        <!-- Review (right) -->
+                        <rect x="292" y="176" width="108" height="48" rx="6" fill="#fff" stroke="#4a7c6f" stroke-width="2"/>
+                        <text x="346" y="206" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#4a7c6f" font-weight="600">REVIEW</text>
+
+                        <!-- Implement (bottom) -->
+                        <rect x="130" y="312" width="140" height="48" rx="6" fill="#fff" stroke="#d94f30" stroke-width="2"/>
+                        <text x="200" y="342" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#d94f30" font-weight="600">IMPLEMENT</text>
+
+                        <!-- Sync (left) -->
+                        <rect x="10" y="176" width="100" height="48" rx="6" fill="#fff" stroke="#1a1f36" stroke-width="2"/>
+                        <text x="60" y="206" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#1a1f36" font-weight="600">SYNC</text>
+
+                        <!-- Arrows between phases -->
+                        <!-- Design -> Review -->
+                        <path d="M260 72 Q310 110 305 174" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#loop-arrow)"/>
+                        <!-- Review -> Implement -->
+                        <path d="M340 226 Q320 280 272 315" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#loop-arrow)"/>
+                        <!-- Implement -> Sync -->
+                        <path d="M130 336 Q80 310 72 226" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#loop-arrow)"/>
+                        <!-- Sync -> Design -->
+                        <path d="M60 174 Q70 110 138 72" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#loop-arrow)"/>
+
+                        <!-- Center label -->
+                        <text x="200" y="196" text-anchor="middle" font-family="Instrument Serif, serif" font-size="14" fill="#6b6560" font-style="italic">cooperate</text>
+                        <text x="200" y="214" text-anchor="middle" font-family="Instrument Serif, serif" font-size="14" fill="#6b6560" font-style="italic">continuously</text>
+                    </svg>
+                </div>
+
+                <!-- Phase descriptions -->
+                <div class="loop-phases">
+                    <div class="loop-phase">
+                        <div class="loop-phase-name design">Design</div>
+                        <p>Human architect creates or updates the canvas &mdash; classes, methods, fields, relationships, and documentation contracts. The agent may also propose design changes as ghost nodes. This is the authoritative moment for architectural decisions.</p>
+                    </div>
+                    <div class="loop-phase">
+                        <div class="loop-phase-name review">Review</div>
+                        <p>The human reviews ghost proposals, accepting elements that fit the vision and rejecting those that do not. Ghosts may be edited before acceptance. Only accepted elements proceed to implementation.</p>
+                    </div>
+                    <div class="loop-phase">
+                        <div class="loop-phase-name implement">Implement</div>
+                        <p>The agent generates or updates source code based on accepted canvas elements. Documentation blocks become docstrings, edges become inheritance declarations and imports, node kinds become class skeletons.</p>
+                    </div>
+                    <div class="loop-phase">
+                        <div class="loop-phase-name sync">Sync</div>
+                        <p>The sync engine detects changes on both sides and propagates them. Code changes update the canvas; canvas changes update the code. Conflicts are detected and surfaced for human resolution. The loop begins anew.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================================
+         SECTION 6: DATA MODEL
+         ================================================================ -->
+    <section id="data-model">
+        <div class="container">
+            <h2 class="section-heading">Data Model</h2>
+            <p class="section-lead">The building blocks of architectural description &mdash; a semantic layer on top of JSON Canvas v1.0.</p>
+
+            <div class="data-model-layout">
+                <!-- Node Kinds -->
+                <div class="data-model-col">
+                    <h3>Node Kinds</h3>
+
+                    <div class="node-kind">
+                        <span class="node-kind-chip kind-class">class</span>
+                        <span class="node-kind-desc">A class, struct, trait, or equivalent named type. The primary building block. Carries responsibility, fields, methods, and constraints in its documentation block.</span>
+                    </div>
+
+                    <div class="node-kind">
+                        <span class="node-kind-chip kind-method">method</span>
+                        <span class="node-kind-desc">A method or function promoted to its own detail node. Connected to its parent class via a <code>detail</code> edge. Contains signature, pseudo code, and constraints.</span>
+                    </div>
+
+                    <div class="node-kind">
+                        <span class="node-kind-chip kind-field">field</span>
+                        <span class="node-kind-desc">A field or property promoted to its own detail node. Used when a field carries significant design semantics &mdash; a configuration object, a dependency injection point.</span>
+                    </div>
+
+                    <div class="node-kind">
+                        <span class="node-kind-chip kind-package">package</span>
+                        <span class="node-kind-desc">A package, module, or namespace that groups related types. Used for high-level architectural views and directory structure generation.</span>
+                    </div>
+
+                    <div class="node-kind">
+                        <span class="node-kind-chip kind-test">test</span>
+                        <span class="node-kind-desc">A test class or suite that verifies production code. Connected to classes under test via <code>tests</code> edges. Carries test execution results alongside design intent.</span>
+                    </div>
+
+                    <div class="node-kind">
+                        <span class="node-kind-chip kind-interface">interface</span>
+                        <span class="node-kind-desc">An interface, protocol, or abstract contract. May also be represented as a <code>class</code> node with an appropriate stereotype.</span>
+                    </div>
+
+                    <div class="node-kind">
+                        <span class="node-kind-chip kind-module">module</span>
+                        <span class="node-kind-desc">A single-file module or compilation unit, distinct from <code>package</code> in languages where the distinction matters.</span>
+                    </div>
+                </div>
+
+                <!-- Edge Relations -->
+                <div class="data-model-col">
+                    <h3>Edge Relations</h3>
+
+                    <div class="edge-relation">
+                        <div class="edge-line-sample">
+                            <svg viewBox="0 0 60 20"><line x1="0" y1="10" x2="52" y2="10" stroke="#3d6b99" stroke-width="2.5"/><polygon points="52,6 60,10 52,14" fill="#3d6b99"/></svg>
+                        </div>
+                        <span class="edge-label">inherits</span>
+                        <span class="edge-desc">Class extends or subclasses another. Generates inheritance declarations.</span>
+                    </div>
+
+                    <div class="edge-relation">
+                        <div class="edge-line-sample">
+                            <svg viewBox="0 0 60 20"><line x1="0" y1="10" x2="52" y2="10" stroke="#3d6b99" stroke-width="1.5" stroke-dasharray="6 3"/><polygon points="52,6 60,10 52,14" fill="#3d6b99"/></svg>
+                        </div>
+                        <span class="edge-label">implements</span>
+                        <span class="edge-desc">Class adopts an interface or protocol. Generates conformance declarations.</span>
+                    </div>
+
+                    <div class="edge-relation">
+                        <div class="edge-line-sample">
+                            <svg viewBox="0 0 60 20"><line x1="8" y1="10" x2="52" y2="10" stroke="#4a7c6f" stroke-width="2"/><polygon points="52,6 60,10 52,14" fill="#4a7c6f"/><polygon points="0,10 8,6 8,14" fill="#4a7c6f"/></svg>
+                        </div>
+                        <span class="edge-label">composes</span>
+                        <span class="edge-desc">Has-a relationship. The edge label carries the field name. Generates typed field declarations.</span>
+                    </div>
+
+                    <div class="edge-relation">
+                        <div class="edge-line-sample">
+                            <svg viewBox="0 0 60 20"><line x1="0" y1="10" x2="52" y2="10" stroke="#6b6560" stroke-width="1.5" stroke-dasharray="3 3"/><polygon points="52,6 60,10 52,14" fill="#6b6560"/></svg>
+                        </div>
+                        <span class="edge-label">depends</span>
+                        <span class="edge-desc">Import-level dependency. Generates import statements in the source file.</span>
+                    </div>
+
+                    <div class="edge-relation">
+                        <div class="edge-line-sample">
+                            <svg viewBox="0 0 60 20"><line x1="0" y1="10" x2="52" y2="10" stroke="#d94f30" stroke-width="1" stroke-dasharray="2 4"/><polygon points="52,6 60,10 52,14" fill="#d94f30"/></svg>
+                        </div>
+                        <span class="edge-label">calls</span>
+                        <span class="edge-desc">Runtime method invocation. Informational &mdash; not synced. Documents runtime flow.</span>
+                    </div>
+
+                    <div class="edge-relation">
+                        <div class="edge-line-sample">
+                            <svg viewBox="0 0 60 20"><line x1="0" y1="10" x2="52" y2="10" stroke="#1a1f36" stroke-width="1.5"/><polygon points="52,6 60,10 52,14" fill="#1a1f36"/></svg>
+                        </div>
+                        <span class="edge-label">detail</span>
+                        <span class="edge-desc">Links a class node to a promoted method or field. Structural, not independently synced.</span>
+                    </div>
+
+                    <div class="edge-relation">
+                        <div class="edge-line-sample">
+                            <svg viewBox="0 0 60 20"><line x1="0" y1="10" x2="52" y2="10" stroke="#8a6dbf" stroke-width="1.5"/><polygon points="52,6 60,10 52,14" fill="#8a6dbf"/></svg>
+                        </div>
+                        <span class="edge-label">tests</span>
+                        <span class="edge-desc">Test node verifies a class. Propagates staleness when the class changes.</span>
+                    </div>
+
+                    <div class="edge-relation">
+                        <div class="edge-line-sample">
+                            <svg viewBox="0 0 60 20"><line x1="0" y1="10" x2="52" y2="10" stroke="#c08b30" stroke-width="1" stroke-dasharray="1 3"/><polygon points="52,6 60,10 52,14" fill="#c08b30"/></svg>
+                        </div>
+                        <span class="edge-label">context</span>
+                        <span class="edge-desc">Links a context node to a code element. Canvas-only &mdash; design rationale and references.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stereotype-note">
+                <strong>Stereotypes</strong> extend node semantics with language-specific subtypes. The set is open and extensible: <code>protocol</code>, <code>dataclass</code>, <code>enum</code>, <code>abstract</code>, <code>singleton</code>, <code>mixin</code>, and any others your language binding defines. Unknown stereotypes are preserved and displayed as-is &mdash; implementations must not reject them.
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================================
+         SECTION 7: STATUS LIFECYCLE
+         ================================================================ -->
+    <section id="lifecycle" style="background: rgba(240, 237, 232, 0.4);">
+        <div class="container">
+            <h2 class="section-heading">Status Lifecycle</h2>
+            <p class="section-lead">Four states. Five transitions. A clear state machine governing every element on the canvas.</p>
+
+            <!-- Inline SVG state machine diagram -->
+            <div class="lifecycle-diagram-container">
+                <svg viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg" fill="none">
+                    <defs>
+                        <marker id="lc-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                            <path d="M0 0 L8 3 L0 6Z" fill="#6b6560"/>
+                        </marker>
+                    </defs>
+
+                    <!-- proposed (dashed border) -->
+                    <rect x="30" y="60" width="130" height="50" rx="8" stroke="#6b6560" stroke-width="2" stroke-dasharray="6 4" fill="#faf8f5"/>
+                    <text x="95" y="91" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#6b6560" font-weight="500">proposed</text>
+
+                    <!-- accepted (solid sage fill) -->
+                    <rect x="260" y="60" width="130" height="50" rx="8" stroke="#4a7c6f" stroke-width="2" fill="rgba(74,124,111,0.1)"/>
+                    <text x="325" y="91" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#4a7c6f" font-weight="600">accepted</text>
+
+                    <!-- rejected (grey) -->
+                    <rect x="30" y="210" width="130" height="50" rx="8" stroke="#999" stroke-width="2" fill="rgba(153,153,153,0.08)"/>
+                    <text x="95" y="241" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#999" font-weight="500">rejected</text>
+
+                    <!-- stale (warm amber) -->
+                    <rect x="480" y="60" width="130" height="50" rx="8" stroke="#c08b30" stroke-width="2" fill="rgba(192,139,48,0.08)"/>
+                    <text x="545" y="91" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#c08b30" font-weight="500">stale</text>
+
+                    <!-- proposed -> accepted (accept) -->
+                    <line x1="162" y1="85" x2="257" y2="85" stroke="#6b6560" stroke-width="1.5" marker-end="url(#lc-arrow)"/>
+                    <text x="210" y="76" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#4a7c6f">accept</text>
+
+                    <!-- proposed -> rejected (reject) -->
+                    <line x1="95" y1="112" x2="95" y2="207" stroke="#6b6560" stroke-width="1.5" marker-end="url(#lc-arrow)"/>
+                    <text x="70" y="164" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#999" transform="rotate(-90 70 164)">reject</text>
+
+                    <!-- accepted -> stale (code deleted) -->
+                    <line x1="392" y1="85" x2="477" y2="85" stroke="#6b6560" stroke-width="1.5" marker-end="url(#lc-arrow)"/>
+                    <text x="435" y="76" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#c08b30">stale</text>
+
+                    <!-- stale -> accepted (restore) -->
+                    <path d="M500 112 Q460 150 400 112" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#lc-arrow)"/>
+                    <text x="445" y="146" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#4a7c6f">restore</text>
+
+                    <!-- rejected -> proposed (reconsider) -->
+                    <path d="M50 208 Q20 160 50 112" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#lc-arrow)"/>
+                    <text x="12" y="164" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#6b6560">reconsider</text>
+                </svg>
+            </div>
+
+            <!-- Status descriptions -->
+            <div class="status-list">
+                <div class="status-item card status-proposed">
+                    <div class="status-name">proposed</div>
+                    <div class="status-desc">A ghost &mdash; a tentative design element awaiting human review. Exists on the canvas as a visual suggestion but has no authority over the codebase. Not synced to code. Canvas tools render ghosts with reduced opacity or dashed borders.</div>
+                </div>
+
+                <div class="status-item card status-accepted">
+                    <div class="status-name">accepted</div>
+                    <div class="status-desc">Part of the canonical design. Represents a deliberate architectural decision confirmed by a human. Synced to code during both canvas-to-code and code-to-canvas sync. Rendered with full visual weight.</div>
+                </div>
+
+                <div class="status-item card status-rejected">
+                    <div class="status-name">rejected</div>
+                    <div class="status-desc">A proposal that a human explicitly declined. Remains in the canvas file as a record of the decision but is not part of the active design. Not synced to code. Hidden by default or visually suppressed.</div>
+                </div>
+
+                <div class="status-item card status-stale">
+                    <div class="status-name">stale</div>
+                    <div class="status-desc">The element's corresponding code was deleted, moved, or renamed in a way the sync engine could not resolve. The canvas node remains, but its link to the codebase is broken. Awaiting human resolution. Not auto-deleted.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================================
+         SECTION 8: BIDIRECTIONAL SYNC
+         ================================================================ -->
+    <section id="sync">
+        <div class="container">
+            <h2 class="section-heading">Bidirectional Sync</h2>
+            <p class="section-lead">Canvas and code are two views of the same system. The sync engine keeps them honest.</p>
+
+            <div class="sync-layout">
+                <div class="sync-box card">
+                    <h3>What Syncs</h3>
+                    <ul class="sync-list sync-yes">
+                        <li>New accepted class nodes generate source files with class skeletons</li>
+                        <li>Changed field or method lists update class definitions in code</li>
+                        <li>Documentation edits propagate to docstrings and doc comments</li>
+                        <li>New <code>inherits</code> edges create inheritance declarations</li>
+                        <li>New <code>implements</code> edges create protocol conformance</li>
+                        <li>New <code>composes</code> edges generate typed field declarations</li>
+                        <li>New <code>depends</code> edges generate import statements</li>
+                        <li>Code-side class creation generates canvas nodes</li>
+                        <li>Code-side documentation changes update canvas node text</li>
+                        <li>Test results flow from code to test node content</li>
+                    </ul>
+                </div>
+
+                <div class="sync-box card">
+                    <h3>What Never Syncs</h3>
+                    <ul class="sync-list sync-no">
+                        <li>Ghost (<code>proposed</code>) elements &mdash; canvas-only proposals</li>
+                        <li>Rejected elements &mdash; preserved for decision history only</li>
+                        <li>Stale elements &mdash; awaiting human resolution</li>
+                        <li>Method bodies &mdash; implementation is code's domain</li>
+                        <li>Local variables and control flow within functions</li>
+                        <li>Context nodes &mdash; design rationale stays on the canvas</li>
+                        <li><code>calls</code> edges &mdash; informational, not structural</li>
+                        <li>Canvas layout positions &mdash; node arrangement is visual only</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="conflict-callout">
+                <strong>Conflict Resolution:</strong> When both canvas and code change the same element between sync cycles, the sync engine detects the conflict and refuses to silently overwrite either side. Implementations present both versions to the human for resolution &mdash; three-way merge, side selection, or deferral. Conflicts are detected at the element level, not the file level: changing ClassA on the canvas and ClassB in the same source file is not a conflict.
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================================
+         SECTION 9: GETTING STARTED
+         ================================================================ -->
+    <section id="getting-started" style="background: rgba(240, 237, 232, 0.4);">
+        <div class="container">
+            <h2 class="section-heading">Getting Started</h2>
+            <p class="section-lead">Four steps to begin working with CooperativeCoding.</p>
+
+            <div class="timeline">
+                <div class="timeline-step">
+                    <div class="timeline-number">1</div>
+                    <h3>Read the Specification</h3>
+                    <p>Start with the Introduction for the vision and principles. Then explore the Data Model, Lifecycle, Sync, and Language Bindings documents for the full technical contract.</p>
+                    <a href="../spec/00-introduction.md" class="step-cta">Read the Introduction &rarr;</a>
+                </div>
+
+                <div class="timeline-step">
+                    <div class="timeline-number">2</div>
+                    <h3>Choose Your Canvas Tool</h3>
+                    <p>CooperativeCoding works with any canvas tool that supports JSON Canvas v1.0. The reference implementation uses Obsidian with a dedicated plugin that renders ghost nodes, detail edges, and status indicators.</p>
+                    <a href="https://jsoncanvas.org" target="_blank" class="step-cta">Explore JSON Canvas &rarr;</a>
+                </div>
+
+                <div class="timeline-step">
+                    <div class="timeline-number">3</div>
+                    <h3>Set Up a Language Binding</h3>
+                    <p>Each programming language needs a binding that maps abstract spec concepts to language-specific idioms. The Python binding is the reference implementation, covering stereotypes, AST parsing, type translation, and sync mapping.</p>
+                    <a href="../bindings/python.md" class="step-cta">Python Binding Reference &rarr;</a>
+                </div>
+
+                <div class="timeline-step">
+                    <div class="timeline-number">4</div>
+                    <h3>Integrate Your Agent</h3>
+                    <p>Teach your agentic coding tool the cooperation protocol: propose design changes as ghost nodes, implement accepted elements, and keep canvas and code in sync. The spec defines the cooperation contract; your agent fulfills it.</p>
+                    <a href="https://github.com/giosullutrone/cooperative-coding" target="_blank" class="step-cta">View on GitHub &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================================
+         SECTION 10: SPECIFICATION DOCUMENTS
+         ================================================================ -->
+    <section id="spec">
+        <div class="container">
+            <h2 class="section-heading">Specification Documents</h2>
+            <p class="section-lead">The complete CooperativeCoding specification, organized in five core documents plus a language binding reference.</p>
+
+            <div class="docs-grid">
+                <div class="doc-card card">
+                    <div class="doc-filename">00-introduction.md</div>
+                    <p>Vision, core principles, terminology, scope, non-goals, and the document index. Start here to understand why CooperativeCoding exists and what it defines.</p>
+                    <a href="../spec/00-introduction.md" class="doc-link">Read &rarr;</a>
+                </div>
+
+                <div class="doc-card card">
+                    <div class="doc-filename">01-data-model.md</div>
+                    <p>Canvas nodes, edges, and metadata schemas. Node kinds, edge relations, status semantics, the <code>ccoding</code> namespace, edge labels, context nodes, and the edge targeting rule.</p>
+                    <a href="../spec/01-data-model.md" class="doc-link">Read &rarr;</a>
+                </div>
+
+                <div class="doc-card card">
+                    <div class="doc-filename">02-lifecycle.md</div>
+                    <p>Ghost proposals and status transitions. Entry points, the cooperation loop, the four-state state machine, ghost semantics, and bulk operations for accepting or rejecting proposals.</p>
+                    <a href="../spec/02-lifecycle.md" class="doc-link">Read &rarr;</a>
+                </div>
+
+                <div class="doc-card card">
+                    <div class="doc-filename">03-sync.md</div>
+                    <p>Bidirectional sync semantics. Canvas-to-code rules, code-to-canvas rules, conflict detection and resolution, state tracking, sync triggers, ordering, and edge cases.</p>
+                    <a href="../spec/03-sync.md" class="doc-link">Read &rarr;</a>
+                </div>
+
+                <div class="doc-card card">
+                    <div class="doc-filename">04-language-bindings.md</div>
+                    <p>The contract for language-specific mappings. Stereotype mapping, AST parsing, type translation, documentation format, and the three-tier compliance model (MUST, SHOULD, MAY).</p>
+                    <a href="../spec/04-language-bindings.md" class="doc-link">Read &rarr;</a>
+                </div>
+
+                <div class="doc-card card">
+                    <div class="doc-filename">bindings/python.md</div>
+                    <p>The reference Python binding. Covers Python stereotypes, docstring conventions, type annotation mapping, <code>ccoding</code> CLI usage, and structured content conventions.</p>
+                    <a href="../bindings/python.md" class="doc-link">Read &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================================
+         FOOTER
+         ================================================================ -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>About</h4>
+                    <p>CooperativeCoding is an open specification for human-AI collaborative software design. It separates architectural thinking from code implementation, giving each the right tool and the right authority.</p>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Resources</h4>
+                    <a href="../spec/00-introduction.md">Specification</a>
+                    <a href="../bindings/python.md">Python Binding</a>
+                    <a href="https://jsoncanvas.org" target="_blank">JSON Canvas v1.0</a>
+                    <a href="https://github.com/giosullutrone/cooperative-coding" target="_blank">GitHub Repository</a>
+                    <a href="https://github.com/giosullutrone/cooperative-coding/blob/main/CONTRIBUTING.md" target="_blank">Contributing</a>
+                </div>
+
+                <div class="footer-col">
+                    <h4>License</h4>
+                    <p>The CooperativeCoding specification is licensed under <strong>CC-BY-4.0</strong> (Creative Commons Attribution 4.0 International). You are free to share and adapt the specification for any purpose, provided you give appropriate credit.</p>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-logo">CooperativeCoding</div>
+                <p class="footer-copyright">An open specification. Built for collaboration.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ================================================================
+         JAVASCRIPT
+         - Header scroll state
+         - Mobile nav toggle
+         - IntersectionObserver for scroll animations
+         - Active nav link tracking on scroll
+         ================================================================ -->
+    <script>
+        (function () {
+            "use strict";
+
+            /* -------------------------------------------------------
+               Header: add "scrolled" class after scrolling
+               ------------------------------------------------------- */
+            var header = document.getElementById("site-header");
+            var scrollThreshold = 40;
+
+            function updateHeader() {
+                if (window.scrollY > scrollThreshold) {
+                    header.classList.add("scrolled");
+                } else {
+                    header.classList.remove("scrolled");
+                }
+            }
+            window.addEventListener("scroll", updateHeader, { passive: true });
+            updateHeader();
+
+            /* -------------------------------------------------------
+               Mobile nav toggle
+               ------------------------------------------------------- */
+            var navToggle = document.querySelector(".nav-toggle");
+            var navLinks = document.querySelector(".nav-links");
+
+            if (navToggle && navLinks) {
+                navToggle.addEventListener("click", function () {
+                    navLinks.classList.toggle("open");
+                });
+
+                /* Close mobile nav when a link is clicked */
+                navLinks.querySelectorAll("a").forEach(function (link) {
+                    link.addEventListener("click", function () {
+                        navLinks.classList.remove("open");
+                    });
+                });
+            }
+
+            /* -------------------------------------------------------
+               IntersectionObserver: scroll-triggered fade-in
+               Targets:
+                 - .fade-in class (generic)
+                 - .principle-card (stagger)
+               ------------------------------------------------------- */
+            var fadeTargets = document.querySelectorAll(".fade-in, .principle-card");
+
+            if ("IntersectionObserver" in window && fadeTargets.length > 0) {
+                var fadeObserver = new IntersectionObserver(
+                    function (entries) {
+                        entries.forEach(function (entry) {
+                            if (entry.isIntersecting) {
+                                entry.target.classList.add("visible");
+                                fadeObserver.unobserve(entry.target);
+                            }
+                        });
+                    },
+                    { threshold: 0.15, rootMargin: "0px 0px -40px 0px" }
+                );
+
+                fadeTargets.forEach(function (el) {
+                    fadeObserver.observe(el);
+                });
+            }
+
+            /* -------------------------------------------------------
+               Active nav link tracking on scroll
+               Highlights the nav link corresponding to the
+               currently visible section.
+               ------------------------------------------------------- */
+            var sections = document.querySelectorAll("section[id]");
+            var navItems = document.querySelectorAll(".nav-links .nav-link");
+
+            function updateActiveNav() {
+                var scrollPos = window.scrollY + 120;
+
+                sections.forEach(function (section) {
+                    var top = section.offsetTop;
+                    var bottom = top + section.offsetHeight;
+                    var id = section.getAttribute("id");
+
+                    if (scrollPos >= top && scrollPos < bottom) {
+                        navItems.forEach(function (link) {
+                            link.classList.remove("active");
+                            var href = link.getAttribute("href");
+                            if (href === "#" + id) {
+                                link.classList.add("active");
+                            }
+                        });
+                    }
+                });
+            }
+
+            window.addEventListener("scroll", updateActiveNav, { passive: true });
+            updateActiveNav();
+        })();
+    </script>
+</body>
+</html>

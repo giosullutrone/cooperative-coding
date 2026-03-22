@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Arrow markers for different edge types -->
+    <marker id="arrowSolid" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#888" />
+    </marker>
+
+    <marker id="arrowDashed" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#888" />
+    </marker>
+
+    <marker id="arrowDiamond" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,3 L4.5,0 L9,3 L4.5,6 z" fill="#888" />
+    </marker>
+
+    <marker id="arrowDotted" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#888" />
+    </marker>
+
+    <marker id="arrowThin" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#999" />
+    </marker>
+
+    <marker id="arrowDetail" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#aaa" />
+    </marker>
+
+    <marker id="arrowContext" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#f472b6" />
+    </marker>
+
+    <marker id="arrowTests" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#10b981" />
+    </marker>
+
+    <!-- Gradients for depth -->
+    <linearGradient id="gradClass" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1db8a6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f9690;stop-opacity:1" />
+    </linearGradient>
+
+    <linearGradient id="gradInterface" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#5a7cff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4361ee;stop-opacity:1" />
+    </linearGradient>
+
+    <linearGradient id="gradMethod" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#9d5cff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
+    </linearGradient>
+
+    <linearGradient id="gradField" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+    </linearGradient>
+
+    <linearGradient id="gradTest" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#34d399;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#10b981;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1000" height="700" fill="#0d1117"/>
+
+  <!-- Package container (gray border) -->
+  <g id="package-group">
+    <rect x="50" y="80" width="450" height="280" fill="none" stroke="#374151" stroke-width="2" stroke-dasharray="5,5" rx="8"/>
+    <text x="70" y="102" fill="#9ca3af" font-size="12" font-weight="bold">package: models</text>
+  </g>
+
+  <!-- CLASS: Animal (parent class) -->
+  <g id="class-animal">
+    <rect x="80" y="130" width="140" height="80" fill="url(#gradClass)" stroke="#0f9690" stroke-width="2" rx="4"/>
+    <text x="150" y="155" fill="white" font-size="13" font-weight="bold" text-anchor="middle">Animal</text>
+    <line x1="80" y1="165" x2="220" y2="165" stroke="#0f9690" stroke-width="1"/>
+    <text x="150" y="182" fill="white" font-size="11" text-anchor="middle">class</text>
+  </g>
+
+  <!-- CLASS: Dog (child class, inherits from Animal) -->
+  <g id="class-dog">
+    <rect x="270" y="130" width="140" height="80" fill="url(#gradClass)" stroke="#0f9690" stroke-width="2" rx="4"/>
+    <text x="340" y="155" fill="white" font-size="13" font-weight="bold" text-anchor="middle">Dog</text>
+    <line x1="270" y1="165" x2="410" y2="165" stroke="#0f9690" stroke-width="1"/>
+    <text x="340" y="182" fill="white" font-size="11" text-anchor="middle">class</text>
+  </g>
+
+  <!-- Inherits edge: Dog → Animal -->
+  <g id="edge-inherits">
+    <path d="M 270 170 Q 225 170 220 170" fill="none" stroke="#888" stroke-width="2.5" marker-end="url(#arrowSolid)"/>
+    <text x="240" y="160" fill="#888" font-size="11" font-weight="bold">extends</text>
+  </g>
+
+  <!-- INTERFACE: Drawable -->
+  <g id="interface-drawable">
+    <rect x="80" y="250" width="140" height="80" fill="url(#gradInterface)" stroke="#4361ee" stroke-width="2" rx="4"/>
+    <text x="150" y="271" fill="white" font-size="12" font-style="italic">«interface»</text>
+    <text x="150" y="290" fill="white" font-size="13" font-weight="bold" text-anchor="middle">Drawable</text>
+    <line x1="80" y1="300" x2="220" y2="300" stroke="#4361ee" stroke-width="1"/>
+    <text x="150" y="317" fill="white" font-size="11" text-anchor="middle">interface</text>
+  </g>
+
+  <!-- Implements edge: Dog → Drawable (dashed) -->
+  <g id="edge-implements">
+    <path d="M 280 250 Q 250 210 220 190" fill="none" stroke="#888" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrowDashed)"/>
+    <text x="260" y="210" fill="#888" font-size="11" font-weight="bold">implements</text>
+  </g>
+
+  <!-- METHOD: bark() -->
+  <g id="method-bark">
+    <rect x="270" y="250" width="140" height="70" fill="url(#gradMethod)" stroke="#7c3aed" stroke-width="2" rx="4"/>
+    <text x="340" y="271" fill="white" font-size="13" font-weight="bold" text-anchor="middle">bark()</text>
+    <line x1="270" y1="281" x2="410" y2="281" stroke="#7c3aed" stroke-width="1"/>
+    <text x="340" y="298" fill="white" font-size="11" text-anchor="middle">method</text>
+  </g>
+
+  <!-- Detail edge: Dog → bark() -->
+  <g id="edge-detail-method">
+    <path d="M 340 210 L 340 250" fill="none" stroke="#aaa" stroke-width="2" marker-end="url(#arrowDetail)"/>
+    <text x="348" y="230" fill="#aaa" font-size="10" font-weight="bold">detail</text>
+  </g>
+
+  <!-- FIELD: breed -->
+  <g id="field-breed">
+    <rect x="270" y="340" width="140" height="70" fill="url(#gradField)" stroke="#f59e0b" stroke-width="2" rx="4"/>
+    <text x="340" y="361" fill="white" font-size="13" font-weight="bold" text-anchor="middle">breed</text>
+    <line x1="270" y1="371" x2="410" y2="371" stroke="#f59e0b" stroke-width="1"/>
+    <text x="340" y="388" fill="white" font-size="11" text-anchor="middle">field</text>
+  </g>
+
+  <!-- Detail edge: Dog → breed -->
+  <g id="edge-detail-field">
+    <path d="M 340 320 L 340 340" fill="none" stroke="#aaa" stroke-width="2" marker-end="url(#arrowDetail)"/>
+  </g>
+
+  <!-- CLASS: Collar (composed by Dog) -->
+  <g id="class-collar">
+    <rect x="480" y="250" width="140" height="80" fill="url(#gradClass)" stroke="#0f9690" stroke-width="2" rx="4"/>
+    <text x="550" y="275" fill="white" font-size="13" font-weight="bold" text-anchor="middle">Collar</text>
+    <line x1="480" y1="285" x2="620" y2="285" stroke="#0f9690" stroke-width="1"/>
+    <text x="550" y="302" fill="white" font-size="11" text-anchor="middle">class</text>
+  </g>
+
+  <!-- Composes edge: Dog → Collar (diamond arrow) -->
+  <g id="edge-composes">
+    <path d="M 410 160 L 480 160 L 480 270" fill="none" stroke="#888" stroke-width="2.5" marker-end="url(#arrowDiamond)"/>
+    <text x="445" y="150" fill="#888" font-size="11" font-weight="bold">has-a</text>
+  </g>
+
+  <!-- TEST: TestDog -->
+  <g id="test-testdog">
+    <rect x="480" y="80" width="140" height="80" fill="url(#gradTest)" stroke="#10b981" stroke-width="2" rx="4"/>
+    <text x="550" y="105" fill="white" font-size="13" font-weight="bold" text-anchor="middle">TestDog</text>
+    <line x1="480" y1="115" x2="620" y2="115" stroke="#10b981" stroke-width="1"/>
+    <text x="550" y="132" fill="white" font-size="11" text-anchor="middle">test</text>
+  </g>
+
+  <!-- Tests edge: TestDog → Dog -->
+  <g id="edge-tests">
+    <path d="M 480 170 L 410 170" fill="none" stroke="#10b981" stroke-width="2.5" marker-end="url(#arrowTests)"/>
+    <text x="435" y="162" fill="#10b981" font-size="11" font-weight="bold">tests</text>
+  </g>
+
+  <!-- CONTEXT: User Story (styled differently) -->
+  <g id="context-node">
+    <defs>
+      <pattern id="contextDash" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
+        <circle cx="2" cy="2" r="1" fill="#f472b6" opacity="0.6"/>
+      </pattern>
+    </defs>
+    <rect x="700" y="100" width="160" height="100" fill="#f472b6" fill-opacity="0.1" stroke="#f472b6" stroke-width="2" stroke-dasharray="6,4" rx="6"/>
+    <text x="780" y="125" fill="#f472b6" font-size="12" font-weight="bold" text-anchor="middle">📌 Context</text>
+    <text x="780" y="145" fill="#f472b6" font-size="11" text-anchor="middle">Create dog</text>
+    <text x="780" y="160" fill="#f472b6" font-size="11" text-anchor="middle">management</text>
+    <text x="780" y="175" fill="#f472b6" font-size="11" text-anchor="middle">app</text>
+  </g>
+
+  <!-- Context edge: Context → Dog -->
+  <g id="edge-context">
+    <path d="M 700 150 Q 620 150 410 160" fill="none" stroke="#f472b6" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrowContext)"/>
+  </g>
+
+  <!-- MODULE: persistence (right side) -->
+  <g id="module-persistence">
+    <rect x="700" y="300" width="160" height="100" fill="none" stroke="#64748b" stroke-width="2.5" rx="6"/>
+    <rect x="700" y="300" width="160" height="25" fill="#64748b" opacity="0.2"/>
+    <text x="780" y="318" fill="#64748b" font-size="12" font-weight="bold" text-anchor="middle">«module»</text>
+    <text x="780" y="340" fill="#94a3b8" font-size="12" text-anchor="middle">persistence</text>
+    <text x="780" y="360" fill="#94a3b8" font-size="10" text-anchor="middle">(save, load)</text>
+    <text x="780" y="378" fill="#94a3b8" font-size="10" text-anchor="middle">module</text>
+  </g>
+
+  <!-- Depends edge: Dog → persistence (dotted) -->
+  <g id="edge-depends">
+    <path d="M 410 200 Q 550 250 700 330" fill="none" stroke="#888" stroke-width="2" stroke-dasharray="3,3" marker-end="url(#arrowDotted)"/>
+    <text x="520" y="260" fill="#888" font-size="11" font-weight="bold">uses</text>
+  </g>
+
+  <!-- Calls edge: TestDog → bark() (thin line, informational) -->
+  <g id="edge-calls">
+    <path d="M 520 160 Q 450 200 410 250" fill="none" stroke="#999" stroke-width="1.5" marker-end="url(#arrowThin)"/>
+    <text x="450" y="200" fill="#999" font-size="10">calls</text>
+  </g>
+
+  <!-- Legend -->
+  <g id="legend">
+    <rect x="50" y="500" width="900" height="180" fill="#1a1f2e" stroke="#374151" stroke-width="1" rx="6"/>
+
+    <text x="70" y="525" fill="#e5e7eb" font-size="13" font-weight="bold">Node Types</text>
+
+    <!-- Node legend items -->
+    <g>
+      <!-- Class -->
+      <rect x="70" y="535" width="20" height="20" fill="url(#gradClass)" stroke="#0f9690" stroke-width="1" rx="2"/>
+      <text x="100" y="549" fill="#e5e7eb" font-size="11">Class</text>
+
+      <!-- Interface -->
+      <rect x="180" y="535" width="20" height="20" fill="url(#gradInterface)" stroke="#4361ee" stroke-width="1" rx="2"/>
+      <text x="210" y="549" fill="#e5e7eb" font-size="11">Interface</text>
+
+      <!-- Method -->
+      <rect x="330" y="535" width="20" height="20" fill="url(#gradMethod)" stroke="#7c3aed" stroke-width="1" rx="2"/>
+      <text x="360" y="549" fill="#e5e7eb" font-size="11">Method</text>
+
+      <!-- Field -->
+      <rect x="460" y="535" width="20" height="20" fill="url(#gradField)" stroke="#f59e0b" stroke-width="1" rx="2"/>
+      <text x="490" y="549" fill="#e5e7eb" font-size="11">Field</text>
+
+      <!-- Test -->
+      <rect x="570" y="535" width="20" height="20" fill="url(#gradTest)" stroke="#10b981" stroke-width="1" rx="2"/>
+      <text x="600" y="549" fill="#e5e7eb" font-size="11">Test</text>
+
+      <!-- Package -->
+      <rect x="680" y="535" width="20" height="20" fill="none" stroke="#374151" stroke-width="2" stroke-dasharray="3,2" rx="2"/>
+      <text x="710" y="549" fill="#e5e7eb" font-size="11">Package</text>
+
+      <!-- Context -->
+      <rect x="810" y="535" width="20" height="20" fill="#f472b6" fill-opacity="0.3" stroke="#f472b6" stroke-width="2" stroke-dasharray="3,2" rx="2"/>
+      <text x="840" y="549" fill="#e5e7eb" font-size="11">Context</text>
+    </g>
+
+    <text x="70" y="575" fill="#e5e7eb" font-size="13" font-weight="bold">Edge Relations</text>
+
+    <!-- Edge legend items -->
+    <g>
+      <!-- Inherits -->
+      <line x1="70" y1="590" x2="100" y2="590" stroke="#888" stroke-width="2.5" marker-end="url(#arrowSolid)"/>
+      <text x="110" y="595" fill="#e5e7eb" font-size="11">extends (solid)</text>
+
+      <!-- Implements -->
+      <line x1="280" y1="590" x2="310" y2="590" stroke="#888" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrowDashed)"/>
+      <text x="320" y="595" fill="#e5e7eb" font-size="11">implements (dashed)</text>
+
+      <!-- Composes -->
+      <line x1="530" y1="590" x2="560" y2="590" stroke="#888" stroke-width="2.5" marker-end="url(#arrowDiamond)"/>
+      <text x="570" y="595" fill="#e5e7eb" font-size="11">has-a (diamond)</text>
+
+      <!-- Depends -->
+      <line x1="70" y1="620" x2="100" y2="620" stroke="#888" stroke-width="2" stroke-dasharray="3,3" marker-end="url(#arrowDotted)"/>
+      <text x="110" y="625" fill="#e5e7eb" font-size="11">uses (dotted)</text>
+
+      <!-- Detail -->
+      <line x1="280" y1="620" x2="310" y2="620" stroke="#aaa" stroke-width="2" marker-end="url(#arrowDetail)"/>
+      <text x="320" y="625" fill="#e5e7eb" font-size="11">detail</text>
+
+      <!-- Tests -->
+      <line x1="450" y1="620" x2="480" y2="620" stroke="#10b981" stroke-width="2.5" marker-end="url(#arrowTests)"/>
+      <text x="490" y="625" fill="#e5e7eb" font-size="11">tests</text>
+
+      <!-- Context -->
+      <line x1="620" y1="620" x2="650" y2="620" stroke="#f472b6" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrowContext)"/>
+      <text x="660" y="625" fill="#e5e7eb" font-size="11">context</text>
+    </g>
+  </g>
+
+  <!-- Title -->
+  <text x="500" y="30" fill="#e5e7eb" font-size="18" font-weight="bold" text-anchor="middle">CooperativeCoding Node Types and Relationships</text>
+</svg>

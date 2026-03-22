@@ -1,0 +1,40 @@
+title: CooperativeCoding
+description: An Open Specification for Human–AI Collaborative Software Design
+url: https://giosullutrone.github.io/cooperative-coding
+baseurl: /cooperative-coding
+
+# Build settings
+theme: null
+plugins: []
+
+# Use plain HTML, not Jekyll templates
+collections:
+  spec:
+    output: false
+  bindings:
+    output: false
+
+# Exclude from build
+exclude:
+  - node_modules
+  - vendor
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - .gitignore
+  - .github
+
+# Output settings
+output: web
+encoding: UTF-8
+
+# Metadata
+author: Cooperative Coding Contributors
+license: CC-BY-4.0
+repository: https://github.com/giosullutrone/cooperative-coding
+
+# Markdown settings (if Jekyll is ever enabled)
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
