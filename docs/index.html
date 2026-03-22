@@ -1287,14 +1287,14 @@
                         <text x="60" y="206" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#1a1f36" font-weight="600">SYNC</text>
 
                         <!-- Arrows between phases (circular arcs) -->
-                        <!-- Design -> Review -->
-                        <path d="M258 88 A156 156 0 0 1 292 184" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#loop-arrow)"/>
-                        <!-- Review -> Implement -->
-                        <path d="M336 224 A156 156 0 0 1 268 314" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#loop-arrow)"/>
-                        <!-- Implement -> Sync -->
-                        <path d="M132 340 A156 156 0 0 1 108 224" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#loop-arrow)"/>
-                        <!-- Sync -> Design -->
-                        <path d="M66 176 A156 156 0 0 1 142 88" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#loop-arrow)"/>
+                        <!-- Design -> Review: right edge to top edge -->
+                        <path d="M260 68 A155 155 0 0 1 320 176" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#loop-arrow)"/>
+                        <!-- Review -> Implement: bottom edge to right edge -->
+                        <path d="M320 224 A155 155 0 0 1 270 332" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#loop-arrow)"/>
+                        <!-- Implement -> Sync: left edge to bottom edge -->
+                        <path d="M130 332 A155 155 0 0 1 80 224" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#loop-arrow)"/>
+                        <!-- Sync -> Design: top edge to left edge -->
+                        <path d="M80 176 A155 155 0 0 1 140 68" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#loop-arrow)"/>
 
                         <!-- Center label -->
                         <text x="200" y="196" text-anchor="middle" font-family="Instrument Serif, serif" font-size="14" fill="#6b6560" font-style="italic">cooperate</text>
