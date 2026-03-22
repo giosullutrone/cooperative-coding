@@ -149,6 +149,20 @@ All implementations MUST support all five transitions defined above. The followi
 
 5. **`stale → accepted` may be triggered by sync or human.** If the sync engine detects that the code has been restored (the file and qualified name match again), it SHOULD automatically transition the element back to `accepted`. Alternatively, the human may manually re-link the node to a new code location, which also transitions it to `accepted`.
 
+### 4.5 Test Node Lifecycle
+
+Test nodes (`ccoding.kind: "test"`) follow the same four-state state machine as all other code-element nodes, but they carry additional lifecycle semantics tied to the classes they verify and the results of test execution.
+
+**Staleness propagation from class changes.** When an accepted class node changes — its fields, methods, documentation, or relationships are modified on the canvas or in code — all test nodes connected to that class via `tests` edges SHOULD transition to `stale`. The rationale: a change to the class under test means the test suite may no longer accurately verify the class's behavior. The test's pseudo code, assertions, and expected outcomes may reference methods, signatures, or behaviors that have changed. Marking the test node as stale signals to the human that the test suite needs review and possible update.
+
+Implementations SHOULD trigger this staleness propagation automatically during sync. The sync engine detects that a class node's content has changed, follows the `tests` edges to find connected test nodes, and sets their `ccoding.status` to `"stale"`. This is an extension of the `accepted → stale` transition from Section 4.3 — the trigger is a change in a related element rather than deletion of the element's own code.
+
+**Test result updates.** Test nodes carry execution results in their structured content — pass, fail, or error status for each test method, along with failure details. When test results change (because the test suite was re-executed), the test node's content MUST be updated to reflect the new results. This update follows the standard code-to-canvas sync path: the sync engine reads the test results from the code side (test output files, CI artifacts, or framework-specific result formats as defined by the active language binding) and updates the test node's text content on the canvas.
+
+A test node whose results change from passing to failing does NOT transition to `stale` — the node's link to its code is intact, and the results accurately reflect the current state. Staleness is reserved for structural disconnection (class changes that invalidate the test's design), not for test failures. Test failures are a content update, not a status transition.
+
+**Restoration from staleness.** A stale test node transitions back to `accepted` when the human updates the test node's content to align with the changed class (updating pseudo code, adjusting assertions, adding or removing test methods) and the sync engine confirms that the test code matches the canvas representation. Alternatively, if the class change is reverted and the original class structure is restored, the test node MAY be automatically transitioned back to `accepted` by the sync engine.
+
 ---
 
 ## 5. Ghost Semantics

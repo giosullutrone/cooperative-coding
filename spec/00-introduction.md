@@ -77,7 +77,7 @@ A visual workspace containing nodes and edges, stored as a [JSON Canvas v1.0](ht
 A visual element on the canvas representing either a code element (class, method, field, package) or a context item (note, file, link). Code element nodes carry `ccoding` metadata that identifies their kind, language, source file mapping, and lifecycle status. Context item nodes are standard JSON Canvas nodes without `ccoding.kind` metadata.
 
 **Edge**
-A connection between two nodes representing a relationship. Each edge carries a `ccoding.relation` type that defines its semantics: `inherits`, `implements`, `composes`, `depends`, `calls`, `detail`, or `context`. Edges MAY carry a `label` that describes the nature, purpose, and constraints of the relationship in human-readable text.
+A connection between two nodes representing a relationship. Each edge carries a `ccoding.relation` type that defines its semantics: `inherits`, `implements`, `composes`, `depends`, `calls`, `tests`, `detail`, or `context`. Edges MAY carry a `label` that describes the nature, purpose, and constraints of the relationship in human-readable text.
 
 **Ghost**
 A node or edge with `status: "proposed"` in its `ccoding` metadata that awaits human review. Ghosts are created by agents proposing design changes or by humans sketching tentative ideas. Each ghost carries a `proposedBy` field (`"agent"` or `"human"`) and an optional `proposalRationale` explaining the reasoning behind the proposal. A ghost becomes real when the human accepts it; it becomes invisible when the human rejects it.
@@ -90,6 +90,12 @@ The bidirectional process of keeping the canvas design and the source code align
 
 **Detail node**
 A method or field that has been promoted from an inline entry within a class node to its own standalone node on the canvas. A detail node is connected to its parent class node by a `detail` edge. Promotion happens when the element needs design attention — complex logic, important constraints, or a role as the source or target of another edge.
+
+**Test node**
+A code-element node with `ccoding.kind` set to `"test"` representing a test class or test suite that verifies the behavior of one or more classes in the system. A test node's structured content includes the test class name, pseudo code of the test methods describing the scenarios being verified, and test execution results (pass, fail, or error with details). Test nodes are connected to the classes they verify via `tests` edges.
+
+**Tests edge**
+An edge with `ccoding.relation` set to `"tests"` that connects a test node to the class node it verifies. The directionality is always from the test node (`fromNode`) to the class under test (`toNode`). A single test node MAY have multiple `tests` edges when the test suite exercises multiple classes. The sync engine uses `tests` edges to propagate staleness — when a class under test changes, connected test nodes become stale, signaling that the tests may need updating.
 
 **Context node**
 A plain JSON Canvas node (text, file, or link type) without `ccoding.kind` metadata, used for design rationale, references, decision logs, and other collaboration artifacts. Context nodes are not synced to code. They MAY be connected to code element nodes via `context` edges, and they MAY carry minimal `ccoding` metadata (`status` and `proposedBy`) when proposed as ghosts by an agent.

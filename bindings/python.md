@@ -229,7 +229,124 @@ Holds parser configuration including tokenizer settings.
 
 ---
 
-## 5. Type Hint Mapping
+## 5. Test Node Format
+
+Test nodes (`ccoding.kind: "test"`) map to Python test classes following [pytest](https://docs.pytest.org/) conventions. The reference implementation uses pytest as the default test framework. Other Python test frameworks (unittest, nose2) MAY be supported through configuration, but this binding documents the pytest mapping.
+
+### 5.1 Test Framework Mapping
+
+| Aspect | pytest Convention |
+|---|---|
+| Test file location | `tests/` directory mirroring the source structure (e.g., `src/parsers/document.py` → `tests/parsers/test_document.py`) |
+| Test file naming | `test_<module>.py` — prefixed with `test_` |
+| Test class naming | `Test<ClassName>` — prefixed with `Test`, no parentheses (pytest does not require inheritance from a base class) |
+| Test method naming | `test_<description>` — prefixed with `test_`, using snake_case |
+| Fixtures | `@pytest.fixture` decorators for setup and shared state |
+| Parametrization | `@pytest.mark.parametrize` for data-driven tests |
+
+### 5.2 Test Class Structured Content
+
+A test node on the canvas uses the following structured markdown format. This is the test-specific counterpart of the class node format defined in Section 4.1.
+
+```markdown
+## TestDocumentParser
+
+> Tests for DocumentParser — verifies the parsing pipeline from raw text to validated AST
+
+### Class Under Test
+- DocumentParser (`parsers.document.DocumentParser`)
+
+### Test Methods
+- test_parse_simple_document — parses a minimal valid document and checks AST structure
+- test_parse_cached_result — verifies that repeated parsing returns cached AST
+- test_parse_with_plugins — applies plugins in order and checks transformed AST
+- test_parse_malformed_input — expects ParseError on invalid input
+- test_validate_rejects_broken_ast — validates that malformed ASTs are rejected
+
+### Results
+- test_parse_simple_document: **PASS**
+- test_parse_cached_result: **PASS**
+- test_parse_with_plugins: **FAIL** — `AssertionError: expected 3 plugins applied, got 2`
+- test_parse_malformed_input: **PASS**
+- test_validate_rejects_broken_ast: **ERROR** — `TypeError: validate() missing 1 required positional argument: 'strict'`
+```
+
+**Section mapping:**
+
+| Canvas Section | Purpose |
+|---|---|
+| `## TestClassName` heading | Test class name |
+| Blockquote (`>`) | One-line summary of what is being tested |
+| `### Class Under Test` | Lists class(es) being verified — corresponds to `tests` edges |
+| `### Test Methods` | Each method as `test_name — pseudo code description of the scenario` |
+| `### Results` | Each method as `test_name: **STATUS**` with optional failure/error details |
+
+### 5.3 Generated Python Code
+
+Given the test node above with a `tests` edge to a `DocumentParser` class node, the sync engine generates:
+
+```python
+import pytest
+
+from parsers.document import DocumentParser
+
+
+class TestDocumentParser:
+    """Tests for DocumentParser.
+
+    Verifies the parsing pipeline from raw text to validated AST.
+    """
+
+    def test_parse_simple_document(self) -> None:
+        """Parse a minimal valid document and check AST structure."""
+        raise NotImplementedError
+
+    def test_parse_cached_result(self) -> None:
+        """Verify that repeated parsing returns cached AST."""
+        raise NotImplementedError
+
+    def test_parse_with_plugins(self) -> None:
+        """Apply plugins in order and check transformed AST."""
+        raise NotImplementedError
+
+    def test_parse_malformed_input(self) -> None:
+        """Expect ParseError on invalid input."""
+        raise NotImplementedError
+
+    def test_validate_rejects_broken_ast(self) -> None:
+        """Validate that malformed ASTs are rejected."""
+        raise NotImplementedError
+```
+
+Key observations:
+
+- The `tests` edge to `DocumentParser` produced the `from parsers.document import DocumentParser` import, derived from the target node's `ccoding.qualifiedName`.
+- Test method names carry the `test_` prefix required by pytest discovery.
+- Each test method's docstring comes from the pseudo code description in the `### Test Methods` section.
+- Method bodies are `raise NotImplementedError` — the human or agent implements the actual test logic. For pytest, the reference implementation does not use `pass` or `...` because a passing test with no assertions is misleading.
+- Return type annotations are `-> None` for all test methods, following the convention that tests do not return values.
+
+### 5.4 Test Result Format
+
+The sync engine reads test results from pytest's output. The reference implementation supports two result sources:
+
+- **pytest JSON report** — produced by `pytest --json-report` (via the `pytest-json-report` plugin). The sync engine reads the JSON file and maps each test's `outcome` field (`passed`, `failed`, `error`) to the canvas result status.
+- **JUnit XML** — produced by `pytest --junitxml=results.xml`. The sync engine parses the XML and extracts test case outcomes.
+
+Result status mapping:
+
+| pytest Outcome | Canvas Status | Details |
+|---|---|---|
+| `passed` | **PASS** | No additional details. |
+| `failed` | **FAIL** | The assertion message from the `longrepr` or `message` field, truncated to a single line for canvas readability. |
+| `error` | **ERROR** | The exception type and message from the `longrepr` or `message` field, truncated to a single line. |
+| `skipped` | **SKIP** | The skip reason, if available. |
+
+When test results are imported, the sync engine updates the `### Results` section of the test node's canvas content. Existing result entries are overwritten with the new status. Test methods that appear in the results but not in the `### Test Methods` section SHOULD be added to the test methods list (this handles tests added directly in code). Test methods that appear in the `### Test Methods` section but not in the results retain their previous result status — the absence of a result does not imply removal.
+
+---
+
+## 6. Type Hint Mapping
 
 Canvas uses language-neutral type names in the `### Fields` and `### Signature` sections. The binding translates these to Python's native type syntax. The reference implementation performs this translation during both code generation (canvas to code) and code parsing (code to canvas).
 
@@ -257,11 +374,11 @@ The Python 3.10+ union syntax (`X | Y`) is preferred over `Optional[X]` and `Uni
 
 ---
 
-## 6. Example Round-Trip
+## 7. Example Round-Trip
 
 This section walks through a complete cycle: a class node on the canvas, the Python code generated from it, an edit made in code, and the resulting canvas update. This demonstrates how the binding keeps both representations in sync.
 
-### 6.1 Canvas Data (Starting Point)
+### 7.1 Canvas Data (Starting Point)
 
 A canvas file contains a `DocumentParser` class node and a detail node for its `parse` method, connected by a `detail` edge:
 
@@ -325,7 +442,7 @@ A canvas file contains a `DocumentParser` class node and a detail node for its `
 }
 ```
 
-### 6.2 Generated Python Code
+### 7.2 Generated Python Code
 
 The sync engine reads the canvas and generates `src/parsers/document.py`:
 
@@ -396,7 +513,7 @@ Key observations:
 - The `validate` method has a minimal docstring since it had no detail node.
 - Method bodies are `...` (ellipsis) — the protocol stub. For non-protocol classes, the reference implementation generates `raise NotImplementedError`.
 
-### 6.3 Code Edit
+### 7.3 Code Edit
 
 A developer adds a plugin step to the `parse` method's pseudo code and adds a new parameter:
 
@@ -432,7 +549,7 @@ A developer adds a plugin step to the `parse` method's pseudo code and adds a ne
 
 Two changes were made: a new keyword-only parameter `strict: bool = False`, and an updated pseudo code (step 5 added, step 6 updated).
 
-### 6.4 Canvas Update
+### 7.4 Canvas Update
 
 The sync engine detects the code change and updates the canvas. The class node's method list and the method detail node both change.
 
@@ -470,7 +587,7 @@ The Python type `bool` was translated back to the canvas type `Boolean`, and `Fa
 
 ---
 
-## 7. Reference Implementation
+## 8. Reference Implementation
 
 The full working implementation is available at [cooperative-coding-python](https://github.com/giosullutrone/cooperative-coding-python). The repository contains the sync engine, code parser, code generator, and docstring mapping logic that this appendix describes.
 

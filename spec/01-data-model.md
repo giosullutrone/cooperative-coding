@@ -104,7 +104,7 @@ The `ccoding` object on a node carries the semantic identity, language mapping, 
 
 | Field | Required | Values | Description |
 |---|---|---|---|
-| `kind` | REQUIRED | `class`, `method`, `field`, `package` (core); `interface`, `module` (extended) | The type of code element this node represents. Core kinds MUST be supported by all implementations. Extended kinds SHOULD be supported. A minimal implementation MAY represent `interface` as `class` with a stereotype (e.g., `"stereotype": "protocol"`), and MAY represent `module` as `package`. |
+| `kind` | REQUIRED | `class`, `method`, `field`, `package`, `test` (core); `interface`, `module` (extended) | The type of code element this node represents. Core kinds MUST be supported by all implementations. Extended kinds SHOULD be supported. A minimal implementation MAY represent `interface` as `class` with a stereotype (e.g., `"stereotype": "protocol"`), and MAY represent `module` as `package`. |
 | `stereotype` | OPTIONAL | Open set (e.g., `protocol`, `dataclass`, `abstract`, `enum`, `singleton`, `mixin`) | Language-specific subtype that refines the `kind`. Implementations MUST NOT reject unknown stereotype values — the set is open and extensible. Each language binding defines its recognized stereotypes; unrecognized stereotypes SHOULD be preserved and displayed as-is. |
 | `language` | OPTIONAL | Language identifier string (e.g., `python`, `typescript`, `rust`, `go`) | The programming language for this element. When omitted, implementations SHOULD infer the language from the canvas-level default or the language binding in use. |
 | `source` | OPTIONAL | Relative file path (e.g., `src/parsers/document.py`) | Path to the source file this node maps to, relative to the project root. Used by the sync engine to locate the corresponding code. Implementations MUST treat this as a project-relative path, never absolute. |
@@ -122,6 +122,7 @@ The `kind` field determines what type of code construct the node represents and 
 - **`field`** — A field or property that has been promoted to its own detail node. Always connected to its parent class via a `detail` edge. Used when a field carries significant design semantics (e.g., a configuration object, a dependency injection point).
 - **`package`** — A package, module, namespace, or directory that groups related classes. Used for high-level architectural views. Package nodes MAY contain a listing of their contents in the text field.
 - **`interface`** (extended) — Explicitly marks a node as an interface, protocol, trait, or abstract contract rather than a concrete class. Implementations that don't support this kind SHOULD represent it as `"kind": "class"` with an appropriate stereotype.
+- **`test`** — A test class or test suite that verifies the behavior of one or more classes in the system. A test node's text content contains the test class name, pseudo code of the test methods describing the scenarios being verified, and test execution results (pass, fail, or error with details). Test nodes are connected to the class nodes they verify via `tests` edges. Unlike other code-element nodes, test nodes carry execution state — results from the most recent test run — in addition to design intent. This dual nature is deliberate: the canvas shows both what is being tested and whether it passes, giving the human a live view of system health alongside architecture.
 - **`module`** (extended) — A single-file module or compilation unit. Distinguished from `package` in languages where the distinction matters (e.g., Python's module vs. package). Implementations that don't support this kind SHOULD represent it as `package`.
 
 ---
@@ -225,6 +226,7 @@ Each relation type defines a specific semantic relationship between two nodes. T
 | `depends` | The source class uses the target class (import-level dependency). | `fromNode` depends on `toNode`. | Generates an import statement in the source file. |
 | `calls` | A method on the source calls a method on the target. Informational — documents runtime flow. | `fromNode` calls `toNode`. | Not directly synced. Used for documentation, sequence reasoning, and architectural analysis. Implementations MAY generate call-site comments. |
 | `detail` | Links a class node to one of its promoted method or field nodes. The target is a detail of the source. | `fromNode` is the parent class; `toNode` is the detail node. | The detail node's content is synced as part of the parent class's code. The edge itself produces no independent code construct. |
+| `tests` | The source test node verifies the behavior of the target class node. Establishes a traceability link between test suites and the production code they cover. | `fromNode` is the test node; `toNode` is the class under test. | Generates import statements and test class skeletons that reference the class under test. The sync engine uses this edge to propagate staleness when the target class changes (see [Lifecycle](02-lifecycle.md)). |
 | `context` | Links a context node to a CooperativeCoding code-element node. Provides design rationale, references, or other non-code information. | Direction is flexible. Either node may be `fromNode`. | Not synced — canvas-only. Context edges and their target context nodes are collaboration artifacts that exist solely on the canvas. |
 
 ### Relation Validity
@@ -237,6 +239,7 @@ Implementations SHOULD validate that edges connect appropriate node kinds:
 - `depends` — MAY connect any code-element nodes.
 - `calls` — SHOULD connect `method` to `method`, or `class` to `class` (shorthand for "some method in A calls some method in B").
 - `detail` — MUST connect `class` to `method` or `class` to `field`.
+- `tests` — SHOULD connect `test` to `class` (or `interface`). A single test node MAY have multiple `tests` edges to different class nodes when the test suite exercises interactions between classes.
 - `context` — MUST have at least one endpoint that is a context node (a node without `ccoding.kind`).
 
 Implementations SHOULD warn on invalid combinations but MUST NOT reject the canvas file. Permissive reading ensures forward compatibility and cross-tool interoperability.
@@ -257,6 +260,7 @@ The JSON Canvas `label` field is OPTIONAL but RECOMMENDED for CooperativeCoding 
 | `inherits` | Nature of the inheritance relationship. | `"Base parsing interface"`, `"Abstract document handler"` |
 | `implements` | The contract or capability being fulfilled. | `"Serialization support"`, `"Iterator protocol"` |
 | `detail` | The method or field name that was promoted. | `"parse()"`, `"config"`, `"validate()"` |
+| `tests` | What aspect of the class is being tested, or the test scope. | `"unit — parsing pipeline"`, `"integration — plugin loading"`, `"edge cases"` |
 | `context` | Type of context being provided. | `"rationale"`, `"reference"`, `"decision log"`, `"RFC link"` |
 
 ### Label Parsing

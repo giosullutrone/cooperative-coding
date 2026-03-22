@@ -101,7 +101,25 @@ A binding MUST be able to generate the following from canvas node data:
 **Inheritance and implementation declarations.** Given `inherits` and `implements` edges:
 - Generate the correct syntax for the target language (e.g., parenthesized base classes in Python, `extends`/`implements` clauses in TypeScript, trait bounds in Rust).
 
-### 2.4 Documentation Mapping
+### 2.4 Test Node Support
+
+Test nodes are core code-element nodes (`ccoding.kind: "test"`), and a compliant binding MUST define how they map to the target language's testing conventions. The binding is responsible for translating between the canvas representation of test suites and the language's test framework idioms.
+
+A binding MUST define the following for test nodes:
+
+**Test framework mapping.** The binding MUST identify the default test framework for the target language (e.g., pytest for Python, Jest/Vitest for TypeScript, cargo test for Rust) and define how test node content maps to that framework's conventions. A binding MAY support multiple test frameworks through configuration.
+
+**Test class generation.** Given a test node's metadata, structured content, and connected `tests` edges, the binding MUST be able to generate a test source file containing:
+- A test class or test module declaration following the language's test framework conventions.
+- Test method stubs for each test method listed in the node's pseudo code section, with appropriate test framework decorators or annotations.
+- Import statements for the class(es) under test, derived from connected `tests` edges.
+- Test framework boilerplate (e.g., fixtures, setup/teardown methods, test configuration).
+
+**Test result format.** The binding MUST define how test execution results are represented in the test node's structured content. The result format MUST include, for each test method: the execution status (pass, fail, or error), and for failures and errors, the relevant details (assertion message, exception type, or error traceback). The binding MUST define how the sync engine reads these results from the language's test framework output (e.g., JUnit XML, pytest JSON, TAP output).
+
+**Test file conventions.** The binding MUST define the file path conventions for test source files — where test files live relative to the source they test, how test file names are derived from the class under test, and how the `ccoding.source` field is populated for test nodes that lack an explicit path.
+
+### 2.5 Documentation Mapping
 
 The canvas node's text content carries the design intent: responsibility statements, pseudo code, field descriptions, method signatures, and constraints. The binding defines how this content maps to the language's documentation format.
 

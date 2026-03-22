@@ -65,6 +65,25 @@ Package nodes (`ccoding.kind: "package"`) represent directories or module groupi
 - The sync engine SHOULD create any required package initialization files (e.g., `__init__.py` in Python) as defined by the active language binding.
 - Package nodes are organizational — their primary role is grouping, not code generation.
 
+### 3.3 Test Node Sync (Canvas → Code)
+
+Test nodes (`ccoding.kind: "test"`) are synced to code as test class skeletons. When a new test node is accepted:
+
+- The sync engine MUST generate a test source file containing a test class skeleton — the test class declaration, test method stubs for each test method listed in the node's pseudo code, and import statements for the class(es) under test as determined by connected `tests` edges.
+- The file path MUST follow the `ccoding.source` field if set, or be derived from the `ccoding.qualifiedName` using the active language binding's test file conventions (e.g., `tests/test_document.py` in Python, `__tests__/document.test.ts` in TypeScript).
+- Each test method stub MUST include a documentation block populated from the corresponding pseudo code entry in the test node's content.
+- The sync engine SHOULD generate appropriate test framework boilerplate as defined by the active language binding (e.g., `pytest` fixtures in Python, `describe`/`it` blocks in TypeScript).
+
+When a test node's content changes on the canvas (test methods added, removed, or their pseudo code modified):
+
+- The sync engine MUST add new test method stubs for added test methods.
+- The sync engine MUST update documentation blocks for modified test methods.
+- The sync engine MUST NOT overwrite existing test method bodies — the implementation logic within test methods is code's domain, just as it is for regular method bodies.
+
+When a `tests` edge is added between a test node and a class node:
+
+- The sync engine MUST add an import statement for the class under test in the test source file, if one does not already exist.
+
 ---
 
 ## 4. Code → Canvas Sync Rules
@@ -97,6 +116,18 @@ When the sync engine encounters a source file that contains classes not present 
 - Implementations MAY require explicit opt-in for tracking new directories (e.g., a configuration that specifies which source paths are synced).
 - Newly created canvas nodes from code import MUST have `status: "accepted"` — the code exists and is authoritative.
 
+### 4.3 Test Node Sync (Code → Canvas)
+
+Test execution produces results — pass, fail, or error for each test method — that MUST be reflected on the canvas. This is a unique aspect of test nodes: they carry execution state in addition to design intent.
+
+**Test result import.** When the sync engine detects updated test results (from test output files, CI artifacts, or framework-specific result formats as defined by the active language binding), it MUST update the test node's structured content to reflect the current results. Each test method in the node's content MUST show its most recent execution status: pass, fail (with failure message), or error (with error details). The format of the results section is defined by the active language binding.
+
+**New test class in code.** When the sync engine encounters a test class in a tracked source file that has no corresponding canvas node, it SHOULD create a test node on the canvas with `status: "accepted"`. The sync engine SHOULD also create `tests` edges to any class nodes whose classes are imported and exercised by the test class. Detecting which classes a test exercises MAY rely on import analysis, naming conventions (e.g., `TestDocumentParser` tests `DocumentParser`), or explicit markers as defined by the active language binding.
+
+**Changed test methods.** When test methods are added, removed, or modified in code, the sync engine MUST update the test node's content following the same rules as regular method sync (Section 4): new methods are added to the node's method list, removed methods are flagged or removed, and documentation changes propagate to the canvas.
+
+**Staleness propagation.** When a class node connected via a `tests` edge changes its structural content (fields, methods, or signature changes — not just documentation), the sync engine SHOULD mark the connected test nodes as `stale` per the lifecycle rules defined in [Lifecycle, Section 4.5](02-lifecycle.md). This signals to the human that the test suite may need updating to reflect the class changes.
+
 ---
 
 ## 5. Abstract Sync Mapping
@@ -113,6 +144,8 @@ This section provides the complete mapping between canvas elements and code elem
 | Edge `implements` | Interface or protocol implementation | Maps to the language's interface implementation syntax. One edge = one implemented interface. |
 | Edge `composes` | Typed field declaration | The edge label provides the field name. The target node provides the field type. Maps to a field declaration on the source class. |
 | Edge `depends` | Import statement | Maps to an import of the target class in the source class's file. |
+| Test node | Test class definition + test method stubs + documentation blocks | A test node maps to a test class in a test source file. The node's test method pseudo code maps to test method stubs and documentation. The node's results section maps to the most recent test execution output. |
+| Edge `tests` | Import statement + test class reference | Maps to an import of the class under test in the test source file. The sync engine also uses this edge to propagate staleness when the target class changes. |
 | Edge `calls` | Not synced (informational) | Documents runtime method call flow on the canvas. The actual calls exist in method bodies, which are code's domain. The sync engine MUST NOT generate or remove code based on `calls` edges. |
 | Edge `detail` | Not synced (structural) | A canvas-only structural relationship linking a class node to its promoted method or field node. The sync engine uses this edge to locate parent-child relationships but does not generate an independent code construct from it. |
 | `status: "proposed"` | Not in code (ghost) | Ghost elements exist only on the canvas. They have zero code representation. |
