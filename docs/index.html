@@ -1286,15 +1286,15 @@
                         <rect x="10" y="176" width="100" height="48" rx="6" fill="#fff" stroke="#1a1f36" stroke-width="2"/>
                         <text x="60" y="206" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#1a1f36" font-weight="600">SYNC</text>
 
-                        <!-- Arrows between phases (circular arcs) -->
-                        <!-- Design -> Review: right edge to top edge -->
-                        <path d="M260 68 A155 155 0 0 1 320 176" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#loop-arrow)"/>
-                        <!-- Review -> Implement: bottom edge to right edge -->
-                        <path d="M320 224 A155 155 0 0 1 270 332" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#loop-arrow)"/>
-                        <!-- Implement -> Sync: left edge to bottom edge -->
-                        <path d="M130 332 A155 155 0 0 1 80 224" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#loop-arrow)"/>
-                        <!-- Sync -> Design: top edge to left edge -->
-                        <path d="M80 176 A155 155 0 0 1 140 68" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#loop-arrow)"/>
+                        <!-- Arrows between phases (circular arcs, edge centers) -->
+                        <!-- Design -> Review: center of right edge (260,64) to center of top edge (346,176) -->
+                        <path d="M260 64 A165 165 0 0 1 346 176" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#loop-arrow)"/>
+                        <!-- Review -> Implement: center of bottom edge (346,224) to center of right edge (270,336) -->
+                        <path d="M346 224 A165 165 0 0 1 270 336" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#loop-arrow)"/>
+                        <!-- Implement -> Sync: center of left edge (130,336) to center of bottom edge (60,224) -->
+                        <path d="M130 336 A165 165 0 0 1 60 224" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#loop-arrow)"/>
+                        <!-- Sync -> Design: center of top edge (60,176) to center of left edge (140,64) -->
+                        <path d="M60 176 A165 165 0 0 1 140 64" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#loop-arrow)"/>
 
                         <!-- Center label -->
                         <text x="200" y="196" text-anchor="middle" font-family="Instrument Serif, serif" font-size="14" fill="#6b6560" font-style="italic">cooperate</text>
