@@ -104,6 +104,13 @@ When source code changes, the sync engine MUST propagate those changes to the co
 | Deleted method | If the method has a detail node, mark it as `stale`. If the method was only listed inline in the class node, remove it from the class node's method list. Implementations SHOULD prefer marking as stale over silent removal when the method was architecturally significant (had a detail node or was an edge endpoint). |
 | Renamed class or method | If the sync engine can detect the rename (e.g., through heuristics, git history, or language server analysis), it SHOULD update the canvas node's `ccoding.qualifiedName` and text content to reflect the new name. If the rename cannot be confidently detected, the sync engine MUST mark the old element as `stale` and create a new `accepted` element for the renamed construct. |
 
+**Rename detection heuristics:** Implementations SHOULD use the following signals to detect renames:
+- Same file, different class name (high confidence).
+- Same qualified name prefix, different final segment (medium confidence).
+- Matching field/method structure in a new class (low confidence).
+
+When confidence is below a threshold defined by the implementation, the sync engine SHOULD mark the old node as `stale` and create a new node rather than assuming a rename. Implementations SHOULD allow the human to confirm or reject detected renames.
+
 ### 4.1 Scope of Code-to-Canvas Sync
 
 Not every code change is architecturally significant. The sync engine MUST update the canvas for structural changes (new classes, changed signatures, changed documentation, changed relationships). The sync engine MUST NOT attempt to reflect implementation details on the canvas — local variable changes, control flow modifications, performance optimizations within method bodies, and other line-level code changes are the code's domain and have no canvas representation.
@@ -190,6 +197,8 @@ The following rules are normative:
 4. Implementations SHOULD identify the specific element and section in conflict, not just flag the entire file or node.
 5. Implementations MAY offer automatic resolution strategies (e.g., "keep canvas version", "keep code version", "merge both") but MUST NOT apply any strategy without explicit human selection.
 
+**Convergent edge creation:** If both the canvas and code independently create the same relationship (e.g., human adds a `composes` edge on canvas while the agent adds a typed field in code), and both resolve to the same semantic relationship, this is NOT a conflict. The sync engine SHOULD recognize convergent edits and merge them without user intervention.
+
 ### 6.4 Resolution Strategies
 
 The spec does not mandate a specific resolution mechanism, but RECOMMENDS the following strategies that implementations SHOULD support:
@@ -234,6 +243,8 @@ The spec RECOMMENDS content hashing as the state tracking mechanism:
 
 This approach is simple, efficient, and deterministic. Content hashing avoids the complexity of tracking individual edit operations and works regardless of how the changes were made (manual editing, agent generation, external tooling, git operations).
 
+**Incremental sync (RECOMMENDED):** Full-canvas scans on every sync cycle can be expensive for large projects. Implementations SHOULD use file-system modification timestamps to pre-filter which source files need re-hashing. Canvas tools SHOULD track which nodes were modified since the last save to avoid re-hashing unchanged nodes.
+
 ### 7.3 Storage
 
 The spec does NOT prescribe a specific state format or storage location. Implementations choose their own. RECOMMENDED conventions:
@@ -276,6 +287,12 @@ Implementations MAY support automatic sync — sync triggered by events without 
 - **Periodic polling:** Check for changes on a timer.
 
 Automatic sync is OPTIONAL. Implementations that support it MUST provide a way to disable it — some users prefer manual control. Implementations that support automatic sync SHOULD also support manual sync, so users can force a sync cycle at any time.
+
+### Sync Serialization
+
+Implementations MUST serialize sync operations within a project. Concurrent sync cycles MUST NOT run simultaneously. Implementations SHOULD use a lock file (e.g., `.ccoding/sync.lock`) to enforce this.
+
+If a lock file is stale (e.g., the process that created it crashed), implementations SHOULD check whether the owning process is still alive before breaking the lock. A lock older than 5 minutes with no active owning process MAY be considered stale.
 
 ### 8.3 Trigger Rules
 
@@ -338,6 +355,15 @@ A project MAY have multiple `.canvas` files representing different architectural
 - If different canvases show conflicting states for the same element, the sync engine MUST treat this as a conflict and present it for human resolution.
 - Implementations SHOULD warn users when the same element appears on multiple canvases, as this increases the risk of conflicting edits.
 
+### Version Control Integration
+
+JSON Canvas files are JSON, which does not merge well with line-based version control tools. When two developers edit the same `.canvas` file and their changes conflict at the git merge level:
+
+1. Implementations SHOULD resolve the git conflict manually or with a JSON-aware merge tool.
+2. After resolving the git conflict, implementations SHOULD run a full sync cycle to reconcile any inconsistencies.
+3. Implementations MAY provide a post-merge hook that automatically validates and re-syncs the canvas.
+4. Teams SHOULD consider organizing canvases to minimize overlap — e.g., one canvas per subsystem or per developer area.
+
 ### 10.3 External Code Changes
 
 Code may change outside of the canvas-agent workflow — a teammate pushes a commit, a merge brings in changes, or the user edits code directly in an editor without touching the canvas. The sync engine MUST handle these changes the same way it handles any code change: compare the current code against the sync state, detect changes, and propagate them to the canvas.
@@ -353,3 +379,30 @@ Source files that exist in the project but have no corresponding canvas nodes ar
 - Implementations SHOULD respect a tracking configuration that defines which source paths are synced.
 - New classes within tracked paths SHOULD get canvas nodes (as defined in Section 4.2).
 - Classes outside tracked paths SHOULD be ignored by sync unless the user explicitly imports them.
+
+### Error Taxonomy
+
+Sync operations MAY produce the following error categories. Implementations SHOULD use these categories for structured logging and user-facing messages:
+
+| Category | Description | Example |
+|---|---|---|
+| `parse_error` | Source file has syntax errors preventing AST extraction | `SyntaxError in parsers/document.py line 42` |
+| `conflict` | Both canvas and code changed the same element | `Conflict on DocumentParser: canvas and code both modified` |
+| `missing_source` | `ccoding.source` references a file that does not exist | `File parsers/document.py not found` |
+| `orphan` | A detail node has no parent class via `detail` edge | `Method parse() has no parent class node` |
+| `schema_error` | Invalid `ccoding` metadata on a node or edge | `Node abc123: unknown status value 'draft'` |
+| `path_violation` | `ccoding.source` resolves outside the project root | `Path ../../../etc/passwd escapes project root` |
+| `lock_error` | Another sync process holds the lock | `Sync lock held by process 12345` |
+
+### Structured Observability
+
+Implementations SHOULD emit structured sync events for debugging and monitoring. Each sync cycle SHOULD produce a summary including:
+- Cycle ID (unique identifier)
+- Timestamp (start and end)
+- Direction (canvas-to-code, code-to-canvas, or bidirectional)
+- Elements processed (count by direction)
+- Conflicts detected (count and element identifiers)
+- Errors encountered (count by category)
+- Duration (total and per-element breakdown for cycles exceeding a threshold)
+
+Implementations MAY expose a read-only **diagnostic command** (e.g., `ccoding check`) that reports drift between canvas and code without modifying either side. This command SHOULD output the list of elements that would be synced, any detected conflicts, and any errors — without performing the sync.

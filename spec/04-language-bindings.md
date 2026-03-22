@@ -12,6 +12,8 @@ A language binding is the translation layer between the canvas world and the cod
 
 Without a binding, the sync engine cannot operate. It knows that an `inherits` edge means "generate an inheritance declaration" but it cannot know the syntax for that declaration without a language-specific mapping. It knows that a class node's documentation should appear in a doc comment but it cannot know whether that means `"""..."""`, `/** ... */`, or `/// ...` without a binding. The binding is what makes the abstract spec concrete.
 
+A _language binding_ has two parts: (1) a **binding specification** — a markdown document in this repository describing the mapping rules, and (2) a **binding implementation** — executable code (parser, generator, type mapper) that a sync engine uses at runtime. The spec document defines the contract; the implementation fulfills it.
+
 This document defines the contract that any language binding MUST fulfill to be CooperativeCoding-compliant. It separates requirements into three tiers — MUST (required for compliance), SHOULD (recommended for quality), and MAY (optional enhancements) — following [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) keyword semantics as established in [Introduction](00-introduction.md). A binding that satisfies all MUST requirements is compliant. A binding that also satisfies the SHOULD requirements is high-quality. A binding that goes further with MAY capabilities is comprehensive.
 
 ---
@@ -157,7 +159,7 @@ When the sync engine generates code, it needs to produce correct import statemen
 
 Import resolution involves:
 
-- Mapping `ccoding.qualifiedName` values (dot-notation identifiers like `parsers.document.DocumentParser`) to the target language's module system and import syntax.
+- Mapping `ccoding.qualifiedName` values (dot-notation identifiers like `parsers.document.DocumentParser`) to the target language's module system and import syntax. For languages with path-based module systems (e.g., TypeScript, JavaScript, Go), the `qualifiedName` SHOULD use dot-notation derived from the module path relative to the project root. For example, a TypeScript class `DocumentParser` in `src/parsers/document.ts` would have `qualifiedName: "src.parsers.document.DocumentParser"`. Implementations SHOULD normalize path separators to dots and strip file extensions.
 - Handling the distinction between relative and absolute imports where the language supports both.
 - Resolving standard library types (e.g., `List`, `Dict`, `Optional` in Python) to the correct import source and syntax for the target language version.
 - Handling re-exports, namespace packages, and other module system features specific to the target language.
@@ -228,6 +230,42 @@ A binding MAY define strategies for how canvas nodes map to file organization. T
 - **Feature-based grouping.** Classes grouped by feature or domain rather than by type. The binding defines the grouping heuristic.
 
 When a binding defines multi-file strategies, it SHOULD specify how the sync engine determines file boundaries when generating code from canvas nodes that lack an explicit `ccoding.source` value.
+
+---
+
+### Sync Engine Architecture
+
+The spec is deliberately silent on deployment topology. Valid architectures include:
+
+- A **standalone sync daemon** that watches file changes and runs sync automatically.
+- A **canvas plugin component** where the plugin embeds sync logic and triggers it on canvas save.
+- An **agent-integrated sync** where the AI agent invokes sync as part of its cooperation loop.
+- A **CLI tool** that the user or agent invokes manually.
+
+All architectures MUST implement the same sync semantics defined in §03-sync. The choice of architecture is an implementation concern, not a spec concern.
+
+### Minimum Viable Binding
+
+Binding authors MAY adopt a phased implementation approach:
+
+**Phase 1 — Canvas-to-code only:** Implement code generation from canvas nodes. This enables designing on canvas and generating skeletons. Requires: stereotype mapping, code generation, documentation formatting. Does not require: AST parsing or code-to-canvas sync.
+
+**Phase 2 — Bidirectional sync:** Add AST parsing and code-to-canvas propagation. This enables the full cooperation loop. Requires: all Phase 1 capabilities plus AST parsing, type translation, and import resolution.
+
+**Phase 3 — Full compliance:** Add test node support, all SHOULD-level features, and edge-case handling.
+
+A Phase 1 binding is useful but NOT fully compliant with this spec. The binding document MUST declare which phase it covers.
+
+### Conformance Testing
+
+Binding authors SHOULD publish a conformance test suite alongside their binding specification. At minimum, this SHOULD include:
+
+- A set of `.canvas` files representing common patterns (single class, inheritance hierarchy, package structure, test nodes).
+- The expected generated source files for each canvas (canvas-to-code golden tests).
+- A set of source files and the expected canvas JSON after import (code-to-canvas golden tests).
+- Round-trip tests demonstrating that canvas → code → canvas produces stable output.
+
+The spec repository MAY host a shared conformance harness in a future version.
 
 ---
 

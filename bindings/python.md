@@ -55,6 +55,15 @@ Four sections are added beyond the standard Google docstring style:
 - **`Responsibility:`** — appears on class and method docstrings. Describes what this element owns in the system. This is the most important section for design: it defines the boundaries.
 - **`Pseudo Code:`** — appears on method docstrings only. A numbered step-by-step description of the algorithm. Deliberately not real code — it describes what happens, not how in language-specific terms.
 - **`Collaborators:`** — appears on class docstrings only. Lists other classes this one works with and why. On the canvas, this information is primarily conveyed through edges, but the docstring captures it in prose for readability in code.
+
+The `Collaborators` section is derived automatically during canvas-to-code sync from the edges connected to this node:
+- `inherits` edges (outgoing) → listed as 'Inherits from: TargetClass'
+- `implements` edges (outgoing) → listed as 'Implements: TargetProtocol'
+- `composes` edges (outgoing) → listed as 'Composes: TargetClass (via field_name)'
+- `depends` edges (outgoing) → listed as 'Depends on: TargetModule'
+- `tests` edges (incoming) → listed as 'Tested by: TestClassName'
+
+During code-to-canvas sync, the `Collaborators` section is ignored — relationships are derived from actual import statements and type annotations in the code.
 - **`Constraints:`** — appears on field documentation only (as comment blocks). Describes invariants, validation rules, and immutability requirements.
 
 These sections are designed to be safely ignored by standard Python documentation tools that do not recognize them — they appear as additional text in the rendered docstring.
@@ -165,6 +174,64 @@ The reference implementation uses structured markdown in canvas node text. This 
 
 Tools that consume canvas files produced by the reference implementation can rely on these formats. Tools that produce canvas files for the reference implementation to consume should follow them. Other implementations may use different internal formats as long as the sync mapping is consistent.
 
+### Structured Content Format
+
+The Python binding uses a structured markdown format for node text. This format is required for sync to function — it is not optional.
+
+**Class node text structure:**
+```
+> Responsibility statement (one-line summary)
+
+Detailed description paragraph(s).
+
+### Fields
+- `field_name`: `type` — description
+- `field_name`: `type` = `default` — description
+
+### Methods
+- `method_name(param: type, ...) -> return_type` — description •
+- `method_name(param: type) -> None` — description
+
+### Constraints
+- Constraint description
+- Invariant description
+```
+
+Key conventions:
+- The blockquote (`>`) on the first line is the responsibility statement, mapped to the class docstring's first line.
+- Fields use backtick-delimited types after a colon.
+- Methods use Python signature syntax. A trailing `•` (bullet marker) indicates a promoted detail node exists.
+- The `###` headings are section delimiters — their exact names (`Fields`, `Methods`, `Constraints`) are significant.
+
+**Method detail node text structure:**
+```
+> Brief description
+
+### Signature
+`method_name(param: type, ...) -> return_type`
+
+### Pseudo Code
+Step-by-step algorithm description
+
+### Constraints
+- Pre/post conditions
+```
+
+**Test node text structure:**
+```
+> What this test suite verifies
+
+### Test Cases
+- `test_method_name` — description
+- `test_another` — description
+
+### Results
+- Last run: PASS/FAIL (timestamp)
+- Coverage: X%
+```
+
+These formats are specific to the Python binding. Other language bindings MAY define different content conventions.
+
 ### 4.1 Class Node
 
 A class node contains the class name as a heading, a responsibility blockquote, and sections for fields and methods. The `●` marker after a field or method indicates that a detail node exists for that element.
@@ -208,6 +275,14 @@ Transform raw source into a validated AST, applying all registered plugins in or
 6. Validate final AST structure
 7. Cache and return
 ```
+
+**Variadic and special parameters:** Python-specific parameter forms are mapped as follows:
+- `*args` → represented in canvas as `*args: type` (or `*args` if untyped)
+- `**kwargs` → represented in canvas as `**kwargs: type` (or `**kwargs` if untyped)
+- Keyword-only arguments (after `*`) → represented with a `*` separator in the parameter list, matching Python syntax
+- Positional-only arguments (before `/`) → represented with a `/` separator in the parameter list
+
+Round-trip fidelity: these special forms MUST survive canvas → code → canvas without loss.
 
 ### 4.3 Field Detail Node
 
@@ -325,6 +400,14 @@ Key observations:
 - Each test method's docstring comes from the pseudo code description in the `### Test Methods` section.
 - Method bodies are `raise NotImplementedError` — the human or agent implements the actual test logic. For pytest, the reference implementation does not use `pass` or `...` because a passing test with no assertions is misleading.
 - Return type annotations are `-> None` for all test methods, following the convention that tests do not return values.
+
+**Stub detection during sync:** The sync engine MUST distinguish between stub bodies and human-implemented bodies to avoid overwriting user code. A method body is considered a stub if it consists solely of:
+- `raise NotImplementedError` (or `raise NotImplementedError(...)`)
+- `pass`
+- `...` (Ellipsis)
+- A single docstring with no other statements
+
+Any other body content is considered human-implemented and MUST NOT be overwritten during canvas-to-code sync. When the canvas changes a method's signature, the sync engine MUST update the signature while preserving the existing body.
 
 ### 5.4 Test Result Format
 
@@ -585,6 +668,52 @@ Transform raw source into a validated AST, applying all registered plugins.
 
 The Python type `bool` was translated back to the canvas type `Boolean`, and `False` was preserved as the default value. The new pseudo code step and the updated step were carried over verbatim. The round-trip is lossless for the information the binding tracks.
 
+### Complete Agent Interaction Example
+
+This example shows a full cooperation turn:
+
+**1. Human designs on canvas:** The human creates a class node for `UserService` with fields `db: Database` and methods `create_user(name: str, email: str) -> User`.
+
+**2. Agent proposes:** The agent reads the canvas, notices `UserService` has no validation, and proposes a ghost node:
+```json
+{
+  "id": "ghost-validator",
+  "type": "text",
+  "text": "> Validates user input before persistence\n\n### Methods\n- `validate_email(email: str) -> bool` — RFC 5322 validation\n- `validate_name(name: str) -> bool` — Non-empty, max 100 chars",
+  "x": 400, "y": 200, "width": 300, "height": 200,
+  "ccoding": {
+    "kind": "class",
+    "qualifiedName": "services.validation.UserValidator",
+    "status": "proposed",
+    "proposedBy": "agent",
+    "proposalRationale": "UserService performs no input validation. Extracting validation to a dedicated class follows SRP."
+  }
+}
+```
+The agent also proposes a `composes` edge from `UserService` to `UserValidator`.
+
+**3. Human reviews:** The human sees the ghost node with reduced opacity on the canvas. They accept it (status changes to `accepted`).
+
+**4. Sync generates code:** The sync engine creates `services/validation.py`:
+```python
+class UserValidator:
+    """Validates user input before persistence."""
+
+    def validate_email(self, email: str) -> bool:
+        """RFC 5322 validation."""
+        raise NotImplementedError
+
+    def validate_name(self, name: str) -> bool:
+        """Non-empty, max 100 chars."""
+        raise NotImplementedError
+```
+And adds to `services/user_service.py`:
+```python
+from services.validation import UserValidator
+```
+
+**5. Loop continues:** The human implements the validation methods. On the next sync cycle, the sync engine detects the bodies are no longer stubs and preserves them.
+
 ---
 
 ## 8. Reference Implementation
@@ -602,7 +731,7 @@ Key modules:
 
 The reference implementation also includes:
 
-- **Type mapper** (`ccoding/code/types.py`) — translates between canvas language-neutral types and Python type annotations, including generic types and union syntax. *(Planned — not yet implemented)*
-- **Import resolver** (`ccoding/code/imports.py`) — generates correct import statements from `ccoding.qualifiedName` values, stereotype requirements, and type annotation dependencies. *(Planned — not yet implemented)*
+- **Type mapper** (`ccoding/code/types.py`) — translates between canvas language-neutral types and Python type annotations, including generic types and union syntax. *(Partial — basic type annotations are generated from canvas field types. Complex generics (e.g., `Dict[str, List[Callable]]`), forward references, and `TYPE_CHECKING` imports are not yet handled. The binding generates type annotations verbatim from canvas text — no validation or transformation is performed.)*
+- **Import resolver** (`ccoding/code/imports.py`) — generates correct import statements from `ccoding.qualifiedName` values, stereotype requirements, and type annotation dependencies. *(Partial — import statements are generated from `depends` edges using the target node's `qualifiedName`. Relative vs. absolute import selection, conditional imports, and `__init__.py` re-exports are not yet handled.)*
 - **Canvas reader** (`ccoding/canvas/reader.py`) — reads JSON Canvas files into the internal model, preserving all standard fields and `ccoding` metadata.
 - **Canvas writer** (`ccoding/canvas/writer.py`) — writes the internal model back to JSON Canvas files, preserving all standard fields and `ccoding` metadata through round-trips.

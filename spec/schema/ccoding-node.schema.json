@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cooperativecoding.dev/schema/ccoding-node.schema.json",
+  "title": "CooperativeCoding Node Metadata",
+  "description": "JSON Schema for validating the ccoding metadata object on a JSON Canvas node.",
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string",
+      "description": "The semantic kind of this code element.",
+      "oneOf": [
+        {
+          "enum": ["class", "method", "field", "package", "test"],
+          "description": "Core kinds — MUST be supported by all implementations."
+        },
+        {
+          "enum": ["interface", "module", "function", "constant"],
+          "description": "Extended kinds — SHOULD be supported."
+        }
+      ]
+    },
+    "stereotype": {
+      "type": "string",
+      "description": "Language-specific subtype refinement. Open set — implementations MUST NOT reject unknown values.",
+      "examples": ["protocol", "dataclass", "abstract", "enum", "singleton", "mixin", "frozen", "slots"]
+    },
+    "language": {
+      "type": "string",
+      "description": "Programming language for this node. Overrides canvas-level default.",
+      "examples": ["python", "typescript", "rust", "go", "java", "csharp"]
+    },
+    "source": {
+      "type": "string",
+      "description": "Project-relative file path. MUST NOT be absolute. MUST NOT contain path traversal sequences that escape the project root.",
+      "pattern": "^(?!\\/)",
+      "not": {
+        "pattern": "(^|\\/)\\.\\.(\\/|$)"
+      }
+    },
+    "qualifiedName": {
+      "type": "string",
+      "description": "Dot-notation identifier linking this node to its code counterpart. Used by the sync engine for identity matching.",
+      "examples": ["parsers.document.DocumentParser", "utils.helpers.format_date", "models.User"]
+    },
+    "status": {
+      "$ref": "#/$defs/status"
+    },
+    "proposedBy": {
+      "$ref": "#/$defs/proposedBy"
+    },
+    "proposalRationale": {
+      "$ref": "#/$defs/proposalRationale"
+    },
+    "staleReason": {
+      "type": "string",
+      "enum": ["code-deleted", "code-renamed", "dependency-changed"],
+      "description": "Reason for staleness. Set by the sync engine when status transitions to 'stale'."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "status": { "const": "proposed" } },
+        "required": ["status"]
+      },
+      "then": {
+        "required": ["proposedBy"],
+        "properties": {
+          "proposedBy": {
+            "enum": ["agent", "human"]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "status": { "const": "stale" } },
+        "required": ["status"]
+      },
+      "then": {
+        "required": ["staleReason"]
+      }
+    }
+  ],
+  "required": ["kind"],
+  "additionalProperties": true,
+  "$defs": {
+    "status": {
+      "type": "string",
+      "enum": ["accepted", "proposed", "rejected", "stale"],
+      "description": "Lifecycle status governing sync behavior."
+    },
+    "proposedBy": {
+      "type": ["string", "null"],
+      "enum": ["agent", "human", null],
+      "description": "Who proposed this element. MUST be set when status is 'proposed'."
+    },
+    "proposalRationale": {
+      "type": ["string", "null"],
+      "description": "Free-text explanation for the proposal. SHOULD be present when proposedBy is 'agent'."
+    }
+  }
+}

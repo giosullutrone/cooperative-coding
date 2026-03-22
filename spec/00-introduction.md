@@ -122,7 +122,27 @@ The CooperativeCoding specification uses [Semantic Versioning](https://semver.or
 - **MINOR** — backwards-compatible additions. New node kinds, new edge relations, new optional metadata fields. Existing implementations continue to work but MAY not support the new features.
 - **PATCH** — clarifications, editorial fixes, and examples. No behavioral changes.
 
-Implementations SHOULD declare which spec version they target. A canvas file SHOULD include the spec version in its metadata so that tools can detect compatibility.
+Implementations SHOULD declare which spec version they target. Every canvas file MUST include `ccoding.specVersion`. Tools encountering a canvas without `specVersion` SHOULD treat it as v1.0.0 for backward compatibility.
+
+### Migration
+
+When a new MAJOR version introduces breaking changes to the `ccoding` namespace, the spec repository MUST publish a migration guide.
+
+Implementations SHOULD provide an automated migration tool or command that upgrades canvas files from version N to N+1.
+
+During migration, implementations MUST preserve all node and edge content. Metadata transformations MUST be lossless — no user data may be discarded.
+
+If an implementation encounters a canvas with a `specVersion` newer than it supports, it MUST warn the user and MUST NOT silently modify the file.
+
+### Forward Compatibility
+
+Stereotypes are open-set: implementations MUST NOT reject unknown stereotype values (see §01-data-model).
+
+Node kinds and edge relations are closed-set for a given spec version. Implementations encountering an unknown `kind` value SHOULD preserve it and render the node as a generic card. Implementations encountering an unknown `relation` value SHOULD preserve it and render the edge as a plain arrow.
+
+Status values are strictly closed-set. Implementations MUST reject or ignore nodes with unrecognized `status` values.
+
+Implementations MUST preserve any unrecognized fields in the `ccoding` metadata object. This allows higher spec versions to add new fields without breaking older tools.
 
 ---
 
@@ -134,6 +154,30 @@ The following topics are explicitly out of scope for this specification. They ar
 - **Canvas tool UX conventions** — How nodes are rendered, how ghost accept/reject controls appear, how context nodes are highlighted on selection — these are left to each canvas tool implementation. The spec provides recommended visual styles but does not mandate them.
 - **Agent behavior and skill design** — How an agent reasons about architecture, when it proposes changes, what heuristics it uses to detect design issues — these are left to each agent integration. The spec defines the cooperation protocol, not the intelligence behind it.
 - **Layout algorithms** — How nodes are arranged on the canvas (force-directed, hierarchical, manual) is an implementation detail. The spec stores absolute positions per JSON Canvas but does not prescribe how they are determined.
+
+---
+
+## Security Considerations
+
+**Path traversal:** Implementations MUST validate that resolved `ccoding.source` paths do not escape the project root directory. Paths containing `..` segments MUST be normalized and re-validated after normalization. Implementations MUST reject paths that resolve outside the project boundary.
+
+**Content sanitization:** Node `text` content is rendered as markdown by canvas tools. Implementations SHOULD sanitize rendered HTML to prevent script injection. Implementations MUST NOT execute embedded HTML, JavaScript, or other active content found in node text.
+
+**Agent trust:** The spec relies on agents being well-behaved (e.g., not self-accepting proposals). Implementations SHOULD log all status transitions with actor identity and timestamp to provide an audit trail. A future spec version MAY introduce a formal authorization model.
+
+---
+
+## JSON Schemas
+
+Machine-readable JSON Schemas for validating `ccoding` metadata are provided in the [`spec/schema/`](schema/) directory:
+
+| Schema | Validates |
+|--------|-----------|
+| [`ccoding-canvas.schema.json`](schema/ccoding-canvas.schema.json) | Top-level `ccoding` object on the canvas |
+| [`ccoding-node.schema.json`](schema/ccoding-node.schema.json) | `ccoding` object on individual nodes |
+| [`ccoding-edge.schema.json`](schema/ccoding-edge.schema.json) | `ccoding` object on individual edges |
+
+These schemas encode the field types, allowed values, and conditional requirements (e.g., `proposedBy` is required when `status` is `"proposed"`). Implementations SHOULD use these schemas or equivalent validation logic. All schemas allow additional properties for forward compatibility.
 
 ---
 

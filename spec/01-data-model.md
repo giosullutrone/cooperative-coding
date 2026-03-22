@@ -70,6 +70,12 @@ In addition to node-level and edge-level `ccoding` objects, a canvas file MAY in
 
 Tools that do not recognize the top-level `ccoding` object MUST preserve it through read/write cycles.
 
+### Cross-Canvas References
+
+A project MAY use multiple `.canvas` files to represent different architectural views (see §03-sync, Section 10.2). Edges MUST NOT reference nodes in a different canvas file — the JSON Canvas format does not support cross-file references.
+
+To express cross-canvas relationships, implementations SHOULD use `context` nodes that summarize the external dependency with a note like 'See core.canvas → BaseService'. A future spec version MAY introduce a formal cross-canvas reference mechanism.
+
 ---
 
 ## 3. Node Metadata Schema
@@ -104,10 +110,10 @@ The `ccoding` object on a node carries the semantic identity, language mapping, 
 
 | Field | Required | Values | Description |
 |---|---|---|---|
-| `kind` | REQUIRED | `class`, `method`, `field`, `package`, `test` (core); `interface`, `module` (extended) | The type of code element this node represents. Core kinds MUST be supported by all implementations. Extended kinds SHOULD be supported. A minimal implementation MAY represent `interface` as `class` with a stereotype (e.g., `"stereotype": "protocol"`), and MAY represent `module` as `package`. |
+| `kind` | REQUIRED | `class`, `method`, `field`, `package`, `test` (core); `interface`, `module`, `function`, `constant` (extended) | The type of code element this node represents. Core kinds MUST be supported by all implementations. Extended kinds SHOULD be supported. A minimal implementation MAY represent `interface` as `class` with a stereotype (e.g., `"stereotype": "protocol"`), and MAY represent `module` as `package`. |
 | `stereotype` | OPTIONAL | Open set (e.g., `protocol`, `dataclass`, `abstract`, `enum`, `singleton`, `mixin`) | Language-specific subtype that refines the `kind`. Implementations MUST NOT reject unknown stereotype values — the set is open and extensible. Each language binding defines its recognized stereotypes; unrecognized stereotypes SHOULD be preserved and displayed as-is. |
-| `language` | OPTIONAL | Language identifier string (e.g., `python`, `typescript`, `rust`, `go`) | The programming language for this element. When omitted, implementations SHOULD infer the language from the canvas-level default or the language binding in use. |
-| `source` | OPTIONAL | Relative file path (e.g., `src/parsers/document.py`) | Path to the source file this node maps to, relative to the project root. Used by the sync engine to locate the corresponding code. Implementations MUST treat this as a project-relative path, never absolute. |
+| `language` | OPTIONAL | Language identifier string (e.g., `python`, `typescript`, `rust`, `go`) | The programming language for this element. When omitted, implementations SHOULD infer the language from the canvas-level default or the language binding in use. **Multi-language canvases:** A single canvas MAY contain nodes with different `ccoding.language` values. Each node is synced using the binding for its own language. Cross-language edges (e.g., a Python class `inherits` from a TypeScript class) are informational only — they are NOT synced to code. Implementations SHOULD render cross-language edges visually distinct (e.g., dashed style) to indicate they do not generate code. |
+| `source` | OPTIONAL | Relative file path (e.g., `src/parsers/document.py`) | Path to the source file this node maps to, relative to the project root. Used by the sync engine to locate the corresponding code. Implementations MUST treat this as a project-relative path, never absolute. **Security:** Implementations MUST validate that resolved `ccoding.source` paths do not escape the project root directory. Paths containing `..` segments MUST be normalized and validated after normalization. Implementations MUST reject source paths that resolve outside the project boundary. |
 | `qualifiedName` | RECOMMENDED | Dot-notation identifier (e.g., `parsers.document.DocumentParser`) | Fully qualified name in the target language's namespace. This is the stable identity link between a canvas node and its code counterpart. The sync engine uses this value — not the node `id` — to match canvas elements to code elements. Implementations SHOULD include `qualifiedName` on all code-element nodes. |
 | `status` | REQUIRED for tracked nodes | `accepted`, `proposed`, `rejected`, `stale` | Current lifecycle status. Governs whether the element is synced to code, awaiting review, or flagged for attention. See Section 4 and [Lifecycle](02-lifecycle.md) for full semantics. |
 | `proposedBy` | OPTIONAL | `"agent"`, `"human"`, or `null` | Who created this element as a proposal. MUST be set when `status` is `"proposed"`. MAY be preserved after acceptance for audit trail purposes, or MAY be cleared (set to `null`). |
@@ -122,8 +128,12 @@ The `kind` field determines what type of code construct the node represents and 
 - **`field`** — A field or property that has been promoted to its own detail node. Always connected to its parent class via a `detail` edge. Used when a field carries significant design semantics (e.g., a configuration object, a dependency injection point).
 - **`package`** — A package, module, namespace, or directory that groups related classes. Used for high-level architectural views. Package nodes MAY contain a listing of their contents in the text field.
 - **`interface`** (extended) — Explicitly marks a node as an interface, protocol, trait, or abstract contract rather than a concrete class. Implementations that don't support this kind SHOULD represent it as `"kind": "class"` with an appropriate stereotype.
+
+**Precedence rule:** When a language has a native interface/protocol construct (e.g., TypeScript `interface`, Python `Protocol`, Go `interface`), the binding SHOULD use `kind: "class"` with the appropriate stereotype (e.g., `stereotype: "protocol"` for Python). The `kind: "interface"` exists for language-agnostic canvases where the author wants to express an abstract contract without committing to a language-specific construct. If a sync engine encounters both `kind: "interface"` and `kind: "class", stereotype: "protocol"` for equivalent concepts, it SHOULD treat them as semantically identical.
 - **`test`** — A test class or test suite that verifies the behavior of one or more classes in the system. A test node's text content contains the test class name, pseudo code of the test methods describing the scenarios being verified, and test execution results (pass, fail, or error with details). Test nodes are connected to the class nodes they verify via `tests` edges. Unlike other code-element nodes, test nodes carry execution state — results from the most recent test run — in addition to design intent. This dual nature is deliberate: the canvas shows both what is being tested and whether it passes, giving the human a live view of system health alongside architecture.
 - **`module`** (extended) — A single-file module or compilation unit. Distinguished from `package` in languages where the distinction matters (e.g., Python's module vs. package). Implementations that don't support this kind SHOULD represent it as `package`.
+- **`function`** (extended) — A free-standing function or procedure that does not belong to any class. Used in languages with first-class functions (Python module-level functions, Go package-level functions, Rust free functions). Connected to its containing `module` or `package` node via a `detail` edge. A minimal implementation MAY represent free-standing functions as methods on a synthetic module node.
+- **`constant`** (extended) — A module-level constant, configuration value, or global binding with architectural significance. Connected to its containing `module` or `package` node via a `detail` edge.
 
 ---
 
@@ -228,6 +238,8 @@ Each relation type defines a specific semantic relationship between two nodes. T
 | `detail` | Links a class node to one of its promoted method or field nodes. The target is a detail of the source. | `fromNode` is the parent class; `toNode` is the detail node. | The detail node's content is synced as part of the parent class's code. The edge itself produces no independent code construct. |
 | `tests` | The source test node verifies the behavior of the target class node. Establishes a traceability link between test suites and the production code they cover. | `fromNode` is the test node; `toNode` is the class under test. | Generates import statements and test class skeletons that reference the class under test. The sync engine uses this edge to propagate staleness when the target class changes (see [Lifecycle](02-lifecycle.md)). |
 | `context` | Links a context node to a CooperativeCoding code-element node. Provides design rationale, references, or other non-code information. | Direction is flexible. Either node may be `fromNode`. | Not synced — canvas-only. Context edges and their target context nodes are collaboration artifacts that exist solely on the canvas. |
+| `contains` | Links a `package` or `module` node to the classes, functions, and constants it contains. Structural, not independently synced. Establishes the containment hierarchy that determines directory structure during code generation. `fromNode` is the container; `toNode` is the contained element. | `fromNode` is the container; `toNode` is the contained element. | Structural — not independently synced. |
+| `overrides` | Indicates that a method node overrides a method in a parent class. Informational — not independently synced. Documents the override chain for architectural visibility. | `fromNode` overrides `toNode`. | Informational — not independently synced. |
 
 ### Relation Validity
 
@@ -241,6 +253,8 @@ Implementations SHOULD validate that edges connect appropriate node kinds:
 - `detail` — MUST connect `class` to `method` or `class` to `field`.
 - `tests` — SHOULD connect `test` to `class` (or `interface`). A single test node MAY have multiple `tests` edges to different class nodes when the test suite exercises interactions between classes.
 - `context` — MUST have at least one endpoint that is a context node (a node without `ccoding.kind`).
+- `contains` — SHOULD connect `package` or `module` to `class`, `function`, or `constant`.
+- `overrides` — SHOULD connect `method` to `method`.
 
 Implementations SHOULD warn on invalid combinations but MUST NOT reject the canvas file. Permissive reading ensures forward compatibility and cross-tool interoperability.
 
@@ -336,6 +350,12 @@ The `text` field on a JSON Canvas node is a markdown string. CooperativeCoding t
 - Canvas tool implementations MAY parse node text for rendering purposes (e.g., extracting the first heading as the node title) but MUST NOT modify the text as a side effect of rendering.
 
 See [bindings/python.md](../bindings/python.md) for an example of structured node content conventions.
+
+### Structured Content Convention
+
+While the spec does not mandate a single content format for node text, practical sync requires that binding implementations parse the text to extract fields, methods, signatures, and documentation. Each language binding defines its own structured content convention (see §04-language-bindings).
+
+Canvases are portable within a single binding but MAY NOT be portable across bindings that use different content conventions. Implementations MUST document their content format in the binding specification.
 
 ---
 
@@ -434,3 +454,13 @@ If `DocumentParser.parse()` calls `PluginManager.apply()`, both methods must be 
 ```
 
 This example shows the full chain: class nodes own method detail nodes via `detail` edges, and the `calls` edge connects the two method nodes directly. The canvas clearly shows both the structural hierarchy and the runtime flow.
+
+---
+
+### Scalability Guidance
+
+The spec defines no hard limits, but implementations SHOULD consider these practical constraints:
+- **Nodes per canvas:** Canvas tools typically become unwieldy beyond 100–200 nodes. Large projects SHOULD use multiple canvases organized by subsystem or architectural layer.
+- **Node text length:** Individual node text SHOULD stay under 5,000 characters. Nodes with extensive detail SHOULD promote methods and fields to their own detail nodes.
+- **Detail chain depth:** Detail nodes SHOULD NOT have their own detail nodes. The maximum recommended depth is one level (class → method/field).
+- **Canvas file size:** A well-organized canvas file SHOULD stay under 500 KB. Files exceeding this indicate the canvas should be split.

@@ -72,6 +72,16 @@ ghost nodes               improvements
 
 The loop is asynchronous and interleaved. The human might edit three nodes, accept two ghosts, and request agent input — all before the agent finishes analyzing the last change. Implementations MUST handle concurrent activity gracefully. The sync engine is the serialization point: all changes — human or agent — flow through sync to reach the other side.
 
+### Concurrency
+
+Implementations MUST serialize sync cycles — concurrent sync operations on the same project MUST NOT overlap. If a sync cycle is already in progress when a new one is triggered, the new cycle MUST be queued or skipped.
+
+When a human is actively editing a canvas node, the sync engine SHOULD defer propagation of that node until the edit is complete (e.g., on save or after an idle timeout).
+
+When an agent is writing code while a sync cycle is running, the sync engine SHOULD detect the in-progress write and either wait for it to complete or flag the affected elements for re-sync in the next cycle.
+
+Implementations MUST use file-level or project-level locking (e.g., a `.ccoding/sync.lock` file) to prevent concurrent sync processes from corrupting state.
+
 ### 3.1 Human Actions
 
 The human is the design authority. Every action the human takes on the canvas is authoritative and immediate.
@@ -80,11 +90,21 @@ The human is the design authority. Every action the human takes on the canvas is
 
 **Edit documentation blocks, pseudo code, responsibilities.** The documentation block is the contract. When the human updates a method's pseudo code or a class's responsibility statement, the sync engine propagates the change to code. The agent reads the updated contract and adjusts its implementation accordingly.
 
-**Accept a ghost.** The human transitions a `proposed` element to `accepted`. This is the fundamental approval action — it tells the agent and the sync engine: "This is now part of the design. Generate the code." Accepting a ghost MUST trigger code generation or update through the sync engine.
+**Accept a ghost.** The human transitions a `proposed` element to `accepted`. This is the fundamental approval action — it tells the agent and the sync engine: "This is now part of the design. Generate the code." Accepting a ghost marks it for code generation in the next sync cycle. Implementations MAY trigger sync immediately upon acceptance, or MAY batch accepted nodes and sync on the next manual or automatic trigger. The lifecycle requirement is that acceptance eventually results in code generation — the timing is implementation-defined.
 
 **Reject a ghost.** The human transitions a `proposed` element to `rejected`. The element is excluded from the active design. Implementations SHOULD hide or visually suppress rejected elements. The sync engine MUST NOT generate code for rejected elements.
 
 **Request agent input.** The human asks the agent to analyze, propose, or implement. Examples: "What's missing from this design?", "Implement this class", "Split this into two classes", "Add error handling". The request may be explicit (a command or chat message) or implicit (a canvas annotation or trigger).
+
+### Agent Communication Protocol
+
+The spec does not mandate a specific communication mechanism between agents and the canvas. Valid approaches include:
+- **Direct file I/O:** The agent reads and writes the `.canvas` JSON file directly, adding ghost nodes and edges as JSON objects in the `nodes` and `edges` arrays.
+- **Canvas tool API:** The canvas tool exposes an API (HTTP, IPC, or plugin SDK) that the agent calls to propose changes.
+- **CLI mediation:** A CLI tool (e.g., `ccoding propose`) accepts structured input and modifies the canvas file.
+- **Prompt-based:** The agent outputs structured JSON describing proposals, and a harness applies them to the canvas.
+
+All approaches MUST result in valid JSON Canvas files with correct `ccoding` metadata. The agent integration layer MUST ensure that proposals are created as `proposed` status — agents MUST NOT create nodes with `accepted` status directly.
 
 ### 3.2 Agent Actions
 
@@ -135,6 +155,22 @@ These four values — `proposed`, `accepted`, `rejected`, `stale` — are the ON
 | `accepted → stale` | Sync detects code deletion or unresolvable move/rename | Sync engine | The canvas node remains but its link to the codebase is broken. A visual indicator MUST appear on the canvas (e.g., warning icon, muted color, strikethrough). The implementation MUST NOT auto-delete the stale node — the human decides what to do. |
 | `stale → accepted` | Sync detects code restoration, or human manually re-links | Human or Sync | The element becomes active again. Sync resumes normally. The visual indicator is removed. |
 
+When a node transitions to `stale`, implementations MUST set `ccoding.staleReason` to one of:
+- `"code-deleted"` — the corresponding source code was deleted, moved, or renamed beyond recognition.
+- `"code-renamed"` — the sync engine detected a likely rename but could not auto-resolve it.
+- `"dependency-changed"` — a node connected via a `tests` edge had structural changes (staleness propagation).
+
+This field allows canvas tools to display context-specific guidance (e.g., 'Source file missing' vs. 'Test may be outdated').
+
+### Deletion Cascade
+
+When a human deletes an accepted class node from the canvas:
+1. All `detail` edges from that node are also removed.
+2. Detail nodes (methods, fields) that were connected ONLY via a `detail` edge to the deleted class become `stale` with `staleReason: "code-deleted"`. They are NOT automatically deleted — the human decides.
+3. Incoming edges from other nodes (e.g., `inherits`, `composes`) are removed. The source nodes of those edges are NOT affected — they retain their status.
+4. The corresponding source code is marked as deprecated (see §03-sync, Section 3). Implementations MUST NOT delete source files without explicit human confirmation.
+5. These operations SHOULD be treated as a single atomic transaction by the sync engine.
+
 ### 4.4 Transition Rules
 
 All implementations MUST support all five transitions defined above. The following rules are normative:
@@ -156,6 +192,8 @@ Test nodes (`ccoding.kind: "test"`) follow the same four-state state machine as 
 **Staleness propagation from class changes.** When an accepted class node changes — its fields, methods, documentation, or relationships are modified on the canvas or in code — all test nodes connected to that class via `tests` edges SHOULD transition to `stale`. The rationale: a change to the class under test means the test suite may no longer accurately verify the class's behavior. The test's pseudo code, assertions, and expected outcomes may reference methods, signatures, or behaviors that have changed. Marking the test node as stale signals to the human that the test suite needs review and possible update.
 
 Implementations SHOULD trigger this staleness propagation automatically during sync. The sync engine detects that a class node's content has changed, follows the `tests` edges to find connected test nodes, and sets their `ccoding.status` to `"stale"`. This is an extension of the `accepted → stale` transition from Section 4.3 — the trigger is a change in a related element rather than deletion of the element's own code.
+
+Staleness propagation via `tests` edges is **single-hop only**: when a class changes, only test nodes directly connected to that class via a `tests` edge become stale. Staleness does NOT propagate transitively — if TestA tests ClassA and ClassB, and ClassA changes, only TestA becomes stale. ClassB is not affected.
 
 **Test result updates.** Test nodes carry execution results in their structured content — pass, fail, or error status for each test method, along with failure details. When test results change (because the test suite was re-executed), the test node's content MUST be updated to reflect the new results. This update follows the standard code-to-canvas sync path: the sync engine reads the test results from the code side (test output files, CI artifacts, or framework-specific result formats as defined by the active language binding) and updates the test node's text content on the canvas.
 
