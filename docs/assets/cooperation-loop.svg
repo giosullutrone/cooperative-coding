@@ -22,13 +22,13 @@
   <rect width="900" height="520" fill="url(#dots)"/>
 
   <!-- Title -->
-  <text x="450" y="38" font-family="monospace" font-size="12" fill="#d94f30" text-anchor="middle" letter-spacing="2">THE COOPERATION LOOP</text>
+  <text x="450" y="22" font-family="monospace" font-size="12" fill="#d94f30" text-anchor="middle" letter-spacing="2">THE COOPERATION LOOP</text>
 
   <!-- ============================================ -->
   <!-- Layer 1: Loop-back edge (behind everything)  -->
   <!-- ============================================ -->
   <!-- From Decision 2 "yes" bottom, down, right along bottom, up far right, left along top, down into code request -->
-  <path d="M130,460 L130,500 L890,500 L890,45 L390,45 L390,60"
+  <path d="M130,460 L130,500 L890,500 L890,35 L390,35 L390,60"
         fill="none" stroke="#d94f30" stroke-width="2" stroke-dasharray="8,4"
         marker-end="url(#arrow-terracotta)"/>
   <!-- Loop-back label on bottom segment -->
