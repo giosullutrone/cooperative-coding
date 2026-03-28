@@ -1,4 +1,6 @@
-# CooperativeCoding
+<p align="center">
+  <img src="graphics/hero-banner.svg" alt="CooperativeCoding" width="100%">
+</p>
 
 > Current agentic coding treats software as text to be generated.
 > CooperativeCoding treats it as architecture to be negotiated.
@@ -13,19 +15,9 @@ The spec is language-agnostic and tool-agnostic. It can be implemented for any p
 
 ## How It Works
 
-```
-    Canvas change ──> code request ──> agent updates code
-                                              |
-                                        agent changed code?
-                                              |
-                                    no: done
-                                    yes: design request ──> agent updates canvas
-                                                                  |
-                                                            agent changed canvas?
-                                                                  |
-                                                        no: done
-                                                        yes: code request ──> ... (loop continues)
-```
+<p align="center">
+  <img src="graphics/cooperation-loop.svg" alt="The Cooperation Loop" width="100%">
+</p>
 
 1. **Design** on a visual canvas: create classes, methods, fields as nodes with responsibilities, pseudo code, and relationships as edges.
 2. **Sync** keeps canvas and code aligned. Canvas changes produce code requests (update the code). Code changes produce design requests (update the canvas).
@@ -36,47 +28,9 @@ The spec is language-agnostic and tool-agnostic. It can be implemented for any p
 
 ### Canvas: A UserService with its methods
 
-```
-┌─────────────────────────────┐
-│ UserService                 │
-│                             │
-│ > Manages user accounts:    │
-│   creation, lookup,         │
-│   updates, and deletion.    │
-│                             │
-│ ### Constraints             │
-│ - All operations require    │
-│   authenticated context     │
-└──────────┬──────────────────┘
-           │ member
-     ┌─────┼──────────┐
-     │     │          │
-     v     v          v
-┌─────────┐ ┌────────┐ ┌──────────────────────────┐
-│ get_user│ │ delete_ │ │ register                 │
-│         │ │ user   │ │                          │
-│ > Look  │ │ > Soft │ │ > Create a new user      │
-│   up a  │ │   dele │ │   account with validated │
-│   user  │ │   te a │ │   input, hashed creds,   │
-│   by ID │ │   user │ │   and a welcome email.   │
-│         │ │        │ │                          │
-└─────────┘ └────────┘ │ ### Pseudo Code          │
-                       │ 1. Validate name/email   │
-                       │ 2. Check for duplicates  │
-                       │ 3. Hash password         │
-                       │ 4. Create user record    │
-                       │ 5. Send welcome email    │
-                       │ 6. Return new user       │
-                       └───────┬──────────────────┘
-                               │ calls
-                               v
-                       ┌──────────────────┐
-                       │ PasswordHasher   │
-                       │                  │
-                       │ > Securely hash  │
-                       │   passwords      │
-                       └──────────────────┘
-```
+<p align="center">
+  <img src="graphics/visual-example.svg" alt="UserService canvas example" width="100%">
+</p>
 
 ### Generated Python code (from canvas)
 
