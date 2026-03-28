@@ -10,57 +10,16 @@
       "description": "Semantic relationship type. Determines sync mapping and visual rendering.",
       "oneOf": [
         {
-          "enum": ["inherits", "implements", "composes", "depends", "calls", "detail", "tests", "context"],
-          "description": "Core relations — MUST be supported by all implementations."
+          "enum": ["inherits", "implements", "composes", "depends", "member", "calls", "tests", "context"],
+          "description": "Core relations: MUST be supported by all implementations."
         },
         {
           "enum": ["contains", "overrides"],
-          "description": "Extended relations — SHOULD be supported."
+          "description": "Extended relations: SHOULD be supported."
         }
       ]
-    },
-    "status": {
-      "$ref": "#/$defs/status"
-    },
-    "proposedBy": {
-      "$ref": "#/$defs/proposedBy"
-    },
-    "proposalRationale": {
-      "$ref": "#/$defs/proposalRationale"
     }
   },
-  "allOf": [
-    {
-      "if": {
-        "properties": { "status": { "const": "proposed" } },
-        "required": ["status"]
-      },
-      "then": {
-        "required": ["proposedBy"],
-        "properties": {
-          "proposedBy": {
-            "enum": ["agent", "human"]
-          }
-        }
-      }
-    }
-  ],
   "required": ["relation"],
-  "additionalProperties": true,
-  "$defs": {
-    "status": {
-      "type": "string",
-      "enum": ["accepted", "proposed", "rejected", "stale"],
-      "description": "Lifecycle status governing sync behavior. Defaults to 'accepted' if omitted."
-    },
-    "proposedBy": {
-      "type": ["string", "null"],
-      "enum": ["agent", "human", null],
-      "description": "Who proposed this element. MUST be set when status is 'proposed'."
-    },
-    "proposalRationale": {
-      "type": ["string", "null"],
-      "description": "Free-text explanation for the proposal. SHOULD be present when proposedBy is 'agent'."
-    }
-  }
+  "additionalProperties": true
 }

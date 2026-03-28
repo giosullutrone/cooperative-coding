@@ -26,7 +26,6 @@ with open("spec/schema/ccoding-node.schema.json") as f:
 node_metadata = {
     "kind": "class",
     "qualifiedName": "models.User",
-    "status": "accepted",
     "source": "src/models/user.py"
 }
 
@@ -43,19 +42,17 @@ const validate = ajv.compile(require("./ccoding-node.schema.json"));
 const valid = validate({
   kind: "class",
   qualifiedName: "models.User",
-  status: "accepted",
 });
 ```
 
-## Conditional Rules
+## Key Constraints
 
 The schemas encode key spec constraints:
 
-- **proposed status** requires `proposedBy` to be `"agent"` or `"human"`
-- **stale status** requires `staleReason` on nodes
-- **source paths** must be relative (no leading `/`) and must not contain path traversal (`..`)
 - **kind** is required on all code-element nodes
 - **relation** is required on all edges with ccoding metadata
+- **source paths** must be relative (no leading `/`) and must not contain path traversal (`..`)
+- **stereotypes** are open-set (any string value is valid)
 
 ## Extensibility
 

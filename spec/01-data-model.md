@@ -1,4 +1,4 @@
-# CooperativeCoding Specification — Data Model
+# CooperativeCoding Specification: Data Model
 
 **Version 1.0.0**
 
@@ -6,9 +6,9 @@
 
 ## 1. Overview
 
-CooperativeCoding is a semantic layer on top of [JSON Canvas v1.0](https://jsoncanvas.org/spec/1.0/). Every `.canvas` file produced by CooperativeCoding is two things simultaneously: a valid JSON Canvas v1.0 document that any compliant tool can open, render, and edit — and an enriched architectural description that CooperativeCoding-aware tools use to provide design semantics, lifecycle tracking, and bidirectional code sync.
+CooperativeCoding is a semantic layer on top of [JSON Canvas v1.0](https://jsoncanvas.org/spec/1.0/). Every `.canvas` file produced by CooperativeCoding is two things simultaneously: a valid JSON Canvas v1.0 document that any compliant tool can open, render, and edit, and an enriched architectural description that CooperativeCoding-aware tools use to provide design semantics and code sync.
 
-The enrichment lives in a single namespace: `ccoding`. This is an object attached to nodes and edges alongside the standard JSON Canvas fields. Tools that don't understand `ccoding` ignore it safely — the file remains a readable canvas of text nodes and labeled edges. Tools that do understand `ccoding` gain access to the full CooperativeCoding paradigm: typed code elements, semantic relationships, ghost proposals, and sync mappings.
+The enrichment lives in a single namespace: `ccoding`. This is an object attached to nodes and edges alongside the standard JSON Canvas fields. Tools that don't understand `ccoding` ignore it safely. The file remains a readable canvas of text nodes and labeled edges. Tools that do understand `ccoding` gain access to the full CooperativeCoding paradigm: typed code elements, semantic relationships, and sync mappings.
 
 This document defines the complete data model: the fields, the types, the constraints, and the semantics. It is the authoritative reference for what a CooperativeCoding canvas file contains and what each piece means.
 
@@ -72,15 +72,15 @@ Tools that do not recognize the top-level `ccoding` object MUST preserve it thro
 
 ### Cross-Canvas References
 
-A project MAY use multiple `.canvas` files to represent different architectural views (see §03-sync, Section 10.2). Edges MUST NOT reference nodes in a different canvas file — the JSON Canvas format does not support cross-file references.
+A project MAY use multiple `.canvas` files to represent different architectural views (see §03-sync, Section 7). Edges MUST NOT reference nodes in a different canvas file. The JSON Canvas format does not support cross-file references.
 
-To express cross-canvas relationships, implementations SHOULD use `context` nodes that summarize the external dependency with a note like 'See core.canvas → BaseService'. A future spec version MAY introduce a formal cross-canvas reference mechanism.
+To express cross-canvas relationships, implementations SHOULD use `context` nodes that summarize the external dependency with a note like "See core.canvas, BaseService". A future spec version MAY introduce a formal cross-canvas reference mechanism.
 
 ---
 
 ## 3. Node Metadata Schema
 
-The `ccoding` object on a node carries the semantic identity, language mapping, and lifecycle status of a code element. This is the primary extension point where CooperativeCoding adds meaning to what JSON Canvas sees as a plain text box.
+The `ccoding` object on a node carries the semantic identity and language mapping of a code element. This is the primary extension point where CooperativeCoding adds meaning to what JSON Canvas sees as a plain text box.
 
 ### Complete JSON Example
 
@@ -98,10 +98,7 @@ The `ccoding` object on a node carries the semantic identity, language mapping, 
     "stereotype": "protocol",
     "language": "python",
     "source": "src/parsers/document.py",
-    "qualifiedName": "parsers.document.DocumentParser",
-    "status": "accepted",
-    "proposedBy": null,
-    "proposalRationale": null
+    "qualifiedName": "parsers.document.DocumentParser"
   }
 }
 ```
@@ -111,84 +108,30 @@ The `ccoding` object on a node carries the semantic identity, language mapping, 
 | Field | Required | Values | Description |
 |---|---|---|---|
 | `kind` | REQUIRED | `class`, `method`, `field`, `package`, `test` (core); `interface`, `module`, `function`, `constant` (extended) | The type of code element this node represents. Core kinds MUST be supported by all implementations. Extended kinds SHOULD be supported. A minimal implementation MAY represent `interface` as `class` with a stereotype (e.g., `"stereotype": "protocol"`), and MAY represent `module` as `package`. |
-| `stereotype` | OPTIONAL | Open set (e.g., `protocol`, `dataclass`, `abstract`, `enum`, `singleton`, `mixin`) | Language-specific subtype that refines the `kind`. Implementations MUST NOT reject unknown stereotype values — the set is open and extensible. Each language binding defines its recognized stereotypes; unrecognized stereotypes SHOULD be preserved and displayed as-is. |
-| `language` | OPTIONAL | Language identifier string (e.g., `python`, `typescript`, `rust`, `go`) | The programming language for this element. When omitted, implementations SHOULD infer the language from the canvas-level default or the language binding in use. **Multi-language canvases:** A single canvas MAY contain nodes with different `ccoding.language` values. Each node is synced using the binding for its own language. Cross-language edges (e.g., a Python class `inherits` from a TypeScript class) are informational only — they are NOT synced to code. Implementations SHOULD render cross-language edges visually distinct (e.g., dashed style) to indicate they do not generate code. |
-| `source` | OPTIONAL | Relative file path (e.g., `src/parsers/document.py`) | Path to the source file this node maps to, relative to the project root. Used by the sync engine to locate the corresponding code. Implementations MUST treat this as a project-relative path, never absolute. **Security:** Implementations MUST validate that resolved `ccoding.source` paths do not escape the project root directory. Paths containing `..` segments MUST be normalized and validated after normalization. Implementations MUST reject source paths that resolve outside the project boundary. |
-| `qualifiedName` | RECOMMENDED | Dot-notation identifier (e.g., `parsers.document.DocumentParser`) | Fully qualified name in the target language's namespace. This is the stable identity link between a canvas node and its code counterpart. The sync engine uses this value — not the node `id` — to match canvas elements to code elements. Implementations SHOULD include `qualifiedName` on all code-element nodes. |
-| `status` | REQUIRED for tracked nodes | `accepted`, `proposed`, `rejected`, `stale` | Current lifecycle status. Governs whether the element is synced to code, awaiting review, or flagged for attention. See Section 4 and [Lifecycle](02-lifecycle.md) for full semantics. |
-| `proposedBy` | OPTIONAL | `"agent"`, `"human"`, or `null` | Who created this element as a proposal. MUST be set when `status` is `"proposed"`. MAY be preserved after acceptance for audit trail purposes, or MAY be cleared (set to `null`). |
-| `proposalRationale` | OPTIONAL | String or `null` | Free-text explanation for why this element was proposed. Intended for human review — the agent explains its reasoning, or the human explains their tentative idea. SHOULD be present when `proposedBy` is `"agent"`. |
+| `stereotype` | OPTIONAL | Open set (e.g., `protocol`, `dataclass`, `abstract`, `enum`, `singleton`, `mixin`) | Language-specific subtype that refines the `kind`. Implementations MUST NOT reject unknown stereotype values. Each language binding defines its recognized stereotypes; unrecognized stereotypes SHOULD be preserved and displayed as-is. |
+| `language` | OPTIONAL | Language identifier string (e.g., `python`, `typescript`, `rust`, `go`) | The programming language for this element. When omitted, implementations SHOULD infer the language from the canvas-level default or the language binding in use. A single canvas MAY contain nodes with different `ccoding.language` values. Each node is synced using the binding for its own language. Cross-language edges are informational only and are NOT synced to code. |
+| `source` | OPTIONAL | Relative file path (e.g., `src/parsers/document.py`) | Path to the source file this node maps to, relative to the project root. Used by sync to locate the corresponding code. Implementations MUST treat this as a project-relative path, never absolute. Implementations MUST validate that resolved paths do not escape the project root directory. |
+| `qualifiedName` | RECOMMENDED | Dot-notation identifier (e.g., `parsers.document.DocumentParser`) | Fully qualified name in the target language's namespace. This is the stable identity link between a canvas node and its code counterpart. Sync uses this value, not the node `id`, to match canvas elements to code elements. Implementations SHOULD include `qualifiedName` on all code-element nodes. |
 
 ### Kind Semantics
 
 The `kind` field determines what type of code construct the node represents and how it participates in the canvas:
 
-- **`class`** — A class, struct, trait, protocol, or equivalent named type in the target language. This is the primary building block of the canvas. A class node's text content contains its responsibility, fields, methods, and constraints.
-- **`method`** — A method or function that has been promoted to its own detail node. Always connected to its parent class via a `detail` edge. A method node's text content contains the method signature, responsibility, pseudo code, and constraints.
-- **`field`** — A field or property that has been promoted to its own detail node. Always connected to its parent class via a `detail` edge. Used when a field carries significant design semantics (e.g., a configuration object, a dependency injection point).
-- **`package`** — A package, module, namespace, or directory that groups related classes. Used for high-level architectural views. Package nodes MAY contain a listing of their contents in the text field.
-- **`interface`** (extended) — Explicitly marks a node as an interface, protocol, trait, or abstract contract rather than a concrete class. Implementations that don't support this kind SHOULD represent it as `"kind": "class"` with an appropriate stereotype.
-
-**Precedence rule:** When a language has a native interface/protocol construct (e.g., TypeScript `interface`, Python `Protocol`, Go `interface`), the binding SHOULD use `kind: "class"` with the appropriate stereotype (e.g., `stereotype: "protocol"` for Python). The `kind: "interface"` exists for language-agnostic canvases where the author wants to express an abstract contract without committing to a language-specific construct. If a sync engine encounters both `kind: "interface"` and `kind: "class", stereotype: "protocol"` for equivalent concepts, it SHOULD treat them as semantically identical.
-- **`test`** — A test class or test suite that verifies the behavior of one or more classes in the system. A test node's text content contains the test class name, pseudo code of the test methods describing the scenarios being verified, and test execution results (pass, fail, or error with details). Test nodes are connected to the class nodes they verify via `tests` edges. Unlike other code-element nodes, test nodes carry execution state — results from the most recent test run — in addition to design intent. This dual nature is deliberate: the canvas shows both what is being tested and whether it passes, giving the human a live view of system health alongside architecture.
-- **`module`** (extended) — A single-file module or compilation unit. Distinguished from `package` in languages where the distinction matters (e.g., Python's module vs. package). Implementations that don't support this kind SHOULD represent it as `package`.
-- **`function`** (extended) — A free-standing function or procedure that does not belong to any class. Used in languages with first-class functions (Python module-level functions, Go package-level functions, Rust free functions). Connected to its containing `module` or `package` node via a `detail` edge. A minimal implementation MAY represent free-standing functions as methods on a synthetic module node.
-- **`constant`** (extended) — A module-level constant, configuration value, or global binding with architectural significance. Connected to its containing `module` or `package` node via a `detail` edge.
+- **`class`** A class, struct, trait, protocol, or equivalent named type in the target language. This is the primary building block of the canvas. A class node's text content contains its responsibility and constraints. Its methods and fields are separate nodes connected to it.
+- **`method`** A method or function. Every method is its own node on the canvas, connected to its parent class. A method node's text content contains the method signature, responsibility, pseudo code, and constraints.
+- **`field`** A field or property. Every field is its own node on the canvas, connected to its parent class. A field node's text content contains the type, responsibility, and constraints.
+- **`package`** A package, module, namespace, or directory that groups related classes. Used for high-level architectural views.
+- **`interface`** (extended) Explicitly marks a node as an interface, protocol, trait, or abstract contract. Implementations that don't support this kind SHOULD represent it as `"kind": "class"` with an appropriate stereotype. The active language binding defines when to use `interface` vs `class` with a stereotype.
+- **`test`** A test class or test suite that verifies the behavior of one or more classes. Connected to the class nodes it verifies via `tests` edges. A test node's text content contains the test class name, pseudo code of the test methods, and test execution results (pass, fail, or error with details).
+- **`module`** (extended) A single-file module or compilation unit. Distinguished from `package` in languages where the distinction matters (e.g., Python's module vs. package). Implementations that don't support this kind SHOULD represent it as `package`.
+- **`function`** (extended) A free-standing function or procedure that does not belong to any class. Connected to its containing `module` or `package` node.
+- **`constant`** (extended) A module-level constant, configuration value, or global binding with architectural significance. Connected to its containing `module` or `package` node.
 
 ---
 
-## 4. Status Semantics
+## 4. Edge Metadata Schema
 
-The `status` field governs how implementations treat a node or edge. Each value carries precise, normative semantics.
-
-### `accepted`
-
-The element is part of the canonical design. It represents a deliberate architectural decision that has been confirmed by a human.
-
-- Implementations MUST sync `accepted` elements to code during canvas-to-code sync.
-- Implementations MUST update `accepted` elements from code during code-to-canvas sync.
-- Canvas tools SHOULD render `accepted` elements with full visual weight (normal opacity, standard colors).
-
-### `proposed`
-
-The element is a ghost — a tentative proposal awaiting human review. It exists on the canvas as a visual suggestion but has no authority over the codebase.
-
-- Implementations MUST NOT sync `proposed` elements to code. A ghost MUST NOT create, modify, or delete any source file.
-- Canvas tools SHOULD render `proposed` elements with reduced visual weight (lower opacity, dashed borders, or other distinct styling) to clearly distinguish them from accepted elements.
-- The `proposedBy` field MUST be set to `"agent"` or `"human"` when `status` is `"proposed"`.
-
-### `rejected`
-
-The element was a proposal that a human explicitly declined. It remains in the canvas file as a record of the decision but is not part of the active design.
-
-- Implementations MUST NOT sync `rejected` elements to code.
-- Canvas tools SHOULD hide rejected elements by default, or render them with a visually suppressed style (greyed out, collapsed, or filtered to a separate view).
-- Implementations SHOULD preserve `rejected` elements in the canvas file rather than deleting them, so the decision history is retained.
-
-### `stale`
-
-The element's corresponding code was deleted, moved, or renamed in a way the sync engine could not automatically resolve. The canvas node remains, but its link to the codebase is broken.
-
-- Implementations MUST NOT auto-delete stale nodes. The human decides whether to remove, update, or restore the element.
-- Implementations MUST NOT sync stale elements to code until a human resolves the staleness.
-- Canvas tools SHOULD render stale elements with a distinct visual indicator (e.g., a warning icon, a strikethrough, or a muted color).
-- A stale node MAY transition back to `accepted` if the corresponding code is restored or the human manually re-links it.
-
-### Status Transition Summary
-
-```
-proposed  ──accept──▸  accepted
-proposed  ──reject──▸  rejected
-accepted  ──stale───▸  stale      (detected by sync)
-stale     ──restore─▸  accepted   (human or sync action)
-rejected  ──reconsider──▸  proposed   (human reconsideration)
-```
-
----
-
-## 5. Edge Metadata Schema
-
-The `ccoding` object on an edge carries the semantic relationship type and lifecycle status. While JSON Canvas edges are unlabeled connections by default, CooperativeCoding edges carry typed relationships that the sync engine uses to generate code constructs (inheritance declarations, imports, field types) and that canvas tools use to render relationship-specific styling.
+The `ccoding` object on an edge carries the semantic relationship type. While JSON Canvas edges are unlabeled connections by default, CooperativeCoding edges carry typed relationships that sync uses to generate code constructs (inheritance declarations, imports, field types) and that canvas tools use to render relationship-specific styling.
 
 ### Complete JSON Example
 
@@ -199,12 +142,9 @@ The `ccoding` object on an edge carries the semantic relationship type and lifec
   "toNode": "node-2",
   "fromSide": "bottom",
   "toSide": "top",
-  "label": "plugins — Applied sequentially during parse(). Order matters.",
+  "label": "plugins: Applied sequentially during parse(). Order matters.",
   "ccoding": {
-    "relation": "composes",
-    "status": "accepted",
-    "proposedBy": null,
-    "proposalRationale": null
+    "relation": "composes"
   }
 }
 ```
@@ -213,141 +153,74 @@ The `ccoding` object on an edge carries the semantic relationship type and lifec
 
 | Field | Required | Values | Description |
 |---|---|---|---|
-| `relation` | REQUIRED | See Section 6 (Relation Types) | The type of relationship this edge represents. Determines how the sync engine maps the edge to code and how canvas tools render it. |
-| `status` | OPTIONAL | `accepted`, `proposed`, `rejected`, `stale` | Lifecycle status. Follows the same semantics as node status (Section 4). Defaults to `accepted` if omitted. When an edge connects two `accepted` nodes but the edge itself is `proposed`, the relationship is a ghost — the nodes exist in code, but the connection between them is tentative. |
-| `proposedBy` | OPTIONAL | `"agent"`, `"human"`, or `null` | Who created this edge as a proposal. Same semantics as the node-level field. |
-| `proposalRationale` | OPTIONAL | String or `null` | Explanation for why this relationship was proposed. Same semantics as the node-level field. |
+| `relation` | REQUIRED | See Section 5 (Relation Types) | The type of relationship this edge represents. Determines how sync maps the edge to code and how canvas tools render it. |
 
-### Edge Status Defaults
-
-When a `ccoding` object is present on an edge but `status` is omitted, implementations MUST treat the edge as `accepted`. When the entire `ccoding` object is absent, the edge is a plain JSON Canvas edge with no CooperativeCoding semantics — it is neither synced nor tracked.
+When the entire `ccoding` object is absent, the edge is a plain JSON Canvas edge with no CooperativeCoding semantics. It is neither synced nor tracked.
 
 ---
 
-## 6. Relation Types
+## 5. Relation Types
 
 Each relation type defines a specific semantic relationship between two nodes. The `relation` field MUST contain one of the following values. Implementations MUST support all relation types listed here.
 
-| Relation | Semantics | Directionality | Sync Mapping |
+| Relation | Semantics | Directionality | Code Construct |
 |---|---|---|---|
-| `inherits` | The source class extends or subclasses the target class. | `fromNode` inherits from `toNode`. | Generates an inheritance declaration in code (e.g., `class Foo(Bar)` in Python, `class Foo extends Bar` in TypeScript). |
-| `implements` | The source class implements, conforms to, or adopts the target interface/protocol/trait. | `fromNode` implements `toNode`. | Generates an implementation declaration (e.g., protocol conformance in Python, `implements` clause in TypeScript). |
-| `composes` | The source class contains the target as a field (has-a relationship). The edge label carries the field name and composition semantics. | `fromNode` has a field of type `toNode`. | Generates a typed field declaration on the source class. The field name comes from the edge label. |
-| `depends` | The source class uses the target class (import-level dependency). | `fromNode` depends on `toNode`. | Generates an import statement in the source file. |
-| `calls` | A method on the source calls a method on the target. Informational — documents runtime flow. | `fromNode` calls `toNode`. | Not directly synced. Used for documentation, sequence reasoning, and architectural analysis. Implementations MAY generate call-site comments. |
-| `detail` | Links a class node to one of its promoted method or field nodes. The target is a detail of the source. | `fromNode` is the parent class; `toNode` is the detail node. | The detail node's content is synced as part of the parent class's code. The edge itself produces no independent code construct. |
-| `tests` | The source test node verifies the behavior of the target class node. Establishes a traceability link between test suites and the production code they cover. | `fromNode` is the test node; `toNode` is the class under test. | Generates import statements and test class skeletons that reference the class under test. The sync engine uses this edge to propagate staleness when the target class changes (see [Lifecycle](02-lifecycle.md)). |
-| `context` | Links a context node to a CooperativeCoding code-element node. Provides design rationale, references, or other non-code information. | Direction is flexible. Either node may be `fromNode`. | Not synced — canvas-only. Context edges and their target context nodes are collaboration artifacts that exist solely on the canvas. |
-| `contains` | Links a `package` or `module` node to the classes, functions, and constants it contains. Structural, not independently synced. Establishes the containment hierarchy that determines directory structure during code generation. `fromNode` is the container; `toNode` is the contained element. | `fromNode` is the container; `toNode` is the contained element. | Structural — not independently synced. |
-| `overrides` | Indicates that a method node overrides a method in a parent class. Informational — not independently synced. Documents the override chain for architectural visibility. | `fromNode` overrides `toNode`. | Informational — not independently synced. |
+| `inherits` | The source class extends or subclasses the target class. | `fromNode` inherits from `toNode`. | Inheritance declaration. |
+| `implements` | The source class implements, conforms to, or adopts the target interface/protocol/trait. | `fromNode` implements `toNode`. | Implementation declaration. |
+| `composes` | The source class contains the target as a field (has-a relationship). The edge label carries the field name. | `fromNode` has a field of type `toNode`. | Typed field declaration. |
+| `depends` | The source class uses the target class (import-level dependency). | `fromNode` depends on `toNode`. | Import statement. |
+| `member` | The target is a method or field that belongs to the source class. | `fromNode` is the class; `toNode` is the member. | The member is part of the class's code. |
+| `calls` | A method on the source calls a method on the target. Documents runtime flow. | `fromNode` calls `toNode`. | No defined code construct. |
+| `tests` | The source test node verifies the behavior of the target class node. | `fromNode` is the test node; `toNode` is the class under test. | Defined by the active language binding. |
+| `context` | Links a context node to a code-element node. Provides design rationale or references. | Direction is flexible. | No defined code construct. |
+| `contains` | Links a `package` or `module` node to the elements it contains. | `fromNode` is the container; `toNode` is the contained element. | Affects directory/file organization. |
+| `overrides` | Indicates that a method node overrides a method in a parent class. | `fromNode` overrides `toNode`. | Defined by the active language binding. |
 
 ### Relation Validity
 
 Implementations SHOULD validate that edges connect appropriate node kinds:
 
-- `inherits` — SHOULD connect `class` to `class` (or `interface` to `interface`).
-- `implements` — SHOULD connect `class` to `class` or `interface` where the target has an interface/protocol stereotype.
-- `composes` — SHOULD connect `class` to `class`.
-- `depends` — MAY connect any code-element nodes.
-- `calls` — SHOULD connect `method` to `method`, or `class` to `class` (shorthand for "some method in A calls some method in B").
-- `detail` — MUST connect `class` to `method` or `class` to `field`.
-- `tests` — SHOULD connect `test` to `class` (or `interface`). A single test node MAY have multiple `tests` edges to different class nodes when the test suite exercises interactions between classes.
-- `context` — MUST have at least one endpoint that is a context node (a node without `ccoding.kind`).
-- `contains` — SHOULD connect `package` or `module` to `class`, `function`, or `constant`.
-- `overrides` — SHOULD connect `method` to `method`.
+- `inherits`: SHOULD connect `class` to `class` (or `interface` to `interface`).
+- `implements`: SHOULD connect `class` to `class` or `interface` where the target has an interface/protocol stereotype.
+- `composes`: SHOULD connect `class` to `class`.
+- `depends`: MAY connect any code-element nodes.
+- `member`: MUST connect `class` to `method` or `class` to `field`.
+- `calls`: SHOULD connect `method` to `method`, or `class` to `class`.
+- `tests`: SHOULD connect `test` to `class` (or `interface`).
+- `context`: MUST have at least one endpoint that is a context node (a node without `ccoding.kind`).
+- `contains`: SHOULD connect `package` or `module` to `class`, `function`, or `constant`.
+- `overrides`: SHOULD connect `method` to `method`.
 
-Implementations SHOULD warn on invalid combinations but MUST NOT reject the canvas file. Permissive reading ensures forward compatibility and cross-tool interoperability.
-
----
-
-## 7. Edge Labels
-
-The JSON Canvas `label` field is OPTIONAL but RECOMMENDED for CooperativeCoding edges. Labels serve two purposes: they provide human-readable context on the canvas, and they carry structured information that the sync engine uses (particularly for `composes` edges, where the label contains the field name).
-
-### Label Conventions
-
-| Relation | Label Carries | Examples |
-|---|---|---|
-| `composes` | Field name, optionally followed by a dash and composition semantics. The field name portion (before the first ` — `) is used by the sync engine to name the generated field. | `"config"`, `"plugins — Applied sequentially during parse(). Order matters."` |
-| `depends` | What is used from the dependency and/or why the dependency exists. | `"TokenStream — used for lexical analysis"`, `"re — regex pattern matching"` |
-| `calls` | When or why the call happens. Describes the runtime flow. | `"After tokenization"`, `"On validation failure"` |
-| `inherits` | Nature of the inheritance relationship. | `"Base parsing interface"`, `"Abstract document handler"` |
-| `implements` | The contract or capability being fulfilled. | `"Serialization support"`, `"Iterator protocol"` |
-| `detail` | The method or field name that was promoted. | `"parse()"`, `"config"`, `"validate()"` |
-| `tests` | What aspect of the class is being tested, or the test scope. | `"unit — parsing pipeline"`, `"integration — plugin loading"`, `"edge cases"` |
-| `context` | Type of context being provided. | `"rationale"`, `"reference"`, `"decision log"`, `"RFC link"` |
-
-### Label Parsing
-
-For `composes` edges, the sync engine MUST parse the label to extract the field name:
-
-1. If the label contains ` — ` (space, em dash, space), the substring before the first ` — ` is the field name. The remainder is a descriptive comment.
-2. If the label contains no ` — `, the entire label is the field name.
-3. If the label is absent, the sync engine SHOULD derive a field name from the target node's name (lowercased, snake_cased per the language binding conventions).
-
-For all other relation types, labels are informational. The sync engine MAY include label text in generated code comments but MUST NOT depend on label content for correctness.
+Implementations SHOULD warn on invalid combinations but MUST NOT reject the canvas file.
 
 ---
 
-## 8. Context Nodes
+## 6. Edge Labels
 
-Context nodes are plain JSON Canvas nodes — text notes, file embeds, links, or groups — that carry no `ccoding.kind` metadata. They exist on the canvas as collaboration artifacts: design rationale, reference material, decision logs, external links, and any other non-code information that helps humans and agents reason about the architecture.
-
-### Properties
-
-- Context nodes have **no `ccoding` metadata by default**. They are standard JSON Canvas nodes in every respect.
-- Context nodes are **NOT synced to code**. They exist only on the canvas. The sync engine MUST ignore them.
-- Context nodes **can be connected** to CooperativeCoding code-element nodes via `context` edges, establishing a non-synced association between a design note and the code element it relates to.
-- Context nodes **can be proposed as ghosts**. When an agent creates a context node as a suggestion, it attaches a minimal `ccoding` object containing only `status` and `proposedBy`. This makes the context node visible as a ghost without giving it code-element semantics.
-
-### Ghost Context Node Example
-
-```json
-{
-  "id": "note-1",
-  "type": "text",
-  "x": 400,
-  "y": 200,
-  "width": 250,
-  "height": 150,
-  "text": "Protocol chosen over ABC because ABCs cannot enforce method signatures at type-check time in Python 3.12+. Protocol also enables structural subtyping, which is more Pythonic for plugin systems.",
-  "ccoding": {
-    "status": "proposed",
-    "proposedBy": "agent"
-  }
-}
-```
-
-In this example, the node has no `kind` — it is not a code element. The `ccoding` object serves only to mark it as a ghost proposal from the agent. When the human accepts this ghost, the `ccoding` object MAY be removed entirely (returning the node to a plain context node) or MAY be updated to `"status": "accepted"` if the implementation tracks context node lifecycle.
-
-### Context Node with `context` Edge
-
-A context node is typically connected to the code element it describes:
-
-```json
-{
-  "id": "context-edge-1",
-  "fromNode": "note-1",
-  "toNode": "node-1",
-  "label": "rationale",
-  "ccoding": {
-    "relation": "context"
-  }
-}
-```
+The JSON Canvas `label` field is OPTIONAL for CooperativeCoding edges. Labels provide human-readable context on the canvas. The active language binding defines whether and how labels are used during code generation.
 
 ---
 
-## 9. Node Text Content
+## 7. Context Nodes
 
-The `text` field on a JSON Canvas node is a markdown string. CooperativeCoding treats this field as an opaque string at the spec level — the data model defines its type (string) and its preservation requirements, but does not prescribe its internal structure.
+Context nodes are plain JSON Canvas nodes (text notes, file embeds, links, or groups) that carry no `ccoding.kind` metadata. They exist on the canvas as collaboration artifacts: design rationale, reference material, decision logs, external links, and any other non-code information that helps humans and agents reason about the architecture.
+
+- Context nodes have **no `ccoding` metadata by default**. They are standard JSON Canvas nodes.
+- Context nodes have **no defined code construct**. Changes to context nodes produce sync requests, but the agent will typically determine no code changes are needed.
+- Context nodes **can be connected** to code-element nodes via `context` edges.
+
+---
+
+## 8. Node Text Content
+
+The `text` field on a JSON Canvas node is a markdown string. CooperativeCoding treats this field as an opaque string at the spec level. The data model defines its type (string) and its preservation requirements, but does not prescribe its internal structure.
 
 ### Formal Requirements
 
-- Implementations MUST preserve node text content exactly through read/write cycles. No normalization, no reformatting, no stripping of whitespace or markdown constructs. The text a human wrote is the text that persists.
+- Implementations MUST preserve node text content exactly through read/write cycles. No normalization, no reformatting, no stripping of whitespace or markdown constructs.
 - The spec does NOT prescribe a content format. There is no required heading structure, no mandatory sections, no enforced markdown dialect.
-- Language bindings MAY define structured content conventions that map specific markdown sections to language constructs. For example, a Python binding might define that an `## Methods` section lists the class's methods with their signatures and descriptions. These conventions are defined by the binding, not by this spec.
-- Canvas tool implementations MAY parse node text for rendering purposes (e.g., extracting the first heading as the node title) but MUST NOT modify the text as a side effect of rendering.
+- Language bindings MAY define structured content conventions that map specific markdown sections to language constructs. These conventions are defined by the binding, not by this spec.
+- Canvas tool implementations MAY parse node text for rendering purposes but MUST NOT modify the text as a side effect of rendering.
 
 See [bindings/python.md](../bindings/python.md) for an example of structured node content conventions.
 
@@ -356,111 +229,3 @@ See [bindings/python.md](../bindings/python.md) for an example of structured nod
 While the spec does not mandate a single content format for node text, practical sync requires that binding implementations parse the text to extract fields, methods, signatures, and documentation. Each language binding defines its own structured content convention (see §04-language-bindings).
 
 Canvases are portable within a single binding but MAY NOT be portable across bindings that use different content conventions. Implementations MUST document their content format in the binding specification.
-
----
-
-## 10. Edge Targeting Rule
-
-Edges in CooperativeCoding always connect node to node. There is no sub-node anchoring — an edge cannot target a specific method or field within a class node's text content.
-
-This constraint is deliberate. JSON Canvas v1.0 defines edges between nodes, not between regions within nodes. CooperativeCoding inherits this model exactly. The consequence is simple and consistent:
-
-> **If a method or field needs to be the source or target of an edge, it MUST be promoted to its own detail node.**
-
-This means a method that calls another method, a field that composes another class, or any element that participates in a relationship must exist as a standalone node on the canvas. The `detail` edge connects it back to its parent class, maintaining the structural relationship.
-
-This rule keeps the data model aligned with JSON Canvas's native capabilities, ensures edges are unambiguous (every endpoint is a node with a unique `id`), and reinforces the progressive detail principle — only architecturally significant elements earn their own nodes.
-
-### Example: Method-to-Method Call
-
-If `DocumentParser.parse()` calls `PluginManager.apply()`, both methods must be promoted:
-
-```json
-{
-  "nodes": [
-    {
-      "id": "class-parser",
-      "type": "text",
-      "x": 0, "y": 0, "width": 300, "height": 200,
-      "text": "## DocumentParser\n\n> Parses raw documents into structured AST nodes",
-      "ccoding": {
-        "kind": "class",
-        "qualifiedName": "parsers.document.DocumentParser",
-        "status": "accepted"
-      }
-    },
-    {
-      "id": "method-parse",
-      "type": "text",
-      "x": 0, "y": 250, "width": 300, "height": 150,
-      "text": "## parse()\n\n> Tokenize input, apply plugins, return AST",
-      "ccoding": {
-        "kind": "method",
-        "qualifiedName": "parsers.document.DocumentParser.parse",
-        "status": "accepted"
-      }
-    },
-    {
-      "id": "class-plugins",
-      "type": "text",
-      "x": 400, "y": 0, "width": 300, "height": 200,
-      "text": "## PluginManager\n\n> Manages and applies parsing plugins",
-      "ccoding": {
-        "kind": "class",
-        "qualifiedName": "parsers.plugins.PluginManager",
-        "status": "accepted"
-      }
-    },
-    {
-      "id": "method-apply",
-      "type": "text",
-      "x": 400, "y": 250, "width": 300, "height": 150,
-      "text": "## apply()\n\n> Run all registered plugins on the AST",
-      "ccoding": {
-        "kind": "method",
-        "qualifiedName": "parsers.plugins.PluginManager.apply",
-        "status": "accepted"
-      }
-    }
-  ],
-  "edges": [
-    {
-      "id": "detail-1",
-      "fromNode": "class-parser",
-      "toNode": "method-parse",
-      "fromSide": "bottom",
-      "toSide": "top",
-      "label": "parse()",
-      "ccoding": { "relation": "detail" }
-    },
-    {
-      "id": "detail-2",
-      "fromNode": "class-plugins",
-      "toNode": "method-apply",
-      "fromSide": "bottom",
-      "toSide": "top",
-      "label": "apply()",
-      "ccoding": { "relation": "detail" }
-    },
-    {
-      "id": "call-1",
-      "fromNode": "method-parse",
-      "toNode": "method-apply",
-      "label": "After tokenization — applies all plugins to raw AST",
-      "ccoding": { "relation": "calls", "status": "accepted" }
-    }
-  ]
-}
-```
-
-This example shows the full chain: class nodes own method detail nodes via `detail` edges, and the `calls` edge connects the two method nodes directly. The canvas clearly shows both the structural hierarchy and the runtime flow.
-
----
-
-### Scalability Guidance
-
-The spec defines no hard limits, but implementations SHOULD consider these practical constraints:
-- **Nodes per canvas:** Canvas tools typically become unwieldy beyond 100–200 nodes. Large projects SHOULD use multiple canvases organized by subsystem or architectural layer.
-- **Node text length:** Individual node text SHOULD stay under 5,000 characters. Nodes with extensive detail SHOULD promote methods and fields to their own detail nodes.
-- **Detail chain depth:** Detail nodes SHOULD NOT have their own detail nodes. The maximum recommended depth is one level (class → method/field).
-- **Canvas file size:** A well-organized canvas file SHOULD stay under 500 KB. Files exceeding this indicate the canvas should be split.
