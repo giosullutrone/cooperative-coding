@@ -75,6 +75,12 @@ class UserService:
 6. Human edits the pseudo code on the canvas to add step "7. Provision default settings"
 7. Canvas change produces a **code request**. Agent updates the implementation.
 
+## Data Model
+
+<p align="center">
+  <img src="docs/assets/node-types.svg" alt="Node types and relationships" width="100%">
+</p>
+
 ## The Specification
 
 | Document | Description |
