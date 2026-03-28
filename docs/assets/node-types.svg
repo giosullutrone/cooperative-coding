@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg viewBox="0 0 1000 750" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 1000 740" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <pattern id="dots" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
       <circle cx="8" cy="8" r="0.8" fill="#a09080" opacity="0.15"/>
@@ -181,89 +181,91 @@
   <text x="562" y="355" text-anchor="middle" font-family="monospace" font-size="11" fill="#b07070">context</text>
 
   <!-- ====== LEGEND ====== -->
-  <rect x="40" y="520" width="920" height="200" rx="10" fill="white" stroke="#e2ddd5" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="40" y="520" width="920" height="210" rx="10" fill="white" stroke="#e2ddd5" stroke-width="1.5" filter="url(#shadow)"/>
 
-  <!-- Row 1: Node Types (5 core + 5 extended = 10 total, split across two sub-rows) -->
-  <text x="70" y="548" font-family="sans-serif" font-size="13" font-weight="700" fill="#1a1f36">Node Types</text>
+  <!-- Divider line between Node Types and Edge Types -->
+  <line x1="60" y1="610" x2="940" y2="610" stroke="#e2ddd5" stroke-width="1"/>
 
-  <!-- Sub-row 1: core kinds -->
-  <rect x="70" y="558" width="24" height="24" rx="4" fill="white" stroke="#8cb88c" stroke-width="1.5"/>
-  <rect x="70" y="558" width="24" height="4" rx="4 4 0 0" fill="#8cb88c"/>
-  <text x="100" y="575" font-family="sans-serif" font-size="11" fill="#1a1f36">class</text>
+  <!-- ====== NODE TYPES ====== -->
+  <text x="70" y="548" font-family="sans-serif" font-size="12" font-weight="700" fill="#1a1f36" letter-spacing="0.5">Node Types</text>
 
-  <rect x="165" y="558" width="24" height="24" rx="4" fill="white" stroke="#b898c8" stroke-width="1.5"/>
-  <rect x="165" y="558" width="24" height="4" rx="4 4 0 0" fill="#b898c8"/>
-  <text x="195" y="575" font-family="sans-serif" font-size="11" fill="#1a1f36">method</text>
+  <!-- Row 1: 5 items, evenly spaced across 920px (x=70 to x=870, ~180px per item) -->
+  <rect x="70" y="560" width="20" height="20" rx="4" fill="white" stroke="#8cb88c" stroke-width="1.5"/>
+  <rect x="70" y="560" width="20" height="4" rx="4 4 0 0" fill="#8cb88c"/>
+  <text x="96" y="574" font-family="sans-serif" font-size="11" fill="#1a1f36">class</text>
 
-  <rect x="268" y="558" width="24" height="24" rx="4" fill="white" stroke="#d0c888" stroke-width="1.5"/>
-  <rect x="268" y="558" width="24" height="4" rx="4 4 0 0" fill="#d0c888"/>
-  <text x="298" y="575" font-family="sans-serif" font-size="11" fill="#1a1f36">field</text>
+  <rect x="250" y="560" width="20" height="20" rx="4" fill="white" stroke="#b898c8" stroke-width="1.5"/>
+  <rect x="250" y="560" width="20" height="4" rx="4 4 0 0" fill="#b898c8"/>
+  <text x="276" y="574" font-family="sans-serif" font-size="11" fill="#1a1f36">method</text>
 
-  <rect x="348" y="558" width="24" height="24" rx="4" fill="white" stroke="#b0b0b0" stroke-width="1.5" stroke-dasharray="4,3"/>
-  <rect x="348" y="558" width="24" height="4" rx="4 4 0 0" fill="#b0b0b0"/>
-  <text x="378" y="575" font-family="sans-serif" font-size="11" fill="#1a1f36">package</text>
+  <rect x="430" y="560" width="20" height="20" rx="4" fill="white" stroke="#d0c888" stroke-width="1.5"/>
+  <rect x="430" y="560" width="20" height="4" rx="4 4 0 0" fill="#d0c888"/>
+  <text x="456" y="574" font-family="sans-serif" font-size="11" fill="#1a1f36">field</text>
 
-  <rect x="448" y="558" width="24" height="24" rx="4" fill="white" stroke="#7ac0a0" stroke-width="1.5"/>
-  <rect x="448" y="558" width="24" height="4" rx="4 4 0 0" fill="#7ac0a0"/>
-  <text x="478" y="575" font-family="sans-serif" font-size="11" fill="#1a1f36">test</text>
+  <rect x="610" y="560" width="20" height="20" rx="4" fill="white" stroke="#7ac0a0" stroke-width="1.5"/>
+  <rect x="610" y="560" width="20" height="4" rx="4 4 0 0" fill="#7ac0a0"/>
+  <text x="636" y="574" font-family="sans-serif" font-size="11" fill="#1a1f36">test</text>
 
-  <!-- Sub-row 1 continued: extended kinds -->
-  <rect x="530" y="558" width="24" height="24" rx="4" fill="white" stroke="#7ea8d0" stroke-width="1.5"/>
-  <rect x="530" y="558" width="24" height="4" rx="4 4 0 0" fill="#7ea8d0"/>
-  <text x="560" y="575" font-family="sans-serif" font-size="11" fill="#1a1f36">interface</text>
+  <rect x="790" y="560" width="20" height="20" rx="4" fill="white" stroke="#b0b0b0" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <rect x="790" y="560" width="20" height="4" rx="4 4 0 0" fill="#b0b0b0"/>
+  <text x="816" y="574" font-family="sans-serif" font-size="11" fill="#1a1f36">package</text>
 
-  <rect x="640" y="558" width="24" height="24" rx="4" fill="white" stroke="#b0b0b0" stroke-width="1.5"/>
-  <rect x="640" y="558" width="24" height="4" rx="4 4 0 0" fill="#b0b0b0"/>
-  <text x="670" y="575" font-family="sans-serif" font-size="11" fill="#1a1f36">module</text>
+  <!-- Row 2: 5 items -->
+  <rect x="70" y="588" width="20" height="20" rx="4" fill="white" stroke="#7ea8d0" stroke-width="1.5"/>
+  <rect x="70" y="588" width="20" height="4" rx="4 4 0 0" fill="#7ea8d0"/>
+  <text x="96" y="602" font-family="sans-serif" font-size="11" fill="#1a1f36">interface</text>
 
-  <rect x="740" y="558" width="24" height="24" rx="4" fill="white" stroke="#b0b0b0" stroke-width="1.5"/>
-  <rect x="740" y="558" width="24" height="4" rx="4 4 0 0" fill="#b0b0b0"/>
-  <text x="770" y="575" font-family="sans-serif" font-size="11" fill="#1a1f36">function</text>
+  <rect x="250" y="588" width="20" height="20" rx="4" fill="white" stroke="#b0b0b0" stroke-width="1.5"/>
+  <rect x="250" y="588" width="20" height="4" rx="4 4 0 0" fill="#b0b0b0"/>
+  <text x="276" y="602" font-family="sans-serif" font-size="11" fill="#1a1f36">module</text>
 
-  <rect x="848" y="558" width="24" height="24" rx="4" fill="white" stroke="#d4a0a0" stroke-width="1.5" stroke-dasharray="4,3"/>
-  <rect x="848" y="558" width="24" height="4" rx="4 4 0 0" fill="#d4a0a0"/>
-  <text x="878" y="575" font-family="sans-serif" font-size="11" fill="#1a1f36">context</text>
+  <rect x="430" y="588" width="20" height="20" rx="4" fill="white" stroke="#b0b0b0" stroke-width="1.5"/>
+  <rect x="430" y="588" width="20" height="4" rx="4 4 0 0" fill="#b0b0b0"/>
+  <text x="456" y="602" font-family="sans-serif" font-size="11" fill="#1a1f36">function</text>
 
-  <!-- Sub-row 2: remaining -->
-  <rect x="70" y="592" width="24" height="24" rx="4" fill="white" stroke="#b0b0b0" stroke-width="1.5"/>
-  <rect x="70" y="592" width="24" height="4" rx="4 4 0 0" fill="#b0b0b0"/>
-  <text x="100" y="609" font-family="sans-serif" font-size="11" fill="#1a1f36">constant</text>
+  <rect x="610" y="588" width="20" height="20" rx="4" fill="white" stroke="#b0b0b0" stroke-width="1.5"/>
+  <rect x="610" y="588" width="20" height="4" rx="4 4 0 0" fill="#b0b0b0"/>
+  <text x="636" y="602" font-family="sans-serif" font-size="11" fill="#1a1f36">constant</text>
 
-  <!-- Row 2: Edge Types (10 total, two sub-rows) -->
-  <text x="70" y="645" font-family="sans-serif" font-size="13" font-weight="700" fill="#1a1f36">Edge Types</text>
+  <rect x="790" y="588" width="20" height="20" rx="4" fill="white" stroke="#d4a0a0" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <rect x="790" y="588" width="20" height="4" rx="4 4 0 0" fill="#d4a0a0"/>
+  <text x="816" y="602" font-family="sans-serif" font-size="11" fill="#1a1f36">context</text>
 
-  <!-- Sub-row 1 -->
-  <line x1="70" y1="662" x2="105" y2="662" stroke="#8a8480" stroke-width="2" marker-end="url(#arrow-primary)"/>
-  <text x="115" y="666" font-family="sans-serif" font-size="11" fill="#1a1f36">inherits</text>
+  <!-- ====== EDGE TYPES ====== -->
+  <text x="70" y="636" font-family="sans-serif" font-size="12" font-weight="700" fill="#1a1f36" letter-spacing="0.5">Edge Types</text>
 
-  <line x1="195" y1="662" x2="230" y2="662" stroke="#8a8480" stroke-width="2" stroke-dasharray="8,5" marker-end="url(#arrow-primary)"/>
-  <text x="240" y="666" font-family="sans-serif" font-size="11" fill="#1a1f36">implements</text>
+  <!-- Row 1: 5 items, evenly spaced -->
+  <line x1="70" y1="652" x2="100" y2="652" stroke="#8a8480" stroke-width="2" marker-end="url(#arrow-primary)"/>
+  <text x="112" y="656" font-family="sans-serif" font-size="11" fill="#1a1f36">inherits</text>
 
-  <line x1="340" y1="662" x2="373" y2="662" stroke="#8a8480" stroke-width="2" marker-end="url(#diamond-primary)"/>
-  <text x="385" y="666" font-family="sans-serif" font-size="11" fill="#1a1f36">composes</text>
+  <line x1="250" y1="652" x2="280" y2="652" stroke="#8a8480" stroke-width="2" stroke-dasharray="8,5" marker-end="url(#arrow-primary)"/>
+  <text x="292" y="656" font-family="sans-serif" font-size="11" fill="#1a1f36">implements</text>
 
-  <line x1="470" y1="662" x2="505" y2="662" stroke="#b0aaa2" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow-secondary)"/>
-  <text x="515" y="666" font-family="sans-serif" font-size="11" fill="#1a1f36">depends</text>
+  <line x1="430" y1="652" x2="458" y2="652" stroke="#8a8480" stroke-width="2" marker-end="url(#diamond-primary)"/>
+  <text x="470" y="656" font-family="sans-serif" font-size="11" fill="#1a1f36">composes</text>
 
-  <line x1="590" y1="662" x2="625" y2="662" stroke="#b0aaa2" stroke-width="1.5" marker-end="url(#arrow-secondary)"/>
-  <text x="635" y="666" font-family="sans-serif" font-size="11" fill="#1a1f36">member</text>
+  <line x1="610" y1="652" x2="640" y2="652" stroke="#b0aaa2" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow-secondary)"/>
+  <text x="652" y="656" font-family="sans-serif" font-size="11" fill="#1a1f36">depends</text>
 
-  <!-- Sub-row 2 -->
-  <line x1="70" y1="688" x2="105" y2="688" stroke="#b0aaa2" stroke-width="1.5" marker-end="url(#arrow-secondary)"/>
-  <text x="115" y="692" font-family="sans-serif" font-size="11" fill="#1a1f36">calls</text>
+  <line x1="790" y1="652" x2="820" y2="652" stroke="#b0aaa2" stroke-width="1.5" marker-end="url(#arrow-secondary)"/>
+  <text x="832" y="656" font-family="sans-serif" font-size="11" fill="#1a1f36">member</text>
 
-  <line x1="175" y1="688" x2="210" y2="688" stroke="#3a7a5a" stroke-width="2" marker-end="url(#arrow-green)"/>
-  <text x="220" y="692" font-family="sans-serif" font-size="11" fill="#1a1f36">tests</text>
+  <!-- Row 2: 5 items -->
+  <line x1="70" y1="676" x2="100" y2="676" stroke="#b0aaa2" stroke-width="1.5" marker-end="url(#arrow-secondary)"/>
+  <text x="112" y="680" font-family="sans-serif" font-size="11" fill="#1a1f36">calls</text>
 
-  <line x1="280" y1="688" x2="315" y2="688" stroke="#b07070" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#arrow-rose)"/>
-  <text x="325" y="692" font-family="sans-serif" font-size="11" fill="#1a1f36">context</text>
+  <line x1="250" y1="676" x2="280" y2="676" stroke="#3a7a5a" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <text x="292" y="680" font-family="sans-serif" font-size="11" fill="#1a1f36">tests</text>
 
-  <line x1="405" y1="688" x2="440" y2="688" stroke="#8a8480" stroke-width="1.5" marker-end="url(#arrow-primary)"/>
-  <text x="450" y="692" font-family="sans-serif" font-size="11" fill="#1a1f36">contains</text>
+  <line x1="430" y1="676" x2="460" y2="676" stroke="#b07070" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#arrow-rose)"/>
+  <text x="472" y="680" font-family="sans-serif" font-size="11" fill="#1a1f36">context</text>
 
-  <line x1="530" y1="688" x2="565" y2="688" stroke="#8a8480" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#arrow-primary)"/>
-  <text x="575" y="692" font-family="sans-serif" font-size="11" fill="#1a1f36">overrides</text>
+  <line x1="610" y1="676" x2="640" y2="676" stroke="#8a8480" stroke-width="1.5" marker-end="url(#arrow-primary)"/>
+  <text x="652" y="680" font-family="sans-serif" font-size="11" fill="#1a1f36">contains</text>
+
+  <line x1="790" y1="676" x2="820" y2="676" stroke="#8a8480" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#arrow-primary)"/>
+  <text x="832" y="680" font-family="sans-serif" font-size="11" fill="#1a1f36">overrides</text>
 
   <!-- Footer note -->
-  <text x="70" y="710" font-family="sans-serif" font-size="11" font-style="italic" fill="#8a8078">Colored top bars indicate node kind. Edge style encodes the relationship type.</text>
+  <text x="500" y="714" text-anchor="middle" font-family="sans-serif" font-size="10" font-style="italic" fill="#8a8078">Colored top bars indicate node kind. Edge style encodes the relationship type.</text>
 </svg>
