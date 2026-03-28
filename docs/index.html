@@ -13,6 +13,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet">
 
     <style>
+        :root {
+            --sage-bg: #e8f0e8; --sage-border: #8cb88c; --sage-text: #2d5a2d;
+            --sky-bg: #e0e8f4; --sky-border: #7ea8d0; --sky-text: #2a5a7a;
+            --lavender-bg: #f0e8f4; --lavender-border: #b898c8; --lavender-text: #5a3a6a;
+            --wheat-bg: #f4f0e0; --wheat-border: #d0c888; --wheat-text: #6a5a1a;
+            --mint-bg: #e4f4e8; --mint-border: #7ac0a0; --mint-text: #1a5a3a;
+            --rose-bg: #f4e8e8; --rose-border: #d4a0a0; --rose-text: #8a4a4a;
+            --slate-bg: #f0f0f0; --slate-border: #b0b0b0; --slate-text: #707070;
+        }
+
         /* ============================================================
            RESET & BASE
            ============================================================ */
@@ -29,7 +39,7 @@
 
         body {
             font-family: "Source Serif 4", "Georgia", serif;
-            background-color: #faf8f5;
+            background-color: #f4f0ea;
             color: #1a1f36;
             line-height: 1.7;
             overflow-x: hidden;
@@ -47,17 +57,8 @@
             z-index: -1;
             pointer-events: none;
             background-image:
-                /* Major grid lines (every 40px) */
-                linear-gradient(to right, rgba(160, 150, 140, 0.15) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(160, 150, 140, 0.15) 1px, transparent 1px),
-                /* Minor grid lines (every 10px) */
-                linear-gradient(to right, rgba(160, 150, 140, 0.06) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(160, 150, 140, 0.06) 1px, transparent 1px);
-            background-size:
-                40px 40px,
-                40px 40px,
-                10px 10px,
-                10px 10px;
+                radial-gradient(circle, rgba(160, 140, 120, 0.08) 1px, transparent 1px);
+            background-size: 16px 16px;
         }
 
         /* ============================================================
@@ -115,6 +116,15 @@
         .card:hover {
             transform: translateY(-3px);
             box-shadow: 0 2px 6px rgba(0,0,0,0.08), 0 12px 28px rgba(0,0,0,0.06);
+        }
+
+        .card-accent {
+            border-top: 3px solid var(--accent-color, #d94f30);
+        }
+        .card-accent .card-number {
+            color: var(--accent-color, #d94f30);
+            font-family: "JetBrains Mono", monospace;
+            font-size: 0.75rem;
         }
 
         /* ============================================================
@@ -656,13 +666,13 @@
             text-align: center;
         }
 
-        .node-kind-chip.kind-class     { border-left-color: #3d6b99; color: #3d6b99; }
-        .node-kind-chip.kind-method    { border-left-color: #d94f30; color: #d94f30; }
-        .node-kind-chip.kind-field     { border-left-color: #4a7c6f; color: #4a7c6f; }
-        .node-kind-chip.kind-package   { border-left-color: #1a1f36; color: #1a1f36; }
-        .node-kind-chip.kind-test      { border-left-color: #8a6dbf; color: #8a6dbf; }
-        .node-kind-chip.kind-interface { border-left-color: #3d6b99; color: #3d6b99; }
-        .node-kind-chip.kind-module    { border-left-color: #6b6560; color: #6b6560; }
+        .node-kind-chip.kind-class     { border-left-color: var(--sage-border); color: var(--sage-text); background: var(--sage-bg); }
+        .node-kind-chip.kind-method    { border-left-color: var(--lavender-border); color: var(--lavender-text); background: var(--lavender-bg); }
+        .node-kind-chip.kind-field     { border-left-color: var(--wheat-border); color: var(--wheat-text); background: var(--wheat-bg); }
+        .node-kind-chip.kind-package   { border-left-color: var(--slate-border); color: var(--slate-text); background: var(--slate-bg); }
+        .node-kind-chip.kind-test      { border-left-color: var(--mint-border); color: var(--mint-text); background: var(--mint-bg); }
+        .node-kind-chip.kind-interface { border-left-color: var(--sky-border); color: var(--sky-text); background: var(--sky-bg); }
+        .node-kind-chip.kind-module    { border-left-color: var(--slate-border); color: var(--slate-text); background: var(--slate-bg); }
 
         .node-kind-desc {
             color: #6b6560;
@@ -1071,7 +1081,15 @@
          ================================================================ -->
     <header id="site-header">
         <nav>
-            <a href="#" class="logo-text">CooperativeCoding</a>
+            <a href="#hero" class="logo-text" style="display:flex;align-items:center;gap:0.5rem;">
+                <svg width="28" height="28" viewBox="0 0 512 512" aria-hidden="true">
+                    <circle cx="200" cy="256" r="140" fill="none" stroke="#1a1f36" stroke-width="14" opacity="0.3"/>
+                    <circle cx="200" cy="256" r="140" fill="#1a1f36" fill-opacity="0.04"/>
+                    <circle cx="312" cy="256" r="140" fill="none" stroke="#d94f30" stroke-width="14" opacity="0.3"/>
+                    <circle cx="312" cy="256" r="140" fill="#d94f30" fill-opacity="0.04"/>
+                </svg>
+                CooperativeCoding
+            </a>
             <button class="nav-toggle" aria-label="Toggle navigation">
                 <span></span>
                 <span></span>
@@ -1082,7 +1100,6 @@
                 <li><a href="#principles" class="nav-link">Principles</a></li>
                 <li><a href="#loop" class="nav-link">Loop</a></li>
                 <li><a href="#data-model" class="nav-link">Data Model</a></li>
-                <li><a href="#lifecycle" class="nav-link">Lifecycle</a></li>
                 <li><a href="#sync" class="nav-link">Sync</a></li>
                 <li><a href="#getting-started" class="nav-link">Get Started</a></li>
                 <li><a href="https://github.com/giosullutrone/cooperative-coding" target="_blank" class="nav-link">GitHub</a></li>
@@ -1094,71 +1111,15 @@
          HERO SECTION
          ================================================================ -->
     <section class="hero" id="hero">
-
-        <!-- Animated blueprint schematic background -->
-        <div class="hero-blueprint">
-            <svg viewBox="0 0 900 500" xmlns="http://www.w3.org/2000/svg" fill="none">
-                <defs>
-                    <marker id="bp-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-                        <path d="M0 0 L8 3 L0 6Z" fill="#3d6b99"/>
-                    </marker>
-                </defs>
-
-                <!-- Node rectangles (rounded) -->
-                <g class="bp-node">
-                    <rect x="60" y="80" width="140" height="60" rx="6" stroke="#3d6b99" stroke-width="1.5" fill="none"/>
-                    <text x="130" y="115" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#3d6b99">DocumentParser</text>
-                </g>
-                <g class="bp-node">
-                    <rect x="320" y="40" width="130" height="55" rx="6" stroke="#3d6b99" stroke-width="1.5" fill="none"/>
-                    <text x="385" y="72" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#3d6b99">TokenStream</text>
-                </g>
-                <g class="bp-node">
-                    <rect x="320" y="140" width="130" height="55" rx="6" stroke="#4a7c6f" stroke-width="1.5" fill="none"/>
-                    <text x="385" y="172" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#4a7c6f">PluginManager</text>
-                </g>
-                <g class="bp-node">
-                    <rect x="580" y="80" width="120" height="55" rx="6" stroke="#d94f30" stroke-width="1.5" fill="none"/>
-                    <text x="640" y="112" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#d94f30">ASTNode</text>
-                </g>
-                <g class="bp-node">
-                    <rect x="120" y="280" width="140" height="55" rx="6" stroke="#1a1f36" stroke-width="1.2" fill="none"/>
-                    <text x="190" y="312" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#1a1f36">parsers</text>
-                </g>
-                <g class="bp-node">
-                    <rect x="580" y="250" width="150" height="55" rx="6" stroke="#3d6b99" stroke-width="1.5" stroke-dasharray="5 3" fill="none"/>
-                    <text x="655" y="282" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#3d6b99" opacity="0.6">ErrorHandler</text>
-                </g>
-                <g class="bp-node">
-                    <rect x="350" y="340" width="130" height="55" rx="6" stroke="#8a6dbf" stroke-width="1.5" fill="none"/>
-                    <text x="415" y="372" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#8a6dbf">TestParser</text>
-                </g>
-
-                <!-- Edges (lines with arrows) -->
-                <line class="bp-edge" x1="200" y1="110" x2="318" y2="67" stroke="#3d6b99" stroke-width="1.2" marker-end="url(#bp-arrow)"/>
-                <line class="bp-edge" x1="200" y1="110" x2="318" y2="167" stroke="#4a7c6f" stroke-width="1.2" marker-end="url(#bp-arrow)"/>
-                <line class="bp-edge" x1="450" y1="67" x2="578" y2="100" stroke="#3d6b99" stroke-width="1.2" marker-end="url(#bp-arrow)"/>
-                <line class="bp-edge" x1="450" y1="167" x2="578" y2="107" stroke="#d94f30" stroke-width="1.2" marker-end="url(#bp-arrow)"/>
-                <line class="bp-edge" x1="190" y1="280" x2="130" y2="142" stroke="#1a1f36" stroke-width="1" stroke-dasharray="4 3"/>
-                <line class="bp-edge" x1="700" y1="107" x2="700" y2="248" stroke="#3d6b99" stroke-width="1" stroke-dasharray="5 3" marker-end="url(#bp-arrow)"/>
-                <line class="bp-edge" x1="415" y1="340" x2="190" y2="142" stroke="#8a6dbf" stroke-width="1" marker-end="url(#bp-arrow)"/>
-                <line class="bp-edge" x1="350" y1="365" x2="262" y2="310" stroke="#1a1f36" stroke-width="1" stroke-dasharray="4 3"/>
-
-                <!-- Connection dots at junctions -->
-                <circle class="bp-dot" cx="200" cy="110" r="3" fill="#3d6b99"/>
-                <circle class="bp-dot" cx="318" cy="67" r="3" fill="#3d6b99"/>
-                <circle class="bp-dot" cx="318" cy="167" r="3" fill="#4a7c6f"/>
-                <circle class="bp-dot" cx="450" cy="67" r="3" fill="#3d6b99"/>
-                <circle class="bp-dot" cx="578" cy="100" r="3" fill="#d94f30"/>
-                <circle class="bp-dot" cx="450" cy="167" r="3" fill="#d94f30"/>
-                <circle class="bp-dot" cx="700" cy="107" r="3" fill="#3d6b99"/>
-                <circle class="bp-dot" cx="415" cy="340" r="3" fill="#8a6dbf"/>
-            </svg>
-        </div>
-
         <div class="hero-content">
-            <h1>Cooperative Coding</h1>
-            <p class="hero-subtitle">An Open Specification for Human--AI Collaborative Software Design</p>
+            <svg width="56" height="56" viewBox="0 0 512 512" style="margin-bottom:1rem;" aria-hidden="true">
+                <circle cx="200" cy="256" r="140" fill="none" stroke="#1a1f36" stroke-width="10" opacity="0.3"/>
+                <circle cx="200" cy="256" r="140" fill="#1a1f36" fill-opacity="0.04"/>
+                <circle cx="312" cy="256" r="140" fill="none" stroke="#d94f30" stroke-width="10" opacity="0.3"/>
+                <circle cx="312" cy="256" r="140" fill="#d94f30" fill-opacity="0.04"/>
+            </svg>
+            <h1>CooperativeCoding</h1>
+            <p class="hero-subtitle">An open specification for human-AI collaborative software design</p>
             <div class="version-badge">v1.0.0 &middot; CC-BY-4.0</div>
             <div class="hero-cta">
                 <a href="../spec/00-introduction.md" class="btn btn-filled">Read the Spec</a>
@@ -1204,43 +1165,43 @@
             <p class="section-lead">The foundation of human-AI collaborative design.</p>
 
             <div class="principles-grid">
-                <div class="principle-card card">
+                <div class="principle-card card" style="border-top:3px solid #d94f30;">
                     <span class="p-number">01</span>
                     <h3>Design Authority is Human</h3>
                     <p>Software architecture demands judgment that emerges from business context, team culture, and lived experience. The human always has final say. The agent proposes, the human disposes. No design change is applied without explicit human approval.</p>
                 </div>
 
-                <div class="principle-card card">
+                <div class="principle-card card" style="border-top:3px solid #d94f30;">
                     <span class="p-number">02</span>
                     <h3>Progressive Detail</h3>
                     <p>Not everything deserves the same level of attention. Class nodes give the overview; only architecturally significant methods and fields are promoted to their own detail nodes. The canvas highlights what matters, not every line of code.</p>
                 </div>
 
-                <div class="principle-card card">
+                <div class="principle-card card" style="border-top:3px solid #d94f30;">
                     <span class="p-number">03</span>
                     <h3>Documentation as Contract</h3>
                     <p>The documentation block is the bridge between canvas and code. Responsibility statements, pseudo code, and constraints form the contract that the agent implements against and the sync engine uses to detect drift.</p>
                 </div>
 
-                <div class="principle-card card">
+                <div class="principle-card card" style="border-top:3px solid #d94f30;">
                     <span class="p-number">04</span>
                     <h3>Bidirectional Truth</h3>
                     <p>Canvas and code are two views of the same system. Neither is primary. Changes in either propagate through the sync engine. When they disagree, conflict detection ensures a human decides &mdash; no silent overwrites.</p>
                 </div>
 
-                <div class="principle-card card">
+                <div class="principle-card card" style="border-top:3px solid #d94f30;">
                     <span class="p-number">05</span>
                     <h3>Visual Simplicity</h3>
                     <p>The canvas shows a simplified UML focused on architectural thinking. A handful of node kinds, a handful of edge relations, and structured markdown for content. A place to see the shape of the system at a glance.</p>
                 </div>
 
-                <div class="principle-card card">
+                <div class="principle-card card" style="border-top:3px solid #d94f30;">
                     <span class="p-number">06</span>
                     <h3>Any Entry Point</h3>
                     <p>Sketch on a blank canvas. Describe a system in natural language and let the agent propose the design. Import existing code and let the sync engine generate the canvas. The paradigm meets you where you are.</p>
                 </div>
 
-                <div class="principle-card card">
+                <div class="principle-card card" style="border-top:3px solid #d94f30;">
                     <span class="p-number">07</span>
                     <h3>Language-Agnostic, Tool-Agnostic</h3>
                     <p>Nodes, edges, ghost proposals, and the cooperation lifecycle are universal. Each programming language gets a binding, each canvas tool gets an implementation, each agent gets an integration. The core spec defines the contract; bindings fulfill it.</p>
@@ -1258,48 +1219,8 @@
             <p class="section-lead">A continuous cycle where human intent and agent capability meet.</p>
 
             <div class="loop-layout">
-                <!-- Inline SVG circular diagram -->
                 <div class="loop-diagram-container">
-                    <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" fill="none">
-                        <defs>
-                            <marker id="loop-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-                                <path d="M0 0 L8 3 L0 6Z" fill="#6b6560"/>
-                            </marker>
-                        </defs>
-
-                        <!-- Connecting arc (subtle circle) -->
-                        <circle cx="200" cy="200" r="120" stroke="#e2ddd5" stroke-width="1.5" fill="none"/>
-
-                        <!-- Design (top) -->
-                        <rect x="140" y="40" width="120" height="48" rx="6" fill="#fff" stroke="#3d6b99" stroke-width="2"/>
-                        <text x="200" y="70" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#3d6b99" font-weight="600">DESIGN</text>
-
-                        <!-- Review (right) -->
-                        <rect x="292" y="176" width="108" height="48" rx="6" fill="#fff" stroke="#4a7c6f" stroke-width="2"/>
-                        <text x="346" y="206" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#4a7c6f" font-weight="600">REVIEW</text>
-
-                        <!-- Implement (bottom) -->
-                        <rect x="130" y="312" width="140" height="48" rx="6" fill="#fff" stroke="#d94f30" stroke-width="2"/>
-                        <text x="200" y="342" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#d94f30" font-weight="600">IMPLEMENT</text>
-
-                        <!-- Sync (left) -->
-                        <rect x="10" y="176" width="100" height="48" rx="6" fill="#fff" stroke="#1a1f36" stroke-width="2"/>
-                        <text x="60" y="206" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#1a1f36" font-weight="600">SYNC</text>
-
-                        <!-- Arrows between phases (circular arcs, edge centers) -->
-                        <!-- Design -> Review: center of right edge (260,64) to center of top edge (346,176) -->
-                        <path d="M260 64 A165 165 0 0 1 346 176" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#loop-arrow)"/>
-                        <!-- Review -> Implement: center of bottom edge (346,224) to center of right edge (270,336) -->
-                        <path d="M346 224 A165 165 0 0 1 270 336" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#loop-arrow)"/>
-                        <!-- Implement -> Sync: center of left edge (130,336) to center of bottom edge (60,224) -->
-                        <path d="M130 336 A165 165 0 0 1 60 224" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#loop-arrow)"/>
-                        <!-- Sync -> Design: center of top edge (60,176) to center of left edge (140,64) -->
-                        <path d="M60 176 A165 165 0 0 1 140 64" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#loop-arrow)"/>
-
-                        <!-- Center label -->
-                        <text x="200" y="196" text-anchor="middle" font-family="Instrument Serif, serif" font-size="14" fill="#6b6560" font-style="italic">cooperate</text>
-                        <text x="200" y="214" text-anchor="middle" font-family="Instrument Serif, serif" font-size="14" fill="#6b6560" font-style="italic">continuously</text>
-                    </svg>
+                <img src="assets/cooperation-loop.svg" alt="The Cooperation Loop - showing the bidirectional sync flow between canvas and code" style="width:100%;max-width:900px;margin:2rem auto;display:block;">
                 </div>
 
                 <!-- Phase descriptions -->
@@ -1380,7 +1301,7 @@
 
                     <div class="edge-relation">
                         <div class="edge-line-sample">
-                            <svg viewBox="0 0 60 20"><line x1="0" y1="10" x2="52" y2="10" stroke="#3d6b99" stroke-width="2.5"/><polygon points="52,6 60,10 52,14" fill="#3d6b99"/></svg>
+                            <svg viewBox="0 0 60 20"><line x1="0" y1="10" x2="52" y2="10" stroke="#1a1f36" stroke-width="2.5" opacity="0.6"/><polygon points="52,6 60,10 52,14" fill="#1a1f36" opacity="0.6"/></svg>
                         </div>
                         <span class="edge-label">inherits</span>
                         <span class="edge-desc">Class extends or subclasses another. Generates inheritance declarations.</span>
@@ -1388,7 +1309,7 @@
 
                     <div class="edge-relation">
                         <div class="edge-line-sample">
-                            <svg viewBox="0 0 60 20"><line x1="0" y1="10" x2="52" y2="10" stroke="#3d6b99" stroke-width="1.5" stroke-dasharray="6 3"/><polygon points="52,6 60,10 52,14" fill="#3d6b99"/></svg>
+                            <svg viewBox="0 0 60 20"><line x1="0" y1="10" x2="52" y2="10" stroke="#1a1f36" stroke-width="1.5" stroke-dasharray="6 3" opacity="0.5"/><polygon points="52,6 60,10 52,14" fill="#1a1f36" opacity="0.5"/></svg>
                         </div>
                         <span class="edge-label">implements</span>
                         <span class="edge-desc">Class adopts an interface or protocol. Generates conformance declarations.</span>
@@ -1396,7 +1317,7 @@
 
                     <div class="edge-relation">
                         <div class="edge-line-sample">
-                            <svg viewBox="0 0 60 20"><line x1="8" y1="10" x2="52" y2="10" stroke="#4a7c6f" stroke-width="2"/><polygon points="52,6 60,10 52,14" fill="#4a7c6f"/><polygon points="0,10 8,6 8,14" fill="#4a7c6f"/></svg>
+                            <svg viewBox="0 0 60 20"><line x1="8" y1="10" x2="52" y2="10" stroke="#1a1f36" stroke-width="2" opacity="0.5"/><polygon points="52,6 60,10 52,14" fill="#1a1f36" opacity="0.5"/><polygon points="0,10 8,6 8,14" fill="#1a1f36" opacity="0.5"/></svg>
                         </div>
                         <span class="edge-label">composes</span>
                         <span class="edge-desc">Has-a relationship. The edge label carries the field name. Generates typed field declarations.</span>
@@ -1404,7 +1325,7 @@
 
                     <div class="edge-relation">
                         <div class="edge-line-sample">
-                            <svg viewBox="0 0 60 20"><line x1="0" y1="10" x2="52" y2="10" stroke="#6b6560" stroke-width="1.5" stroke-dasharray="3 3"/><polygon points="52,6 60,10 52,14" fill="#6b6560"/></svg>
+                            <svg viewBox="0 0 60 20"><line x1="0" y1="10" x2="52" y2="10" stroke="#1a1f36" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.4"/><polygon points="52,6 60,10 52,14" fill="#1a1f36" opacity="0.4"/></svg>
                         </div>
                         <span class="edge-label">depends</span>
                         <span class="edge-desc">Import-level dependency. Generates import statements in the source file.</span>
@@ -1412,7 +1333,7 @@
 
                     <div class="edge-relation">
                         <div class="edge-line-sample">
-                            <svg viewBox="0 0 60 20"><line x1="0" y1="10" x2="52" y2="10" stroke="#d94f30" stroke-width="1" stroke-dasharray="2 4"/><polygon points="52,6 60,10 52,14" fill="#d94f30"/></svg>
+                            <svg viewBox="0 0 60 20"><line x1="0" y1="10" x2="52" y2="10" stroke="#1a1f36" stroke-width="1" stroke-dasharray="2 4" opacity="0.4"/><polygon points="52,6 60,10 52,14" fill="#1a1f36" opacity="0.4"/></svg>
                         </div>
                         <span class="edge-label">calls</span>
                         <span class="edge-desc">Runtime method invocation. Informational &mdash; not synced. Documents runtime flow.</span>
@@ -1420,7 +1341,7 @@
 
                     <div class="edge-relation">
                         <div class="edge-line-sample">
-                            <svg viewBox="0 0 60 20"><line x1="0" y1="10" x2="52" y2="10" stroke="#1a1f36" stroke-width="1.5"/><polygon points="52,6 60,10 52,14" fill="#1a1f36"/></svg>
+                            <svg viewBox="0 0 60 20"><line x1="0" y1="10" x2="52" y2="10" stroke="#1a1f36" stroke-width="1.5" opacity="0.45"/><polygon points="52,6 60,10 52,14" fill="#1a1f36" opacity="0.45"/></svg>
                         </div>
                         <span class="edge-label">detail</span>
                         <span class="edge-desc">Links a class node to a promoted method or field. Structural, not independently synced.</span>
@@ -1428,7 +1349,7 @@
 
                     <div class="edge-relation">
                         <div class="edge-line-sample">
-                            <svg viewBox="0 0 60 20"><line x1="0" y1="10" x2="52" y2="10" stroke="#8a6dbf" stroke-width="1.5"/><polygon points="52,6 60,10 52,14" fill="#8a6dbf"/></svg>
+                            <svg viewBox="0 0 60 20"><line x1="0" y1="10" x2="52" y2="10" stroke="#3a7a5a" stroke-width="1.5"/><polygon points="52,6 60,10 52,14" fill="#3a7a5a"/></svg>
                         </div>
                         <span class="edge-label">tests</span>
                         <span class="edge-desc">Test node verifies a class. Propagates staleness when the class changes.</span>
@@ -1436,7 +1357,7 @@
 
                     <div class="edge-relation">
                         <div class="edge-line-sample">
-                            <svg viewBox="0 0 60 20"><line x1="0" y1="10" x2="52" y2="10" stroke="#c08b30" stroke-width="1" stroke-dasharray="1 3"/><polygon points="52,6 60,10 52,14" fill="#c08b30"/></svg>
+                            <svg viewBox="0 0 60 20"><line x1="0" y1="10" x2="52" y2="10" stroke="#d4a0a0" stroke-width="1" stroke-dasharray="6 4"/><polygon points="52,6 60,10 52,14" fill="#d4a0a0"/></svg>
                         </div>
                         <span class="edge-label">context</span>
                         <span class="edge-desc">Links a context node to a code element. Canvas-only &mdash; design rationale and references.</span>
@@ -1446,86 +1367,6 @@
 
             <div class="stereotype-note">
                 <strong>Stereotypes</strong> extend node semantics with language-specific subtypes. The set is open and extensible: <code>protocol</code>, <code>dataclass</code>, <code>enum</code>, <code>abstract</code>, <code>singleton</code>, <code>mixin</code>, and any others your language binding defines. Unknown stereotypes are preserved and displayed as-is &mdash; implementations must not reject them.
-            </div>
-        </div>
-    </section>
-
-    <!-- ================================================================
-         SECTION 7: STATUS LIFECYCLE
-         ================================================================ -->
-    <section id="lifecycle" style="background: rgba(240, 237, 232, 0.4);">
-        <div class="container">
-            <h2 class="section-heading">Status Lifecycle</h2>
-            <p class="section-lead">Four states. Five transitions. A clear state machine governing every element on the canvas.</p>
-
-            <!-- Inline SVG state machine diagram -->
-            <div class="lifecycle-diagram-container">
-                <svg viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg" fill="none">
-                    <defs>
-                        <marker id="lc-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-                            <path d="M0 0 L8 3 L0 6Z" fill="#6b6560"/>
-                        </marker>
-                    </defs>
-
-                    <!-- proposed (dashed border) -->
-                    <rect x="30" y="60" width="130" height="50" rx="8" stroke="#6b6560" stroke-width="2" stroke-dasharray="6 4" fill="#faf8f5"/>
-                    <text x="95" y="91" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#6b6560" font-weight="500">proposed</text>
-
-                    <!-- accepted (solid sage fill) -->
-                    <rect x="260" y="60" width="130" height="50" rx="8" stroke="#4a7c6f" stroke-width="2" fill="rgba(74,124,111,0.1)"/>
-                    <text x="325" y="91" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#4a7c6f" font-weight="600">accepted</text>
-
-                    <!-- rejected (grey) -->
-                    <rect x="30" y="210" width="130" height="50" rx="8" stroke="#999" stroke-width="2" fill="rgba(153,153,153,0.08)"/>
-                    <text x="95" y="241" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#999" font-weight="500">rejected</text>
-
-                    <!-- stale (warm amber) -->
-                    <rect x="480" y="60" width="130" height="50" rx="8" stroke="#c08b30" stroke-width="2" fill="rgba(192,139,48,0.08)"/>
-                    <text x="545" y="91" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#c08b30" font-weight="500">stale</text>
-
-                    <!-- proposed -> accepted (accept) -->
-                    <line x1="162" y1="85" x2="257" y2="85" stroke="#6b6560" stroke-width="1.5" marker-end="url(#lc-arrow)"/>
-                    <text x="210" y="76" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#4a7c6f">accept</text>
-
-                    <!-- proposed -> rejected (reject) -->
-                    <line x1="95" y1="112" x2="95" y2="207" stroke="#6b6560" stroke-width="1.5" marker-end="url(#lc-arrow)"/>
-                    <text x="70" y="164" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#999" transform="rotate(-90 70 164)">reject</text>
-
-                    <!-- accepted -> stale (code deleted) -->
-                    <line x1="392" y1="85" x2="477" y2="85" stroke="#6b6560" stroke-width="1.5" marker-end="url(#lc-arrow)"/>
-                    <text x="435" y="76" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#c08b30">stale</text>
-
-                    <!-- stale -> accepted (restore) -->
-                    <path d="M500 112 Q460 150 400 112" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#lc-arrow)"/>
-                    <text x="445" y="146" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#4a7c6f">restore</text>
-
-                    <!-- rejected -> proposed (reconsider) -->
-                    <path d="M50 208 Q20 160 50 112" stroke="#6b6560" stroke-width="1.5" fill="none" marker-end="url(#lc-arrow)"/>
-                    <text x="12" y="164" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#6b6560">reconsider</text>
-                </svg>
-            </div>
-
-            <!-- Status descriptions -->
-            <div class="status-list">
-                <div class="status-item card status-proposed">
-                    <div class="status-name">proposed</div>
-                    <div class="status-desc">A ghost &mdash; a tentative design element awaiting human review. Exists on the canvas as a visual suggestion but has no authority over the codebase. Not synced to code. Canvas tools render ghosts with reduced opacity or dashed borders.</div>
-                </div>
-
-                <div class="status-item card status-accepted">
-                    <div class="status-name">accepted</div>
-                    <div class="status-desc">Part of the canonical design. Represents a deliberate architectural decision confirmed by a human. Synced to code during both canvas-to-code and code-to-canvas sync. Rendered with full visual weight.</div>
-                </div>
-
-                <div class="status-item card status-rejected">
-                    <div class="status-name">rejected</div>
-                    <div class="status-desc">A proposal that a human explicitly declined. Remains in the canvas file as a record of the decision but is not part of the active design. Not synced to code. Hidden by default or visually suppressed.</div>
-                </div>
-
-                <div class="status-item card status-stale">
-                    <div class="status-name">stale</div>
-                    <div class="status-desc">The element's corresponding code was deleted, moved, or renamed in a way the sync engine could not resolve. The canvas node remains, but its link to the codebase is broken. Awaiting human resolution. Not auto-deleted.</div>
-                </div>
             </div>
         </div>
     </section>
@@ -1585,28 +1426,28 @@
             <p class="section-lead">Four steps to begin working with CooperativeCoding.</p>
 
             <div class="timeline">
-                <div class="timeline-step">
+                <div class="timeline-step" style="border-top:3px solid #d94f30;">
                     <div class="timeline-number">1</div>
                     <h3>Read the Specification</h3>
                     <p>Start with the Introduction for the vision and principles. Then explore the Data Model, Lifecycle, Sync, and Language Bindings documents for the full technical contract.</p>
                     <a href="../spec/00-introduction.md" class="step-cta">Read the Introduction &rarr;</a>
                 </div>
 
-                <div class="timeline-step">
+                <div class="timeline-step" style="border-top:3px solid #d94f30;">
                     <div class="timeline-number">2</div>
                     <h3>Choose Your Canvas Tool</h3>
                     <p>CooperativeCoding works with any canvas tool that supports JSON Canvas v1.0. The reference implementation uses Obsidian with a dedicated plugin that renders ghost nodes, detail edges, and status indicators.</p>
                     <a href="https://jsoncanvas.org" target="_blank" class="step-cta">Explore JSON Canvas &rarr;</a>
                 </div>
 
-                <div class="timeline-step">
+                <div class="timeline-step" style="border-top:3px solid #d94f30;">
                     <div class="timeline-number">3</div>
                     <h3>Set Up a Language Binding</h3>
                     <p>Each programming language needs a binding that maps abstract spec concepts to language-specific idioms. The Python binding is the reference implementation, covering stereotypes, AST parsing, type translation, and sync mapping.</p>
                     <a href="../bindings/python.md" class="step-cta">Python Binding Reference &rarr;</a>
                 </div>
 
-                <div class="timeline-step">
+                <div class="timeline-step" style="border-top:3px solid #d94f30;">
                     <div class="timeline-number">4</div>
                     <h3>Integrate Your Agent</h3>
                     <p>Teach your agentic coding tool the cooperation protocol: propose design changes as ghost nodes, implement accepted elements, and keep canvas and code in sync. The spec defines the cooperation contract; your agent fulfills it.</p>
@@ -1625,37 +1466,37 @@
             <p class="section-lead">The complete CooperativeCoding specification, organized in five core documents plus a language binding reference.</p>
 
             <div class="docs-grid">
-                <div class="doc-card card">
+                <div class="doc-card card" style="border-top:3px solid #1a1f36;">
                     <div class="doc-filename">00-introduction.md</div>
                     <p>Vision, core principles, terminology, scope, non-goals, and the document index. Start here to understand why CooperativeCoding exists and what it defines.</p>
                     <a href="../spec/00-introduction.md" class="doc-link">Read &rarr;</a>
                 </div>
 
-                <div class="doc-card card">
+                <div class="doc-card card" style="border-top:3px solid #1a1f36;">
                     <div class="doc-filename">01-data-model.md</div>
                     <p>Canvas nodes, edges, and metadata schemas. Node kinds, edge relations, status semantics, the <code>ccoding</code> namespace, edge labels, context nodes, and the edge targeting rule.</p>
                     <a href="../spec/01-data-model.md" class="doc-link">Read &rarr;</a>
                 </div>
 
-                <div class="doc-card card">
+                <div class="doc-card card" style="border-top:3px solid #1a1f36;">
                     <div class="doc-filename">02-lifecycle.md</div>
                     <p>Ghost proposals and status transitions. Entry points, the cooperation loop, the four-state state machine, ghost semantics, and bulk operations for accepting or rejecting proposals.</p>
                     <a href="../spec/02-lifecycle.md" class="doc-link">Read &rarr;</a>
                 </div>
 
-                <div class="doc-card card">
+                <div class="doc-card card" style="border-top:3px solid #1a1f36;">
                     <div class="doc-filename">03-sync.md</div>
                     <p>Bidirectional sync semantics. Canvas-to-code rules, code-to-canvas rules, conflict detection and resolution, state tracking, sync triggers, ordering, and edge cases.</p>
                     <a href="../spec/03-sync.md" class="doc-link">Read &rarr;</a>
                 </div>
 
-                <div class="doc-card card">
+                <div class="doc-card card" style="border-top:3px solid #1a1f36;">
                     <div class="doc-filename">04-language-bindings.md</div>
                     <p>The contract for language-specific mappings. Stereotype mapping, AST parsing, type translation, documentation format, and the three-tier compliance model (MUST, SHOULD, MAY).</p>
                     <a href="../spec/04-language-bindings.md" class="doc-link">Read &rarr;</a>
                 </div>
 
-                <div class="doc-card card">
+                <div class="doc-card card" style="border-top:3px solid #1a1f36;">
                     <div class="doc-filename">bindings/python.md</div>
                     <p>The reference Python binding. Covers Python stereotypes, docstring conventions, type annotation mapping, <code>ccoding</code> CLI usage, and structured content conventions.</p>
                     <a href="../bindings/python.md" class="doc-link">Read &rarr;</a>
