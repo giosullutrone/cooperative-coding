@@ -28,7 +28,7 @@
   <!-- Layer 1: Loop-back edge (behind everything)  -->
   <!-- ============================================ -->
   <!-- From Decision 2 "yes" bottom, down, right along bottom, up far right, left along top, down into code request -->
-  <path d="M130,460 L130,500 L890,500 L890,45 L390,45 L390,58"
+  <path d="M130,460 L130,500 L890,500 L890,45 L390,45 L390,60"
         fill="none" stroke="#d94f30" stroke-width="2" stroke-dasharray="8,4"
         marker-end="url(#arrow-terracotta)"/>
   <!-- Loop-back label on bottom segment -->
