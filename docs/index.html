@@ -613,7 +613,6 @@
         }
 
         .loop-phase-name.design { color: #3d6b99; }
-        .loop-phase-name.review { color: #4a7c6f; }
         .loop-phase-name.implement { color: #d94f30; }
         .loop-phase-name.sync { color: #1a1f36; }
 
@@ -736,54 +735,6 @@
         }
 
         /* ============================================================
-           SECTION 7: STATUS LIFECYCLE
-           ============================================================ */
-        .lifecycle-diagram-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 3rem;
-        }
-
-        .lifecycle-diagram-container svg {
-            width: 100%;
-            max-width: 640px;
-            height: auto;
-        }
-
-        .status-list {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-        }
-
-        .status-item {
-            padding: 1.5rem;
-        }
-
-        .status-item .status-name {
-            font-family: "JetBrains Mono", monospace;
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 0.4rem;
-        }
-
-        .status-item .status-desc {
-            color: #6b6560;
-            font-size: 0.92rem;
-        }
-
-        .status-proposed .status-name { color: #6b6560; }
-        .status-accepted .status-name { color: #4a7c6f; }
-        .status-rejected .status-name { color: #999; }
-        .status-stale .status-name    { color: #c08b30; }
-
-        @media (max-width: 768px) {
-            .status-list {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* ============================================================
            SECTION 8: BIDIRECTIONAL SYNC
            ============================================================ */
         .sync-layout {
@@ -830,20 +781,6 @@
         .sync-no li::before {
             content: "\2717"; /* x mark */
             color: #d94f30;
-        }
-
-        .conflict-callout {
-            background: rgba(192, 139, 48, 0.08);
-            border: 1px solid rgba(192, 139, 48, 0.25);
-            border-left: 4px solid #c08b30;
-            padding: 1.5rem 2rem;
-            border-radius: 0 6px 6px 0;
-            font-size: 0.95rem;
-            color: #6b6560;
-        }
-
-        .conflict-callout strong {
-            color: #c08b30;
         }
 
         @media (max-width: 768px) {
@@ -1147,7 +1084,7 @@
                     Code design and code implementation are different skills that benefit from different tools. Humans excel at architectural thinking &mdash; defining responsibilities, drawing boundaries, seeing the big picture. Agents excel at translating precise specifications into correct, complete code. Today, both activities happen in the same text editor, forcing the human to think at the wrong level of abstraction and the agent to guess at the right one.
                 </p>
                 <p>
-                    CooperativeCoding separates these concerns. Both human and agent work on a visual canvas &mdash; a simplified UML where design elements carry documentation contracts. The agent also works on the code, implementing the canvas design and keeping canvas and code in bidirectional sync. They cooperate through ghost proposals: agent-created elements appear as tentative suggestions that the human reviews, accepts, or rejects before anything gets implemented.
+                    CooperativeCoding separates these concerns. Both human and agent work on a visual canvas &mdash; a simplified UML where design elements carry documentation contracts. The agent also works on the code, implementing the canvas design and keeping canvas and code in bidirectional sync. They cooperate through a continuous sync loop: the agent can loop autonomously (implement, test, fix, repeat) while every change stays visible on the canvas. The human can intervene at any point by editing the canvas or the code.
                 </p>
                 <p>
                     The specification is <code>language-agnostic</code> and <code>tool-agnostic</code>. It extends JSON Canvas with typed nodes, semantic edges, a status lifecycle, and sync rules. Concrete implementations require a canvas tool plugin, a language binding, and an agent integration &mdash; but the core spec defines the universal contract that all of them share.
@@ -1168,25 +1105,25 @@
                 <div class="principle-card card" style="border-top:3px solid #d94f30;">
                     <span class="p-number">01</span>
                     <h3>Design Authority is Human</h3>
-                    <p>Software architecture demands judgment that emerges from business context, team culture, and lived experience. The human always has final say. The agent proposes, the human disposes. No design change is applied without explicit human approval.</p>
+                    <p>Architectural decisions require judgment that agents do not have: business context, team dynamics, long-term maintainability tradeoffs. Both the human and the agent can change the canvas and the code, but the human always has final say. Every change is visible on the canvas, and the human can edit anything at any time.</p>
                 </div>
 
                 <div class="principle-card card" style="border-top:3px solid #d94f30;">
                     <span class="p-number">02</span>
-                    <h3>Progressive Detail</h3>
-                    <p>Not everything deserves the same level of attention. Class nodes give the overview; only architecturally significant methods and fields are promoted to their own detail nodes. The canvas highlights what matters, not every line of code.</p>
+                    <h3>Every Element is a Node</h3>
+                    <p>Every class, method, and field is its own node on the canvas, carrying full documentation: responsibility, pseudo code, signatures, and constraints. Each member exists independently, with its own identity and detail. Canvas tools may collapse or simplify nodes for readability, but the underlying data always carries the full detail.</p>
                 </div>
 
                 <div class="principle-card card" style="border-top:3px solid #d94f30;">
                     <span class="p-number">03</span>
-                    <h3>Documentation as Contract</h3>
-                    <p>The documentation block is the bridge between canvas and code. Responsibility statements, pseudo code, and constraints form the contract that the agent implements against and the sync engine uses to detect drift.</p>
+                    <h3>Node Content is the Contract</h3>
+                    <p>Each node on the canvas carries natural language content: a responsibility statement, pseudo code, type signatures, and constraints. This content is the authoritative specification for what the corresponding code should do. Clear node content leads to correct implementation; vague content leads to guesswork.</p>
                 </div>
 
                 <div class="principle-card card" style="border-top:3px solid #d94f30;">
                     <span class="p-number">04</span>
-                    <h3>Bidirectional Truth</h3>
-                    <p>Canvas and code are two views of the same system. Neither is primary. Changes in either propagate through the sync engine. When they disagree, conflict detection ensures a human decides &mdash; no silent overwrites.</p>
+                    <h3>Bidirectional Sync</h3>
+                    <p>Canvas and code are always in sync. Every change on either side produces a sync request for the other side. The agent processes each sync request and decides what changes are needed. The human sees every change reflected on the canvas in real time. Version control provides the audit trail and rollback.</p>
                 </div>
 
                 <div class="principle-card card" style="border-top:3px solid #d94f30;">
@@ -1204,7 +1141,7 @@
                 <div class="principle-card card" style="border-top:3px solid #d94f30;">
                     <span class="p-number">07</span>
                     <h3>Language-Agnostic, Tool-Agnostic</h3>
-                    <p>Nodes, edges, ghost proposals, and the cooperation lifecycle are universal. Each programming language gets a binding, each canvas tool gets an implementation, each agent gets an integration. The core spec defines the contract; bindings fulfill it.</p>
+                    <p>The core concepts of CooperativeCoding (nodes, edges, relationships, the sync loop) are universal. Each programming language gets a binding, each canvas tool gets an implementation, each agent gets an integration. The core spec defines the contract; bindings fulfill it.</p>
                 </div>
             </div>
         </div>
@@ -1227,19 +1164,15 @@
                 <div class="loop-phases">
                     <div class="loop-phase">
                         <div class="loop-phase-name design">Design</div>
-                        <p>Human architect creates or updates the canvas &mdash; classes, methods, fields, relationships, and documentation contracts. The agent may also propose design changes as ghost nodes. This is the authoritative moment for architectural decisions.</p>
-                    </div>
-                    <div class="loop-phase">
-                        <div class="loop-phase-name review">Review</div>
-                        <p>The human reviews ghost proposals, accepting elements that fit the vision and rejecting those that do not. Ghosts may be edited before acceptance. Only accepted elements proceed to implementation.</p>
+                        <p>Human or agent creates or updates the canvas &mdash; classes, methods, fields, relationships, and documentation contracts. Both can edit the canvas and the code at any time. The canvas is where the human exercises architectural authority.</p>
                     </div>
                     <div class="loop-phase">
                         <div class="loop-phase-name implement">Implement</div>
-                        <p>The agent generates or updates source code based on accepted canvas elements. Documentation blocks become docstrings, edges become inheritance declarations and imports, node kinds become class skeletons.</p>
+                        <p>The agent generates or updates source code based on canvas elements. Documentation blocks become docstrings, edges become inheritance declarations and imports, node kinds become class skeletons. The agent can loop autonomously: implement, test, fix, repeat.</p>
                     </div>
                     <div class="loop-phase">
                         <div class="loop-phase-name sync">Sync</div>
-                        <p>The sync engine detects changes on both sides and propagates them. Code changes update the canvas; canvas changes update the code. Conflicts are detected and surfaced for human resolution. The loop begins anew.</p>
+                        <p>Every change on either side produces a sync request for the other. Canvas changes produce code requests; code changes produce design requests. The agent processes each request and decides what changes are needed. The loop continues until both sides match.</p>
                     </div>
                 </div>
             </div>
@@ -1266,7 +1199,7 @@
 
                     <div class="node-kind">
                         <span class="node-kind-chip kind-method">method</span>
-                        <span class="node-kind-desc">A method or function promoted to its own detail node. Connected to its parent class via a <code>detail</code> edge. Contains signature, pseudo code, and constraints.</span>
+                        <span class="node-kind-desc">A method or function promoted to its own detail node. Connected to its parent class via a <code>member</code> edge. Contains signature, pseudo code, and constraints.</span>
                     </div>
 
                     <div class="node-kind">
@@ -1343,8 +1276,8 @@
                         <div class="edge-line-sample">
                             <svg viewBox="0 0 60 20"><line x1="0" y1="10" x2="52" y2="10" stroke="#1a1f36" stroke-width="1.5" opacity="0.45"/><polygon points="52,6 60,10 52,14" fill="#1a1f36" opacity="0.45"/></svg>
                         </div>
-                        <span class="edge-label">detail</span>
-                        <span class="edge-desc">Links a class node to a promoted method or field. Structural, not independently synced.</span>
+                        <span class="edge-label">member</span>
+                        <span class="edge-desc">Connects a class node to a promoted method, field, or nested class.</span>
                     </div>
 
                     <div class="edge-relation">
@@ -1352,7 +1285,7 @@
                             <svg viewBox="0 0 60 20"><line x1="0" y1="10" x2="52" y2="10" stroke="#3a7a5a" stroke-width="1.5"/><polygon points="52,6 60,10 52,14" fill="#3a7a5a"/></svg>
                         </div>
                         <span class="edge-label">tests</span>
-                        <span class="edge-desc">Test node verifies a class. Propagates staleness when the class changes.</span>
+                        <span class="edge-desc">Test node verifies a class. Connected via a tests edge.</span>
                     </div>
 
                     <div class="edge-relation">
@@ -1399,9 +1332,6 @@
                 <div class="sync-box card">
                     <h3>What Never Syncs</h3>
                     <ul class="sync-list sync-no">
-                        <li>Ghost (<code>proposed</code>) elements &mdash; canvas-only proposals</li>
-                        <li>Rejected elements &mdash; preserved for decision history only</li>
-                        <li>Stale elements &mdash; awaiting human resolution</li>
                         <li>Method bodies &mdash; implementation is code's domain</li>
                         <li>Local variables and control flow within functions</li>
                         <li>Context nodes &mdash; design rationale stays on the canvas</li>
@@ -1409,10 +1339,6 @@
                         <li>Canvas layout positions &mdash; node arrangement is visual only</li>
                     </ul>
                 </div>
-            </div>
-
-            <div class="conflict-callout">
-                <strong>Conflict Resolution:</strong> When both canvas and code change the same element between sync cycles, the sync engine detects the conflict and refuses to silently overwrite either side. Implementations present both versions to the human for resolution &mdash; three-way merge, side selection, or deferral. Conflicts are detected at the element level, not the file level: changing ClassA on the canvas and ClassB in the same source file is not a conflict.
             </div>
         </div>
     </section>
@@ -1436,7 +1362,7 @@
                 <div class="timeline-step" style="border-top:3px solid #d94f30;">
                     <div class="timeline-number">2</div>
                     <h3>Choose Your Canvas Tool</h3>
-                    <p>CooperativeCoding works with any canvas tool that supports JSON Canvas v1.0. The reference implementation uses Obsidian with a dedicated plugin that renders ghost nodes, detail edges, and status indicators.</p>
+                    <p>CooperativeCoding works with any canvas tool that supports JSON Canvas v1.0. The reference implementation uses Obsidian with a dedicated plugin that renders CooperativeCoding nodes and edges.</p>
                     <a href="https://jsoncanvas.org" target="_blank" class="step-cta">Explore JSON Canvas &rarr;</a>
                 </div>
 
@@ -1450,7 +1376,7 @@
                 <div class="timeline-step" style="border-top:3px solid #d94f30;">
                     <div class="timeline-number">4</div>
                     <h3>Integrate Your Agent</h3>
-                    <p>Teach your agentic coding tool the cooperation protocol: propose design changes as ghost nodes, implement accepted elements, and keep canvas and code in sync. The spec defines the cooperation contract; your agent fulfills it.</p>
+                    <p>Teach your agentic coding tool the cooperation protocol: process sync requests in both directions, implement code from canvas designs, update the canvas when code changes, and loop autonomously while keeping everything visible. The spec defines the cooperation contract; your agent fulfills it.</p>
                     <a href="https://github.com/giosullutrone/cooperative-coding" target="_blank" class="step-cta">View on GitHub &rarr;</a>
                 </div>
             </div>
@@ -1474,19 +1400,19 @@
 
                 <div class="doc-card card" style="border-top:3px solid #1a1f36;">
                     <div class="doc-filename">01-data-model.md</div>
-                    <p>Canvas nodes, edges, and metadata schemas. Node kinds, edge relations, status semantics, the <code>ccoding</code> namespace, edge labels, context nodes, and the edge targeting rule.</p>
+                    <p>Canvas nodes, edges, and metadata schemas. Node kinds, edge relations, the <code>ccoding</code> namespace, edge labels, context nodes, and node text content rules.</p>
                     <a href="../spec/01-data-model.md" class="doc-link">Read &rarr;</a>
                 </div>
 
                 <div class="doc-card card" style="border-top:3px solid #1a1f36;">
                     <div class="doc-filename">02-lifecycle.md</div>
-                    <p>Ghost proposals and status transitions. Entry points, the cooperation loop, the four-state state machine, ghost semantics, and bulk operations for accepting or rejecting proposals.</p>
+                    <p>Entry points, the sync loop, agent and human roles, and agent communication approaches. How the continuous bidirectional sync model works in practice.</p>
                     <a href="../spec/02-lifecycle.md" class="doc-link">Read &rarr;</a>
                 </div>
 
                 <div class="doc-card card" style="border-top:3px solid #1a1f36;">
                     <div class="doc-filename">03-sync.md</div>
-                    <p>Bidirectional sync semantics. Canvas-to-code rules, code-to-canvas rules, conflict detection and resolution, state tracking, sync triggers, ordering, and edge cases.</p>
+                    <p>Bidirectional sync semantics. Canvas-to-code rules, code-to-canvas rules, state tracking via qualified names, sync triggers, and the convergence guarantee.</p>
                     <a href="../spec/03-sync.md" class="doc-link">Read &rarr;</a>
                 </div>
 
