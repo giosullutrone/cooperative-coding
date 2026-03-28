@@ -15,7 +15,7 @@ This binding is used by the [cooperative-coding-python](https://github.com/giosu
 
 ## 1. Overview
 
-This document is an informative (non-normative) appendix to the [CooperativeCoding specification](../spec/00-introduction.md). It describes how the abstract concepts defined in the core spec — nodes, edges, stereotypes, documentation blocks, sync rules — map to Python's type system, documentation conventions, and module structure.
+This document is an informative (non-normative) appendix to the [CooperativeCoding specification](../spec/00-introduction.md). It describes how the abstract concepts defined in the core spec (nodes, edges, stereotypes, node content, sync rules) map to Python's type system, documentation conventions, and module structure.
 
 The mapping aims for zero surprise: a Python developer reading the generated code should see idiomatic Python, and a canvas user reading a node should see clean, language-neutral design documentation. The binding sits in the middle, translating between these two views.
 
@@ -25,11 +25,11 @@ Everything described here reflects what the reference implementation does. Other
 
 ## 2. Stereotype Mapping
 
-The `ccoding.stereotype` field on a class node determines which Python construct the sync engine generates. When no stereotype is set, the node maps to a plain class.
+The `ccoding.stereotype` field on a class node determines which Python construct sync generates. When no stereotype is set, the node maps to a plain class.
 
 | `ccoding.stereotype` | Python Construct | Import Required |
 |---|---|---|
-| *(none)* | `class Foo:` | — |
+| *(none)* | `class Foo:` | none |
 | `protocol` | `class Foo(Protocol):` | `from typing import Protocol` |
 | `abstract` | `class Foo(ABC):` | `from abc import ABC, abstractmethod` |
 | `dataclass` | `@dataclass class Foo:` | `from dataclasses import dataclass` |
@@ -37,12 +37,12 @@ The `ccoding.stereotype` field on a class node determines which Python construct
 
 **Behavioral notes:**
 
-- **`protocol`** — Methods on a protocol class are not decorated with `@abstractmethod`. Protocol uses structural subtyping: any class with matching method signatures satisfies the protocol without explicit inheritance. The canvas `implements` edge translates to explicit Protocol inheritance in code, which opts into nominal checking.
-- **`abstract`** — Methods listed on the canvas node that lack a pseudo code section are generated with `@abstractmethod` and an ellipsis body (`...`). Methods with pseudo code are generated as concrete methods.
-- **`dataclass`** — Fields listed on the canvas node become dataclass fields with type annotations. The field order on the canvas determines the field order in the generated dataclass (which affects `__init__` parameter order). Fields with defaults come after fields without.
-- **`enum`** — Fields listed on the canvas node become enum members. The type column in the canvas field list determines the enum value type (e.g., `str` produces a `class Foo(str, Enum):` mixin).
+- **`protocol`**: Methods on a protocol class are not decorated with `@abstractmethod`. Protocol uses structural subtyping: any class with matching method signatures satisfies the protocol without explicit inheritance. The canvas `implements` edge translates to explicit Protocol inheritance in code, which opts into nominal checking.
+- **`abstract`**: Methods listed on the canvas that lack a pseudo code section are generated with `@abstractmethod` and an ellipsis body (`...`). Methods with pseudo code are generated as concrete methods.
+- **`dataclass`**: Fields are generated as dataclass fields with type annotations. The field order on the canvas determines the field order in the generated dataclass (which affects `__init__` parameter order). Fields with defaults come after fields without.
+- **`enum`**: Fields become enum members. The type column in the canvas field node determines the enum value type (e.g., `str` produces a `class Foo(str, Enum):` mixin).
 
-Unknown stereotypes are treated as plain classes — the sync engine generates a standard `class` declaration with no special syntax or imports.
+Unknown stereotypes are treated as plain classes.
 
 ---
 
@@ -50,27 +50,17 @@ Unknown stereotypes are treated as plain classes — the sync engine generates a
 
 Python uses [Google-style docstrings](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) extended with CooperativeCoding sections. This format is compatible with standard Python documentation tools (Sphinx with `napoleon`, pdoc, mkdocstrings) while carrying the additional design information that the canvas displays.
 
-Four sections are added beyond the standard Google docstring style:
+Three sections are added beyond the standard Google docstring style:
 
-- **`Responsibility:`** — appears on class and method docstrings. Describes what this element owns in the system. This is the most important section for design: it defines the boundaries.
-- **`Pseudo Code:`** — appears on method docstrings only. A numbered step-by-step description of the algorithm. Deliberately not real code — it describes what happens, not how in language-specific terms.
-- **`Collaborators:`** — appears on class docstrings only. Lists other classes this one works with and why. On the canvas, this information is primarily conveyed through edges, but the docstring captures it in prose for readability in code.
+- **`Responsibility:`**: appears on class and method docstrings. Describes what this element owns in the system. This is the most important section for design: it defines the boundaries.
+- **`Pseudo Code:`**: appears on method docstrings only. A numbered step-by-step description of the algorithm. Deliberately not real code: it describes what happens, not how in language-specific terms.
+- **`Collaborators:`**: appears on class docstrings only. Lists other classes this one works with and why. Derived from edges connected to the class node during sync.
 
-The `Collaborators` section is derived automatically during canvas-to-code sync from the edges connected to this node:
-- `inherits` edges (outgoing) → listed as 'Inherits from: TargetClass'
-- `implements` edges (outgoing) → listed as 'Implements: TargetProtocol'
-- `composes` edges (outgoing) → listed as 'Composes: TargetClass (via field_name)'
-- `depends` edges (outgoing) → listed as 'Depends on: TargetModule'
-- `tests` edges (incoming) → listed as 'Tested by: TestClassName'
-
-During code-to-canvas sync, the `Collaborators` section is ignored — relationships are derived from actual import statements and type annotations in the code.
-- **`Constraints:`** — appears on field documentation only (as comment blocks). Describes invariants, validation rules, and immutability requirements.
-
-These sections are designed to be safely ignored by standard Python documentation tools that do not recognize them — they appear as additional text in the rendered docstring.
+These sections are designed to be safely ignored by standard Python documentation tools that do not recognize them.
 
 ### 3.1 Class Docstring
 
-A class docstring maps to the class node's structured markdown on canvas. The first line is the one-line summary. The `Responsibility:` block defines what the class owns. `Collaborators:` captures edge-derived relationships in prose. `Attributes:` maps to the canvas fields section.
+A class docstring maps to the class node's content on the canvas. The first line is the one-line summary. The `Responsibility:` block defines what the class owns. `Collaborators:` captures edge-derived relationships in prose. `Attributes:` maps to the class's field nodes.
 
 ```python
 class DocumentParser(Protocol):
@@ -91,18 +81,9 @@ class DocumentParser(Protocol):
     """
 ```
 
-**Section mapping:**
-
-| Docstring Section | Canvas Node Section | Purpose |
-|---|---|---|
-| First line | Heading + summary | One-line summary |
-| `Responsibility:` | Blockquote (`>`) | What this class owns |
-| `Collaborators:` | Inferred from edges | Related classes |
-| `Attributes:` | Fields section | Class fields |
-
 ### 3.2 Method Docstring
 
-A method docstring maps to the method detail node's structured markdown on canvas. The `Pseudo Code:` section is the algorithm description — it round-trips between the canvas `### Pseudo Code` section and the docstring. Standard Google-style sections (`Args:`, `Returns:`, `Raises:`) map to the `### Signature` section on canvas.
+A method docstring maps to the method node's content on the canvas. The `Pseudo Code:` section is the algorithm description. Standard Google-style sections (`Args:`, `Returns:`, `Raises:`) map to the signature information in the method node.
 
 ```python
 def parse(self, source: str) -> AST:
@@ -132,20 +113,9 @@ def parse(self, source: str) -> AST:
     """
 ```
 
-**Section mapping:**
-
-| Docstring Section | Canvas Node Section | Purpose |
-|---|---|---|
-| First line | `## ClassName.method` heading | One-line summary |
-| `Responsibility:` | `### Responsibility` | What this method is responsible for |
-| `Pseudo Code:` | `### Pseudo Code` | Step-by-step algorithm description |
-| `Args:` | `### Signature` IN fields | Input parameters |
-| `Returns:` | `### Signature` OUT fields | Return value |
-| `Raises:` | `### Signature` RAISES fields | Exceptions |
-
 ### 3.3 Field Documentation
 
-When a field is promoted to its own detail node on the canvas, its design information maps to a comment block above the field annotation in Python code:
+Field-level design information maps to a comment block above the field annotation in Python code:
 
 ```python
 class DocumentParser(Protocol):
@@ -157,103 +127,29 @@ class DocumentParser(Protocol):
     config: ParserConfig
 ```
 
-**Section mapping:**
-
-| Field Detail Section | Python Code | Purpose |
-|---|---|---|
-| `### Responsibility` | Comment block above field | What this field represents |
-| `### Type` | Type annotation | The field's type |
-| `### Constraints` | Comment block above field | Invariants and validation rules |
-| `### Default` | Default value assignment or comment | Default value |
-
 ---
 
 ## 4. Node Content Format
 
-The reference implementation uses structured markdown in canvas node text. This is not part of the core spec (node text is opaque per [Data Model, Section 9](../spec/01-data-model.md)), but is documented here for interoperability with the reference implementation.
-
-Tools that consume canvas files produced by the reference implementation can rely on these formats. Tools that produce canvas files for the reference implementation to consume should follow them. Other implementations may use different internal formats as long as the sync mapping is consistent.
-
-### Structured Content Format
-
-The Python binding uses a structured markdown format for node text. This format is required for sync to function — it is not optional.
-
-**Class node text structure:**
-```
-> Responsibility statement (one-line summary)
-
-Detailed description paragraph(s).
-
-### Fields
-- `field_name`: `type` — description
-- `field_name`: `type` = `default` — description
-
-### Methods
-- `method_name(param: type, ...) -> return_type` — description •
-- `method_name(param: type) -> None` — description
-
-### Constraints
-- Constraint description
-- Invariant description
-```
-
-Key conventions:
-- The blockquote (`>`) on the first line is the responsibility statement, mapped to the class docstring's first line.
-- Fields use backtick-delimited types after a colon.
-- Methods use Python signature syntax. A trailing `•` (bullet marker) indicates a promoted detail node exists.
-- The `###` headings are section delimiters — their exact names (`Fields`, `Methods`, `Constraints`) are significant.
-
-**Method detail node text structure:**
-```
-> Brief description
-
-### Signature
-`method_name(param: type, ...) -> return_type`
-
-### Pseudo Code
-Step-by-step algorithm description
-
-### Constraints
-- Pre/post conditions
-```
-
-**Test node text structure:**
-```
-> What this test suite verifies
-
-### Test Cases
-- `test_method_name` — description
-- `test_another` — description
-
-### Results
-- Last run: PASS/FAIL (timestamp)
-- Coverage: X%
-```
-
-These formats are specific to the Python binding. Other language bindings MAY define different content conventions.
+The reference implementation uses structured markdown in canvas node text. This is not part of the core spec (node text is opaque per [Data Model, Section 8](../spec/01-data-model.md)), but is documented here for interoperability with the reference implementation.
 
 ### 4.1 Class Node
 
-A class node contains the class name as a heading, a responsibility blockquote, and sections for fields and methods. The `●` marker after a field or method indicates that a detail node exists for that element.
+Since every method and field is its own node (Principle 2), a class node contains only the class-level information: name, responsibility, and constraints.
 
 ```markdown
 ## DocumentParser
 
 > Responsible for parsing raw documents into structured AST nodes
 
-### Fields
-- config: `ParserConfig`
-- _cache: `Map<String, AST>`
-- plugins: `List<ParserPlugin>`
-
-### Methods
-- parse(source: `String`) -> `AST`
-- validate(ast: `AST`) -> `Boolean`
+### Constraints
+- Thread-safe for concurrent parsing
+- Plugin order must be deterministic
 ```
 
-### 4.2 Method Detail Node
+### 4.2 Method Node
 
-A method detail node contains the fully qualified method name, a responsibility section, the signature broken into IN/OUT/RAISES, and numbered pseudo code.
+A method node contains the fully qualified method name, a responsibility section, the signature broken into IN/OUT/RAISES, and numbered pseudo code.
 
 ```markdown
 ## DocumentParser.parse
@@ -262,9 +158,9 @@ A method detail node contains the fully qualified method name, a responsibility 
 Transform raw source into a validated AST, applying all registered plugins in order.
 
 ### Signature
-- **IN:** source: `String` — raw document text
-- **OUT:** `AST` — parsed syntax tree
-- **RAISES:** `ParseError` — on malformed input
+- **IN:** source: `String` -- raw document text
+- **OUT:** `AST` -- parsed syntax tree
+- **RAISES:** `ParseError` -- on malformed input
 
 ### Pseudo Code
 1. Check _cache for source hash
@@ -277,16 +173,16 @@ Transform raw source into a validated AST, applying all registered plugins in or
 ```
 
 **Variadic and special parameters:** Python-specific parameter forms are mapped as follows:
-- `*args` → represented in canvas as `*args: type` (or `*args` if untyped)
-- `**kwargs` → represented in canvas as `**kwargs: type` (or `**kwargs` if untyped)
-- Keyword-only arguments (after `*`) → represented with a `*` separator in the parameter list, matching Python syntax
-- Positional-only arguments (before `/`) → represented with a `/` separator in the parameter list
+- `*args` is represented in canvas as `*args: type` (or `*args` if untyped)
+- `**kwargs` is represented in canvas as `**kwargs: type` (or `**kwargs` if untyped)
+- Keyword-only arguments (after `*`) are represented with a `*` separator in the parameter list
+- Positional-only arguments (before `/`) are represented with a `/` separator in the parameter list
 
-Round-trip fidelity: these special forms MUST survive canvas → code → canvas without loss.
+Round-trip fidelity: these special forms MUST survive canvas to code to canvas without loss.
 
-### 4.3 Field Detail Node
+### 4.3 Field Node
 
-A field detail node contains the fully qualified field name, a responsibility section, the type, and any constraints on the field's usage.
+A field node contains the fully qualified field name, a responsibility section, the type, and any constraints.
 
 ```markdown
 ## DocumentParser.config
@@ -302,63 +198,51 @@ Holds parser configuration including tokenizer settings.
 - Validated on construction
 ```
 
----
+### 4.4 Test Node
 
-## 5. Test Node Format
-
-Test nodes (`ccoding.kind: "test"`) map to Python test classes following [pytest](https://docs.pytest.org/) conventions. The reference implementation uses pytest as the default test framework. Other Python test frameworks (unittest, nose2) MAY be supported through configuration, but this binding documents the pytest mapping.
-
-### 5.1 Test Framework Mapping
-
-| Aspect | pytest Convention |
-|---|---|
-| Test file location | `tests/` directory mirroring the source structure (e.g., `src/parsers/document.py` → `tests/parsers/test_document.py`) |
-| Test file naming | `test_<module>.py` — prefixed with `test_` |
-| Test class naming | `Test<ClassName>` — prefixed with `Test`, no parentheses (pytest does not require inheritance from a base class) |
-| Test method naming | `test_<description>` — prefixed with `test_`, using snake_case |
-| Fixtures | `@pytest.fixture` decorators for setup and shared state |
-| Parametrization | `@pytest.mark.parametrize` for data-driven tests |
-
-### 5.2 Test Class Structured Content
-
-A test node on the canvas uses the following structured markdown format. This is the test-specific counterpart of the class node format defined in Section 4.1.
+A test node contains the test class name, what is being tested, the test methods, and results.
 
 ```markdown
 ## TestDocumentParser
 
-> Tests for DocumentParser — verifies the parsing pipeline from raw text to validated AST
+> Tests for DocumentParser: verifies the parsing pipeline from raw text to validated AST
 
 ### Class Under Test
 - DocumentParser (`parsers.document.DocumentParser`)
 
 ### Test Methods
-- test_parse_simple_document — parses a minimal valid document and checks AST structure
-- test_parse_cached_result — verifies that repeated parsing returns cached AST
-- test_parse_with_plugins — applies plugins in order and checks transformed AST
-- test_parse_malformed_input — expects ParseError on invalid input
-- test_validate_rejects_broken_ast — validates that malformed ASTs are rejected
+- test_parse_simple_document: parses a minimal valid document and checks AST structure
+- test_parse_cached_result: verifies that repeated parsing returns cached AST
+- test_parse_with_plugins: applies plugins in order and checks transformed AST
+- test_parse_malformed_input: expects ParseError on invalid input
+- test_validate_rejects_broken_ast: validates that malformed ASTs are rejected
 
 ### Results
 - test_parse_simple_document: **PASS**
 - test_parse_cached_result: **PASS**
-- test_parse_with_plugins: **FAIL** — `AssertionError: expected 3 plugins applied, got 2`
+- test_parse_with_plugins: **FAIL** -- `AssertionError: expected 3 plugins applied, got 2`
 - test_parse_malformed_input: **PASS**
-- test_validate_rejects_broken_ast: **ERROR** — `TypeError: validate() missing 1 required positional argument: 'strict'`
+- test_validate_rejects_broken_ast: **ERROR** -- `TypeError: validate() missing 1 required positional argument: 'strict'`
 ```
 
-**Section mapping:**
+---
 
-| Canvas Section | Purpose |
+## 5. Test Framework Mapping
+
+The reference implementation uses [pytest](https://docs.pytest.org/) as the default test framework.
+
+| Aspect | pytest Convention |
 |---|---|
-| `## TestClassName` heading | Test class name |
-| Blockquote (`>`) | One-line summary of what is being tested |
-| `### Class Under Test` | Lists class(es) being verified — corresponds to `tests` edges |
-| `### Test Methods` | Each method as `test_name — pseudo code description of the scenario` |
-| `### Results` | Each method as `test_name: **STATUS**` with optional failure/error details |
+| Test file location | `tests/` directory mirroring the source structure (e.g., `src/parsers/document.py` to `tests/parsers/test_document.py`) |
+| Test file naming | `test_<module>.py` |
+| Test class naming | `Test<ClassName>` (no base class required) |
+| Test method naming | `test_<description>` using snake_case |
+| Fixtures | `@pytest.fixture` decorators |
+| Parametrization | `@pytest.mark.parametrize` |
 
-### 5.3 Generated Python Code
+### Generated Test Code
 
-Given the test node above with a `tests` edge to a `DocumentParser` class node, the sync engine generates:
+Given the test node above with a `tests` edge to a `DocumentParser` class node, sync generates:
 
 ```python
 import pytest
@@ -397,41 +281,39 @@ Key observations:
 
 - The `tests` edge to `DocumentParser` produced the `from parsers.document import DocumentParser` import, derived from the target node's `ccoding.qualifiedName`.
 - Test method names carry the `test_` prefix required by pytest discovery.
-- Each test method's docstring comes from the pseudo code description in the `### Test Methods` section.
-- Method bodies are `raise NotImplementedError` — the human or agent implements the actual test logic. For pytest, the reference implementation does not use `pass` or `...` because a passing test with no assertions is misleading.
-- Return type annotations are `-> None` for all test methods, following the convention that tests do not return values.
+- Each test method's docstring comes from the pseudo code description in the test node.
+- Method bodies are `raise NotImplementedError`. For pytest, the reference implementation does not use `pass` or `...` because a passing test with no assertions is misleading.
+- Return type annotations are `-> None` for all test methods.
 
-**Stub detection during sync:** The sync engine MUST distinguish between stub bodies and human-implemented bodies to avoid overwriting user code. A method body is considered a stub if it consists solely of:
+**Stub detection during sync:** A method body is considered a stub if it consists solely of:
 - `raise NotImplementedError` (or `raise NotImplementedError(...)`)
 - `pass`
 - `...` (Ellipsis)
 - A single docstring with no other statements
 
-Any other body content is considered human-implemented and MUST NOT be overwritten during canvas-to-code sync. When the canvas changes a method's signature, the sync engine MUST update the signature while preserving the existing body.
+Any other body content is considered implemented and MUST NOT be overwritten during sync. When the canvas changes a method's signature, sync MUST update the signature while preserving the existing body.
 
-### 5.4 Test Result Format
+### Test Result Format
 
-The sync engine reads test results from pytest's output. The reference implementation supports two result sources:
+The sync reads test results from pytest's output. The reference implementation supports two result sources:
 
-- **pytest JSON report** — produced by `pytest --json-report` (via the `pytest-json-report` plugin). The sync engine reads the JSON file and maps each test's `outcome` field (`passed`, `failed`, `error`) to the canvas result status.
-- **JUnit XML** — produced by `pytest --junitxml=results.xml`. The sync engine parses the XML and extracts test case outcomes.
+- **pytest JSON report** (via the `pytest-json-report` plugin). Maps each test's `outcome` field to canvas result status.
+- **JUnit XML** (via `pytest --junitxml=results.xml`).
 
 Result status mapping:
 
 | pytest Outcome | Canvas Status | Details |
 |---|---|---|
 | `passed` | **PASS** | No additional details. |
-| `failed` | **FAIL** | The assertion message from the `longrepr` or `message` field, truncated to a single line for canvas readability. |
-| `error` | **ERROR** | The exception type and message from the `longrepr` or `message` field, truncated to a single line. |
-| `skipped` | **SKIP** | The skip reason, if available. |
-
-When test results are imported, the sync engine updates the `### Results` section of the test node's canvas content. Existing result entries are overwritten with the new status. Test methods that appear in the results but not in the `### Test Methods` section SHOULD be added to the test methods list (this handles tests added directly in code). Test methods that appear in the `### Test Methods` section but not in the results retain their previous result status — the absence of a result does not imply removal.
+| `failed` | **FAIL** | Assertion message, truncated to a single line. |
+| `error` | **ERROR** | Exception type and message, truncated to a single line. |
+| `skipped` | **SKIP** | Skip reason, if available. |
 
 ---
 
 ## 6. Type Hint Mapping
 
-Canvas uses language-neutral type names in the `### Fields` and `### Signature` sections. The binding translates these to Python's native type syntax. The reference implementation performs this translation during both code generation (canvas to code) and code parsing (code to canvas).
+Canvas uses language-neutral type names. The binding translates these to Python's native type syntax during sync in both directions.
 
 | Canvas Type | Python Type |
 |---|---|
@@ -445,25 +327,37 @@ Canvas uses language-neutral type names in the `### Fields` and `### Signature` 
 | `Set<T>` | `set[T]` |
 | `Void` | `None` |
 
-**Additional conventions used by the reference implementation:**
+Additional conventions:
 
 - **`Tuple<T, U>`** maps to `tuple[T, U]`
 - **`Callable<[Args], Return>`** maps to `Callable[[Args], Return]` (from `collections.abc`)
 - **`Union<T, U>`** maps to `T | U`
-- **Custom types** (e.g., `ParserConfig`, `AST`) pass through unchanged — they are class names defined elsewhere on the canvas
-- **Generics** — `T` as a type variable maps to `TypeVar("T")` from `typing`
+- **Custom types** (e.g., `ParserConfig`, `AST`) pass through unchanged
+- **Generics**: `T` as a type variable maps to `TypeVar("T")` from `typing`
 
 The Python 3.10+ union syntax (`X | Y`) is preferred over `Optional[X]` and `Union[X, Y]`. The reference implementation targets Python 3.11+ and uses the modern syntax throughout.
 
 ---
 
-## 7. Example Round-Trip
+## 7. Edge Label Interpretation
 
-This section walks through a complete cycle: a class node on the canvas, the Python code generated from it, an edit made in code, and the resulting canvas update. This demonstrates how the binding keeps both representations in sync.
+For `composes` edges, the reference implementation parses the label to extract the field name:
 
-### 7.1 Canvas Data (Starting Point)
+1. If the label contains `:` or ` - `, the substring before the first separator is the field name. The remainder is a descriptive comment.
+2. If the label contains no separator, the entire label is the field name.
+3. If the label is absent, the field name is derived from the target node's name (lowercased, snake_cased).
 
-A canvas file contains a `DocumentParser` class node and a detail node for its `parse` method, connected by a `detail` edge:
+For all other relation types, labels are informational and not used during code generation.
+
+---
+
+## 8. Example Round-Trip
+
+This section walks through a complete cycle: a class node on the canvas, the Python code generated from it, an edit made in code, and the resulting canvas update.
+
+### 8.1 Canvas Data (Starting Point)
+
+A canvas file contains a `DocumentParser` class node and a separate method node for `parse`, connected by a `member` edge:
 
 ```json
 {
@@ -474,17 +368,14 @@ A canvas file contains a `DocumentParser` class node and a detail node for its `
       "x": 100,
       "y": 100,
       "width": 340,
-      "height": 280,
-      "text": "## DocumentParser\n\n> Responsible for parsing raw documents into structured AST nodes\n\n### Fields\n- config: `ParserConfig`\n- _cache: `Map<String, AST>`\n\n### Methods\n- parse(source: `String`) -> `AST` ●\n- validate(ast: `AST`) -> `Boolean`",
+      "height": 200,
+      "text": "## DocumentParser\n\n> Responsible for parsing raw documents into structured AST nodes\n\n### Constraints\n- Thread-safe for concurrent parsing",
       "ccoding": {
         "kind": "class",
         "stereotype": "protocol",
         "language": "python",
         "source": "src/parsers/document.py",
-        "qualifiedName": "parsers.document.DocumentParser",
-        "status": "accepted",
-        "proposedBy": null,
-        "proposalRationale": null
+        "qualifiedName": "parsers.document.DocumentParser"
       }
     },
     {
@@ -494,40 +385,33 @@ A canvas file contains a `DocumentParser` class node and a detail node for its `
       "y": 100,
       "width": 340,
       "height": 300,
-      "text": "## DocumentParser.parse\n\n### Responsibility\nTransform raw source into a validated AST, applying all registered plugins.\n\n### Signature\n- **IN:** source: `String` — raw document text\n- **OUT:** `AST` — parsed syntax tree\n- **RAISES:** `ParseError` — on malformed input\n\n### Pseudo Code\n1. Check _cache for source hash\n2. If cached, return cached AST\n3. Tokenize source using config.tokenizer\n4. Build raw AST from token stream\n5. Validate final AST structure\n6. Cache and return",
+      "text": "## DocumentParser.parse\n\n### Responsibility\nTransform raw source into a validated AST, applying all registered plugins.\n\n### Signature\n- **IN:** source: `String` -- raw document text\n- **OUT:** `AST` -- parsed syntax tree\n- **RAISES:** `ParseError` -- on malformed input\n\n### Pseudo Code\n1. Check _cache for source hash\n2. If cached, return cached AST\n3. Tokenize source using config.tokenizer\n4. Build raw AST from token stream\n5. Validate final AST structure\n6. Cache and return",
       "ccoding": {
         "kind": "method",
         "language": "python",
         "source": "src/parsers/document.py",
-        "qualifiedName": "parsers.document.DocumentParser.parse",
-        "status": "accepted",
-        "proposedBy": null,
-        "proposalRationale": null
+        "qualifiedName": "parsers.document.DocumentParser.parse"
       }
     }
   ],
   "edges": [
     {
-      "id": "edge-detail-parse",
+      "id": "edge-member-parse",
       "fromNode": "node-parser",
       "toNode": "node-parse-method",
       "fromSide": "right",
       "toSide": "left",
-      "label": "parse()",
       "ccoding": {
-        "relation": "detail",
-        "status": "accepted",
-        "proposedBy": null,
-        "proposalRationale": null
+        "relation": "member"
       }
     }
   ]
 }
 ```
 
-### 7.2 Generated Python Code
+### 8.2 Generated Python Code
 
-The sync engine reads the canvas and generates `src/parsers/document.py`:
+Sync reads the canvas and generates `src/parsers/document.py`:
 
 ```python
 from __future__ import annotations
@@ -574,29 +458,16 @@ class DocumentParser(Protocol):
             ParseError: If the source is malformed.
         """
         ...
-
-    def validate(self, ast: AST) -> bool:
-        """Validate an AST structure.
-
-        Args:
-            ast: The abstract syntax tree to validate.
-
-        Returns:
-            True if the AST is structurally valid.
-        """
-        ...
 ```
 
 Key observations:
 
 - The `protocol` stereotype produced `class DocumentParser(Protocol):` with the `typing.Protocol` import.
 - Canvas type `Map<String, AST>` became `dict[str, AST]` via the type hint mapping.
-- Canvas type `Boolean` became `bool`.
-- The `parse` method has the full docstring with `Responsibility:` and `Pseudo Code:` sections from the detail node.
-- The `validate` method has a minimal docstring since it had no detail node.
-- Method bodies are `...` (ellipsis) — the protocol stub. For non-protocol classes, the reference implementation generates `raise NotImplementedError`.
+- The `parse` method has the full docstring with `Responsibility:` and `Pseudo Code:` sections from the method node.
+- Method bodies are `...` (ellipsis), the protocol stub. For non-protocol classes, the reference implementation generates `raise NotImplementedError`.
 
-### 7.3 Code Edit
+### 8.3 Code Edit
 
 A developer adds a plugin step to the `parse` method's pseudo code and adds a new parameter:
 
@@ -630,19 +501,9 @@ A developer adds a plugin step to the `parse` method's pseudo code and adds a ne
         ...
 ```
 
-Two changes were made: a new keyword-only parameter `strict: bool = False`, and an updated pseudo code (step 5 added, step 6 updated).
+### 8.4 Canvas Update
 
-### 7.4 Canvas Update
-
-The sync engine detects the code change and updates the canvas. The class node's method list and the method detail node both change.
-
-The class node's method line updates:
-
-```markdown
-- parse(source: `String`, *, strict: `Boolean` = False) -> `AST` ●
-```
-
-The method detail node's content updates:
+The code change produces a design request. Sync updates the method node on the canvas:
 
 ```markdown
 ## DocumentParser.parse
@@ -651,10 +512,10 @@ The method detail node's content updates:
 Transform raw source into a validated AST, applying all registered plugins.
 
 ### Signature
-- **IN:** source: `String` — raw document text
-- **IN:** strict: `Boolean` = False — if True, treat warnings as errors during validation
-- **OUT:** `AST` — parsed syntax tree
-- **RAISES:** `ParseError` — on malformed input
+- **IN:** source: `String` -- raw document text
+- **IN:** strict: `Boolean` = False -- if True, treat warnings as errors during validation
+- **OUT:** `AST` -- parsed syntax tree
+- **RAISES:** `ParseError` -- on malformed input
 
 ### Pseudo Code
 1. Check _cache for source hash
@@ -668,70 +529,8 @@ Transform raw source into a validated AST, applying all registered plugins.
 
 The Python type `bool` was translated back to the canvas type `Boolean`, and `False` was preserved as the default value. The new pseudo code step and the updated step were carried over verbatim. The round-trip is lossless for the information the binding tracks.
 
-### Complete Agent Interaction Example
-
-This example shows a full cooperation turn:
-
-**1. Human designs on canvas:** The human creates a class node for `UserService` with fields `db: Database` and methods `create_user(name: str, email: str) -> User`.
-
-**2. Agent proposes:** The agent reads the canvas, notices `UserService` has no validation, and proposes a ghost node:
-```json
-{
-  "id": "ghost-validator",
-  "type": "text",
-  "text": "> Validates user input before persistence\n\n### Methods\n- `validate_email(email: str) -> bool` — RFC 5322 validation\n- `validate_name(name: str) -> bool` — Non-empty, max 100 chars",
-  "x": 400, "y": 200, "width": 300, "height": 200,
-  "ccoding": {
-    "kind": "class",
-    "qualifiedName": "services.validation.UserValidator",
-    "status": "proposed",
-    "proposedBy": "agent",
-    "proposalRationale": "UserService performs no input validation. Extracting validation to a dedicated class follows SRP."
-  }
-}
-```
-The agent also proposes a `composes` edge from `UserService` to `UserValidator`.
-
-**3. Human reviews:** The human sees the ghost node with reduced opacity on the canvas. They accept it (status changes to `accepted`).
-
-**4. Sync generates code:** The sync engine creates `services/validation.py`:
-```python
-class UserValidator:
-    """Validates user input before persistence."""
-
-    def validate_email(self, email: str) -> bool:
-        """RFC 5322 validation."""
-        raise NotImplementedError
-
-    def validate_name(self, name: str) -> bool:
-        """Non-empty, max 100 chars."""
-        raise NotImplementedError
-```
-And adds to `services/user_service.py`:
-```python
-from services.validation import UserValidator
-```
-
-**5. Loop continues:** The human implements the validation methods. On the next sync cycle, the sync engine detects the bodies are no longer stubs and preserves them.
-
 ---
 
-## 8. Reference Implementation
+## 9. Reference Implementation
 
-The full working implementation is available at [cooperative-coding-python](https://github.com/giosullutrone/cooperative-coding-python). The repository contains the sync engine, code parser, code generator, and docstring mapping logic that this appendix describes.
-
-Key modules:
-
-| Module | Path | Responsibility |
-|---|---|---|
-| AST parser | `ccoding/code/parser.py` | Parses Python source files into an intermediate representation. Extracts classes, methods, fields, type annotations, docstrings, and relationships. Infers stereotypes from base classes and decorators. |
-| Code generator | `ccoding/code/generator.py` | Generates Python source files from canvas node data. Produces class skeletons, method stubs, field declarations, import statements, and docstrings. |
-| Docstring mapping | `ccoding/code/docstring.py` | Bidirectional translation between Google-style docstrings (with CooperativeCoding extensions) and canvas node structured markdown. Handles the custom `Responsibility:`, `Pseudo Code:`, `Collaborators:`, and `Constraints:` sections. |
-| Sync engine | `ccoding/sync/engine.py` | Orchestrates bidirectional sync between canvas files and Python source. Detects changes on both sides, applies the binding's mapping rules, and flags conflicts for human resolution. |
-
-The reference implementation also includes:
-
-- **Type mapper** (`ccoding/code/types.py`) — translates between canvas language-neutral types and Python type annotations, including generic types and union syntax. *(Partial — basic type annotations are generated from canvas field types. Complex generics (e.g., `Dict[str, List[Callable]]`), forward references, and `TYPE_CHECKING` imports are not yet handled. The binding generates type annotations verbatim from canvas text — no validation or transformation is performed.)*
-- **Import resolver** (`ccoding/code/imports.py`) — generates correct import statements from `ccoding.qualifiedName` values, stereotype requirements, and type annotation dependencies. *(Partial — import statements are generated from `depends` edges using the target node's `qualifiedName`. Relative vs. absolute import selection, conditional imports, and `__init__.py` re-exports are not yet handled.)*
-- **Canvas reader** (`ccoding/canvas/reader.py`) — reads JSON Canvas files into the internal model, preserving all standard fields and `ccoding` metadata.
-- **Canvas writer** (`ccoding/canvas/writer.py`) — writes the internal model back to JSON Canvas files, preserving all standard fields and `ccoding` metadata through round-trips.
+The full working implementation is available at [cooperative-coding-python](https://github.com/giosullutrone/cooperative-coding-python). The repository contains the sync logic, code parser, code generator, and docstring mapping logic that this appendix describes.
