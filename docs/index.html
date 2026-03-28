@@ -1190,6 +1190,38 @@
             <img src="assets/visual-example.svg" alt="A UserService class with get_user, delete_user, and register methods, plus a PasswordHasher dependency — shown as a CooperativeCoding canvas" style="width:100%;max-width:900px;margin:2rem auto;display:block;">
 
             <p style="max-width:700px;margin:1.5rem auto 0;text-align:center;color:#8a8078;font-size:0.95rem;font-style:italic;">Each node carries its own documentation contract: responsibilities, pseudo code, and constraints. The agent implements code from these contracts, and sync keeps both sides aligned.</p>
+
+            <h3 style="margin-top:3rem;">Generated Python Code</h3>
+            <p style="color:#6b6560;margin-bottom:1rem;">The sync engine generates this code from the canvas above. Signatures and docstrings come from the nodes; method bodies are left as stubs for the agent to implement.</p>
+
+            <pre style="background:#fff;border:1px solid #e2ddd5;border-radius:8px;padding:1.5rem;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:0.85rem;line-height:1.6;color:#1a1f36;"><code><span style="color:#8a6dbf;">class</span> <span style="color:#2d5a2d;">UserService</span>:
+    <span style="color:#8a8078;">"""Manages user accounts: creation, lookup, updates, and deletion.
+
+    Responsibility:
+        All user lifecycle operations including registration,
+        lookup, updates, and soft deletion.
+    """</span>
+
+    <span style="color:#8a6dbf;">def</span> <span style="color:#5a3a6a;">get_user</span>(<span style="color:#6b6560;">self</span>, user_id: <span style="color:#2a5a7a;">str</span>) -&gt; User:
+        <span style="color:#8a8078;">"""Look up a user by ID."""</span>
+        <span style="color:#8a6dbf;">raise</span> NotImplementedError
+
+    <span style="color:#8a6dbf;">def</span> <span style="color:#5a3a6a;">delete_user</span>(<span style="color:#6b6560;">self</span>, user_id: <span style="color:#2a5a7a;">str</span>) -&gt; <span style="color:#2a5a7a;">None</span>:
+        <span style="color:#8a8078;">"""Soft delete a user."""</span>
+        <span style="color:#8a6dbf;">raise</span> NotImplementedError
+
+    <span style="color:#8a6dbf;">def</span> <span style="color:#5a3a6a;">register</span>(<span style="color:#6b6560;">self</span>, name: <span style="color:#2a5a7a;">str</span>, email: <span style="color:#2a5a7a;">str</span>, password: <span style="color:#2a5a7a;">str</span>) -&gt; User:
+        <span style="color:#8a8078;">"""Create a new user account with validated input, hashed creds, and a welcome email.
+
+        Pseudo Code:
+            1. Validate name and email format
+            2. Check for duplicates in db
+            3. Hash password using hasher
+            4. Create user record in db
+            5. Send welcome email
+            6. Return new user
+        """</span>
+        <span style="color:#8a6dbf;">raise</span> NotImplementedError</code></pre>
         </div>
     </section>
 
