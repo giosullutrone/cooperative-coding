@@ -1,279 +1,228 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 1000 720" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <!-- Arrow markers for different edge types -->
-    <marker id="arrowSolid" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L0,6 L9,3 z" fill="#888" />
+    <pattern id="dots" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
+      <circle cx="8" cy="8" r="0.8" fill="#a09080" opacity="0.15"/>
+    </pattern>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#000" flood-opacity="0.07"/>
+    </filter>
+    <marker id="arrow-ink" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#1a1f36" opacity="0.55"/>
     </marker>
-
-    <marker id="arrowDashed" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L0,6 L9,3 z" fill="#888" />
+    <marker id="arrow-green" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#3a7a5a"/>
     </marker>
-
-    <marker id="arrowDiamond" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,3 L4.5,0 L9,3 L4.5,6 z" fill="#888" />
+    <marker id="arrow-rose" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#b07070"/>
     </marker>
-
-    <marker id="arrowDotted" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L0,6 L9,3 z" fill="#888" />
+    <marker id="diamond" markerWidth="12" markerHeight="10" refX="12" refY="5" orient="auto">
+      <path d="M0,5 L6,0 L12,5 L6,10 Z" fill="#1a1f36" opacity="0.5"/>
     </marker>
-
-    <marker id="arrowThin" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L0,6 L9,3 z" fill="#999" />
-    </marker>
-
-    <marker id="arrowDetail" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L0,6 L9,3 z" fill="#aaa" />
-    </marker>
-
-    <marker id="arrowContext" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L0,6 L9,3 z" fill="#f472b6" />
-    </marker>
-
-    <marker id="arrowTests" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L0,6 L9,3 z" fill="#10b981" />
-    </marker>
-
-    <!-- Gradients for depth -->
-    <linearGradient id="gradClass" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#1db8a6;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#0f9690;stop-opacity:1" />
-    </linearGradient>
-
-    <linearGradient id="gradInterface" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#5a7cff;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#4361ee;stop-opacity:1" />
-    </linearGradient>
-
-    <linearGradient id="gradMethod" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#9d5cff;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
-    </linearGradient>
-
-    <linearGradient id="gradField" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
-    </linearGradient>
-
-    <linearGradient id="gradTest" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#34d399;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#10b981;stop-opacity:1" />
-    </linearGradient>
   </defs>
 
-  <!-- Background -->
-  <rect width="1000" height="700" fill="#0d1117"/>
+  <!-- ====== BACKGROUND ====== -->
+  <rect width="1000" height="720" fill="#f4f0ea"/>
+  <rect width="1000" height="720" fill="url(#dots)"/>
+  <text x="500" y="38" text-anchor="middle" font-family="monospace" font-size="12" fill="#d94f30" letter-spacing="2">NODE TYPES &amp; RELATIONSHIPS</text>
 
-  <!-- Package container (gray border) -->
-  <g id="package-group">
-    <rect x="50" y="80" width="450" height="280" fill="none" stroke="#374151" stroke-width="2" stroke-dasharray="5,5" rx="8"/>
-    <text x="70" y="102" fill="#9ca3af" font-size="12" font-weight="bold">package: models</text>
+  <!-- ====== PACKAGE CONTAINER ====== -->
+  <rect x="40" y="55" width="540" height="430" rx="10" stroke="#b0b0b0" stroke-width="2" stroke-dasharray="8,5" fill="none"/>
+  <rect x="55" y="47" width="130" height="20" rx="3" fill="#f4f0ea"/>
+  <text x="120" y="62" text-anchor="middle" font-family="monospace" font-size="11" fill="#707070">package: models</text>
+
+  <!-- ====== EDGES (all drawn before nodes) ====== -->
+
+  <!-- 1. extends: Dog -> Animal -->
+  <line x1="350" y1="140" x2="264" y2="140" stroke="#1a1f36" stroke-width="2" opacity="0.55" marker-end="url(#arrow-ink)"/>
+  <rect x="280" y="127" width="58" height="18" rx="3" fill="#f4f0ea"/>
+  <text x="309" y="140" text-anchor="middle" font-family="monospace" font-size="11" fill="#1a1f36">extends</text>
+
+  <!-- 2. member: Dog -> bark() -->
+  <path d="M 420 180 L 420 210 Q 420 220 410 220 L 400 220 Q 395 220 395 230 L 395 240" stroke="#1a1f36" stroke-width="1.5" fill="none" opacity="0.45" marker-end="url(#arrow-ink)"/>
+  <rect x="430" y="201" width="55" height="18" rx="3" fill="#f4f0ea"/>
+  <text x="457" y="214" text-anchor="middle" font-family="monospace" font-size="11" fill="#1a1f36">member</text>
+
+  <!-- 3. member: Dog -> breed -->
+  <path d="M 400 180 L 400 210 Q 400 220 380 220 L 200 220 Q 180 220 180 230 L 180 240" stroke="#1a1f36" stroke-width="1.5" fill="none" opacity="0.45" marker-end="url(#arrow-ink)"/>
+
+  <!-- 4. has-a: Dog -> Collar -->
+  <path d="M 445 180 L 445 355 Q 445 370 430 370 L 210 370 Q 195 370 195 380" stroke="#1a1f36" stroke-width="2" fill="none" opacity="0.45" marker-end="url(#diamond)"/>
+  <rect x="450" y="274" width="42" height="18" rx="3" fill="#f4f0ea"/>
+  <text x="471" y="287" text-anchor="middle" font-family="monospace" font-size="11" fill="#1a1f36">has-a</text>
+
+  <!-- 5. implements: Dog -> Drawable -->
+  <line x1="540" y1="130" x2="656" y2="130" stroke="#1a1f36" stroke-width="2" stroke-dasharray="8,5" opacity="0.45" marker-end="url(#arrow-ink)"/>
+  <rect x="566" y="117" width="76" height="18" rx="3" fill="#f4f0ea"/>
+  <text x="604" y="130" text-anchor="middle" font-family="monospace" font-size="11" fill="#1a1f36">implements</text>
+
+  <!-- 6. tests: TestDog -> Dog -->
+  <path d="M 660 270 L 600 270 Q 580 270 580 250 L 580 160 Q 580 145 544 145" stroke="#3a7a5a" stroke-width="2.5" fill="none" opacity="0.6" marker-end="url(#arrow-green)"/>
+  <rect x="584" y="204" width="40" height="18" rx="3" fill="#f4f0ea"/>
+  <text x="604" y="217" text-anchor="middle" font-family="monospace" font-size="11" fill="#3a7a5a">tests</text>
+
+  <!-- 7. uses: Dog -> persistence -->
+  <line x1="445" y1="180" x2="445" y2="376" stroke="#1a1f36" stroke-width="1.5" stroke-dasharray="4,4" fill="none" opacity="0.35" marker-end="url(#arrow-ink)"/>
+  <rect x="450" y="334" width="34" height="18" rx="3" fill="#f4f0ea"/>
+  <text x="467" y="347" text-anchor="middle" font-family="monospace" font-size="11" fill="#1a1f36">uses</text>
+
+  <!-- 8. context: Context -> Dog -->
+  <path d="M 660 430 L 600 430 Q 580 430 580 410 L 580 360 Q 580 340 540 340 L 480 340 Q 460 340 460 320 L 460 184" stroke="#b07070" stroke-width="1.5" stroke-dasharray="6,4" fill="none" opacity="0.5" marker-end="url(#arrow-rose)"/>
+  <rect x="517" y="374" width="55" height="18" rx="3" fill="#f4f0ea"/>
+  <text x="544" y="387" text-anchor="middle" font-family="monospace" font-size="11" fill="#b07070">context</text>
+
+  <!-- ====== NODES (all drawn after edges) ====== -->
+
+  <!-- Animal (sage/class) -->
+  <g>
+    <rect x="70" y="100" width="190" height="80" rx="10" fill="white" stroke="#8cb88c" stroke-width="2.5" filter="url(#shadow)"/>
+    <rect x="70" y="100" width="190" height="6" rx="10 10 0 0" fill="#8cb88c"/>
+    <text x="165" y="136" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="700" fill="#2d5a2d">Animal</text>
+    <text x="165" y="157" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#2d5a2d">class</text>
   </g>
 
-  <!-- CLASS: Animal (parent class) -->
-  <g id="class-animal">
-    <rect x="80" y="130" width="140" height="80" fill="url(#gradClass)" stroke="#0f9690" stroke-width="2" rx="4"/>
-    <text x="150" y="155" fill="white" font-size="13" font-weight="bold" text-anchor="middle">Animal</text>
-    <line x1="80" y1="165" x2="220" y2="165" stroke="#0f9690" stroke-width="1"/>
-    <text x="150" y="182" fill="white" font-size="11" text-anchor="middle">class</text>
+  <!-- Dog (sage/class) -->
+  <g>
+    <rect x="350" y="100" width="190" height="80" rx="10" fill="white" stroke="#8cb88c" stroke-width="2.5" filter="url(#shadow)"/>
+    <rect x="350" y="100" width="190" height="6" rx="10 10 0 0" fill="#8cb88c"/>
+    <text x="445" y="136" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="700" fill="#2d5a2d">Dog</text>
+    <text x="445" y="157" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#2d5a2d">class</text>
   </g>
 
-  <!-- CLASS: Dog (child class, inherits from Animal) -->
-  <g id="class-dog">
-    <rect x="270" y="130" width="140" height="80" fill="url(#gradClass)" stroke="#0f9690" stroke-width="2" rx="4"/>
-    <text x="340" y="155" fill="white" font-size="13" font-weight="bold" text-anchor="middle">Dog</text>
-    <line x1="270" y1="165" x2="410" y2="165" stroke="#0f9690" stroke-width="1"/>
-    <text x="340" y="182" fill="white" font-size="11" text-anchor="middle">class</text>
+  <!-- bark() (lavender/method) -->
+  <g>
+    <rect x="310" y="240" width="170" height="75" rx="10" fill="white" stroke="#b898c8" stroke-width="2.5" filter="url(#shadow)"/>
+    <rect x="310" y="240" width="170" height="6" rx="10 10 0 0" fill="#b898c8"/>
+    <text x="395" y="275" text-anchor="middle" font-family="sans-serif" font-size="17" font-weight="700" fill="#5a3a6a">bark()</text>
+    <text x="395" y="297" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#5a3a6a">method</text>
   </g>
 
-  <!-- Inherits edge: Dog → Animal -->
-  <g id="edge-inherits">
-    <path d="M 270 170 Q 225 170 220 170" fill="none" stroke="#888" stroke-width="2.5" marker-end="url(#arrowSolid)"/>
-    <text x="240" y="160" fill="#888" font-size="11" font-weight="bold">extends</text>
+  <!-- breed (wheat/field) -->
+  <g>
+    <rect x="100" y="240" width="160" height="75" rx="10" fill="white" stroke="#d0c888" stroke-width="2.5" filter="url(#shadow)"/>
+    <rect x="100" y="240" width="160" height="6" rx="10 10 0 0" fill="#d0c888"/>
+    <text x="180" y="275" text-anchor="middle" font-family="sans-serif" font-size="17" font-weight="700" fill="#6a5a1a">breed</text>
+    <text x="180" y="297" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#6a5a1a">field</text>
   </g>
 
-  <!-- INTERFACE: Drawable -->
-  <g id="interface-drawable">
-    <rect x="80" y="250" width="140" height="80" fill="url(#gradInterface)" stroke="#4361ee" stroke-width="2" rx="4"/>
-    <text x="150" y="271" fill="white" font-size="12" font-style="italic">«interface»</text>
-    <text x="150" y="290" fill="white" font-size="13" font-weight="bold" text-anchor="middle">Drawable</text>
-    <line x1="80" y1="300" x2="220" y2="300" stroke="#4361ee" stroke-width="1"/>
-    <text x="150" y="317" fill="white" font-size="11" text-anchor="middle">interface</text>
+  <!-- Collar (sage/class) -->
+  <g>
+    <rect x="100" y="380" width="190" height="80" rx="10" fill="white" stroke="#8cb88c" stroke-width="2.5" filter="url(#shadow)"/>
+    <rect x="100" y="380" width="190" height="6" rx="10 10 0 0" fill="#8cb88c"/>
+    <text x="195" y="416" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="700" fill="#2d5a2d">Collar</text>
+    <text x="195" y="437" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#2d5a2d">class</text>
   </g>
 
-  <!-- Implements edge: Dog → Drawable (dashed) -->
-  <g id="edge-implements">
-    <path d="M 280 250 Q 250 210 220 190" fill="none" stroke="#888" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrowDashed)"/>
-    <text x="260" y="210" fill="#888" font-size="11" font-weight="bold">implements</text>
+  <!-- persistence (module) -->
+  <g>
+    <rect x="350" y="380" width="190" height="80" rx="10" fill="white" stroke="#b0b0b0" stroke-width="2.5" filter="url(#shadow)"/>
+    <rect x="350" y="380" width="190" height="6" rx="10 10 0 0" fill="#b0b0b0"/>
+    <text x="445" y="413" text-anchor="middle" font-family="sans-serif" font-size="12" font-style="italic" fill="#1a1f36">&#171;module&#187;</text>
+    <text x="445" y="437" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="600" fill="#1a1f36">persistence</text>
   </g>
 
-  <!-- METHOD: bark() -->
-  <g id="method-bark">
-    <rect x="270" y="250" width="140" height="70" fill="url(#gradMethod)" stroke="#7c3aed" stroke-width="2" rx="4"/>
-    <text x="340" y="271" fill="white" font-size="13" font-weight="bold" text-anchor="middle">bark()</text>
-    <line x1="270" y1="281" x2="410" y2="281" stroke="#7c3aed" stroke-width="1"/>
-    <text x="340" y="298" fill="white" font-size="11" text-anchor="middle">method</text>
+  <!-- Drawable (sky/interface) -->
+  <g>
+    <rect x="660" y="100" width="200" height="80" rx="10" fill="white" stroke="#7ea8d0" stroke-width="2.5" filter="url(#shadow)"/>
+    <rect x="660" y="100" width="200" height="6" rx="10 10 0 0" fill="#7ea8d0"/>
+    <text x="760" y="130" text-anchor="middle" font-family="sans-serif" font-size="12" font-style="italic" fill="#2a5a7a">&#171;interface&#187;</text>
+    <text x="760" y="153" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="700" fill="#2a5a7a">Drawable</text>
   </g>
 
-  <!-- Detail edge: Dog → bark() -->
-  <g id="edge-detail-method">
-    <path d="M 340 210 L 340 250" fill="none" stroke="#aaa" stroke-width="2" marker-end="url(#arrowDetail)"/>
-    <text x="348" y="230" fill="#aaa" font-size="10" font-weight="bold">detail</text>
+  <!-- TestDog (mint/test) -->
+  <g>
+    <rect x="660" y="240" width="200" height="80" rx="10" fill="white" stroke="#7ac0a0" stroke-width="2.5" filter="url(#shadow)"/>
+    <rect x="660" y="240" width="200" height="6" rx="10 10 0 0" fill="#7ac0a0"/>
+    <text x="760" y="276" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="700" fill="#1a5a3a">TestDog</text>
+    <text x="760" y="300" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#1a5a3a">test</text>
   </g>
 
-  <!-- FIELD: breed -->
-  <g id="field-breed">
-    <rect x="270" y="340" width="140" height="70" fill="url(#gradField)" stroke="#f59e0b" stroke-width="2" rx="4"/>
-    <text x="340" y="361" fill="white" font-size="13" font-weight="bold" text-anchor="middle">breed</text>
-    <line x1="270" y1="371" x2="410" y2="371" stroke="#f59e0b" stroke-width="1"/>
-    <text x="340" y="388" fill="white" font-size="11" text-anchor="middle">field</text>
+  <!-- Context (rose/context, dashed border) -->
+  <g>
+    <rect x="660" y="390" width="230" height="90" rx="10" fill="white" stroke="#d4a0a0" stroke-width="2.5" stroke-dasharray="8,5" filter="url(#shadow)"/>
+    <rect x="660" y="390" width="230" height="6" rx="10 10 0 0" fill="#d4a0a0"/>
+    <text x="775" y="418" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="700" fill="#8a4a4a">context</text>
+    <text x="775" y="442" text-anchor="middle" font-family="sans-serif" font-size="14" font-style="italic" fill="#8a4a4a">Create dog management</text>
+    <text x="775" y="462" text-anchor="middle" font-family="sans-serif" font-size="14" font-style="italic" fill="#8a4a4a">application</text>
   </g>
 
-  <!-- Detail edge: Dog → breed -->
-  <g id="edge-detail-field">
-    <path d="M 340 320 L 340 340" fill="none" stroke="#aaa" stroke-width="2" marker-end="url(#arrowDetail)"/>
-  </g>
+  <!-- ====== LEGEND ====== -->
+  <rect x="40" y="520" width="920" height="170" rx="10" fill="white" stroke="#e2ddd5" stroke-width="1.5" filter="url(#shadow)"/>
 
-  <!-- CLASS: Collar (composed by Dog) -->
-  <g id="class-collar">
-    <rect x="480" y="250" width="140" height="80" fill="url(#gradClass)" stroke="#0f9690" stroke-width="2" rx="4"/>
-    <text x="550" y="275" fill="white" font-size="13" font-weight="bold" text-anchor="middle">Collar</text>
-    <line x1="480" y1="285" x2="620" y2="285" stroke="#0f9690" stroke-width="1"/>
-    <text x="550" y="302" fill="white" font-size="11" text-anchor="middle">class</text>
-  </g>
+  <!-- Row 1: Node Types -->
+  <text x="70" y="550" font-family="sans-serif" font-size="13" font-weight="700" fill="#1a1f36">Node Types</text>
 
-  <!-- Composes edge: Dog → Collar (diamond arrow) -->
-  <g id="edge-composes">
-    <path d="M 410 160 L 480 160 L 480 270" fill="none" stroke="#888" stroke-width="2.5" marker-end="url(#arrowDiamond)"/>
-    <text x="445" y="150" fill="#888" font-size="11" font-weight="bold">has-a</text>
-  </g>
+  <!-- class swatch -->
+  <rect x="70" y="562" width="24" height="24" rx="4" fill="white" stroke="#8cb88c" stroke-width="1.5"/>
+  <rect x="70" y="562" width="24" height="4" rx="4 4 0 0" fill="#8cb88c"/>
+  <text x="100" y="579" font-family="sans-serif" font-size="11" fill="#1a1f36">class</text>
 
-  <!-- TEST: TestDog -->
-  <g id="test-testdog">
-    <rect x="480" y="80" width="140" height="80" fill="url(#gradTest)" stroke="#10b981" stroke-width="2" rx="4"/>
-    <text x="550" y="105" fill="white" font-size="13" font-weight="bold" text-anchor="middle">TestDog</text>
-    <line x1="480" y1="115" x2="620" y2="115" stroke="#10b981" stroke-width="1"/>
-    <text x="550" y="132" fill="white" font-size="11" text-anchor="middle">test</text>
-  </g>
+  <!-- interface swatch -->
+  <rect x="170" y="562" width="24" height="24" rx="4" fill="white" stroke="#7ea8d0" stroke-width="1.5"/>
+  <rect x="170" y="562" width="24" height="4" rx="4 4 0 0" fill="#7ea8d0"/>
+  <text x="200" y="579" font-family="sans-serif" font-size="11" fill="#1a1f36">interface</text>
 
-  <!-- Tests edge: TestDog → Dog -->
-  <g id="edge-tests">
-    <path d="M 480 170 L 410 170" fill="none" stroke="#10b981" stroke-width="2.5" marker-end="url(#arrowTests)"/>
-    <text x="435" y="162" fill="#10b981" font-size="11" font-weight="bold">tests</text>
-  </g>
+  <!-- method swatch -->
+  <rect x="290" y="562" width="24" height="24" rx="4" fill="white" stroke="#b898c8" stroke-width="1.5"/>
+  <rect x="290" y="562" width="24" height="4" rx="4 4 0 0" fill="#b898c8"/>
+  <text x="320" y="579" font-family="sans-serif" font-size="11" fill="#1a1f36">method</text>
 
-  <!-- CONTEXT: User Story (styled differently) -->
-  <g id="context-node">
-    <defs>
-      <pattern id="contextDash" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
-        <circle cx="2" cy="2" r="1" fill="#f472b6" opacity="0.6"/>
-      </pattern>
-    </defs>
-    <rect x="700" y="100" width="160" height="100" fill="#f472b6" fill-opacity="0.1" stroke="#f472b6" stroke-width="2" stroke-dasharray="6,4" rx="6"/>
-    <text x="780" y="125" fill="#f472b6" font-size="12" font-weight="bold" text-anchor="middle">📌 Context</text>
-    <text x="780" y="145" fill="#f472b6" font-size="11" text-anchor="middle">Create dog</text>
-    <text x="780" y="160" fill="#f472b6" font-size="11" text-anchor="middle">management</text>
-    <text x="780" y="175" fill="#f472b6" font-size="11" text-anchor="middle">app</text>
-  </g>
+  <!-- field swatch -->
+  <rect x="400" y="562" width="24" height="24" rx="4" fill="white" stroke="#d0c888" stroke-width="1.5"/>
+  <rect x="400" y="562" width="24" height="4" rx="4 4 0 0" fill="#d0c888"/>
+  <text x="430" y="579" font-family="sans-serif" font-size="11" fill="#1a1f36">field</text>
 
-  <!-- Context edge: Context → Dog -->
-  <g id="edge-context">
-    <path d="M 700 150 Q 620 150 410 160" fill="none" stroke="#f472b6" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrowContext)"/>
-  </g>
+  <!-- test swatch -->
+  <rect x="490" y="562" width="24" height="24" rx="4" fill="white" stroke="#7ac0a0" stroke-width="1.5"/>
+  <rect x="490" y="562" width="24" height="4" rx="4 4 0 0" fill="#7ac0a0"/>
+  <text x="520" y="579" font-family="sans-serif" font-size="11" fill="#1a1f36">test</text>
 
-  <!-- MODULE: persistence (right side) -->
-  <g id="module-persistence">
-    <rect x="700" y="300" width="160" height="100" fill="none" stroke="#64748b" stroke-width="2.5" rx="6"/>
-    <rect x="700" y="300" width="160" height="25" fill="#64748b" opacity="0.2"/>
-    <text x="780" y="318" fill="#64748b" font-size="12" font-weight="bold" text-anchor="middle">«module»</text>
-    <text x="780" y="340" fill="#94a3b8" font-size="12" text-anchor="middle">persistence</text>
-    <text x="780" y="360" fill="#94a3b8" font-size="10" text-anchor="middle">(save, load)</text>
-    <text x="780" y="378" fill="#94a3b8" font-size="10" text-anchor="middle">module</text>
-  </g>
+  <!-- context swatch (dashed border) -->
+  <rect x="580" y="562" width="24" height="24" rx="4" fill="white" stroke="#d4a0a0" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <rect x="580" y="562" width="24" height="4" rx="4 4 0 0" fill="#d4a0a0"/>
+  <text x="610" y="579" font-family="sans-serif" font-size="11" fill="#1a1f36">context</text>
 
-  <!-- Depends edge: Dog → persistence (dotted) -->
-  <g id="edge-depends">
-    <path d="M 410 200 Q 550 250 700 330" fill="none" stroke="#888" stroke-width="2" stroke-dasharray="3,3" marker-end="url(#arrowDotted)"/>
-    <text x="520" y="260" fill="#888" font-size="11" font-weight="bold">uses</text>
-  </g>
+  <!-- package swatch (dashed border) -->
+  <rect x="690" y="562" width="24" height="24" rx="4" fill="white" stroke="#b0b0b0" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <rect x="690" y="562" width="24" height="4" rx="4 4 0 0" fill="#b0b0b0"/>
+  <text x="720" y="579" font-family="sans-serif" font-size="11" fill="#1a1f36">package</text>
 
-  <!-- Calls edge: TestDog → bark() (thin line, informational) -->
-  <g id="edge-calls">
-    <path d="M 520 160 Q 450 200 410 250" fill="none" stroke="#999" stroke-width="1.5" marker-end="url(#arrowThin)"/>
-    <text x="450" y="200" fill="#999" font-size="10">calls</text>
-  </g>
+  <!-- module swatch -->
+  <rect x="810" y="562" width="24" height="24" rx="4" fill="white" stroke="#b0b0b0" stroke-width="1.5"/>
+  <rect x="810" y="562" width="24" height="4" rx="4 4 0 0" fill="#b0b0b0"/>
+  <text x="840" y="579" font-family="sans-serif" font-size="11" fill="#1a1f36">module</text>
 
-  <!-- Legend -->
-  <g id="legend">
-    <rect x="50" y="500" width="900" height="180" fill="#1a1f2e" stroke="#374151" stroke-width="1" rx="6"/>
+  <!-- Row 2: Edge Types -->
+  <text x="70" y="620" font-family="sans-serif" font-size="13" font-weight="700" fill="#1a1f36">Edge Types</text>
 
-    <text x="70" y="525" fill="#e5e7eb" font-size="13" font-weight="bold">Node Types</text>
+  <!-- extends -->
+  <line x1="70" y1="638" x2="105" y2="638" stroke="#1a1f36" stroke-width="2" opacity="0.55" marker-end="url(#arrow-ink)"/>
+  <text x="115" y="642" font-family="sans-serif" font-size="11" fill="#1a1f36">extends</text>
 
-    <!-- Node legend items -->
-    <g>
-      <!-- Class -->
-      <rect x="70" y="535" width="20" height="20" fill="url(#gradClass)" stroke="#0f9690" stroke-width="1" rx="2"/>
-      <text x="100" y="549" fill="#e5e7eb" font-size="11">Class</text>
+  <!-- implements -->
+  <line x1="200" y1="638" x2="235" y2="638" stroke="#1a1f36" stroke-width="2" stroke-dasharray="8,5" opacity="0.45" marker-end="url(#arrow-ink)"/>
+  <text x="245" y="642" font-family="sans-serif" font-size="11" fill="#1a1f36">implements</text>
 
-      <!-- Interface -->
-      <rect x="180" y="535" width="20" height="20" fill="url(#gradInterface)" stroke="#4361ee" stroke-width="1" rx="2"/>
-      <text x="210" y="549" fill="#e5e7eb" font-size="11">Interface</text>
+  <!-- has-a -->
+  <line x1="350" y1="638" x2="385" y2="638" stroke="#1a1f36" stroke-width="2" opacity="0.45" marker-end="url(#diamond)"/>
+  <text x="395" y="642" font-family="sans-serif" font-size="11" fill="#1a1f36">has-a</text>
 
-      <!-- Method -->
-      <rect x="330" y="535" width="20" height="20" fill="url(#gradMethod)" stroke="#7c3aed" stroke-width="1" rx="2"/>
-      <text x="360" y="549" fill="#e5e7eb" font-size="11">Method</text>
+  <!-- uses -->
+  <line x1="460" y1="638" x2="495" y2="638" stroke="#1a1f36" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.35" marker-end="url(#arrow-ink)"/>
+  <text x="505" y="642" font-family="sans-serif" font-size="11" fill="#1a1f36">uses</text>
 
-      <!-- Field -->
-      <rect x="460" y="535" width="20" height="20" fill="url(#gradField)" stroke="#f59e0b" stroke-width="1" rx="2"/>
-      <text x="490" y="549" fill="#e5e7eb" font-size="11">Field</text>
+  <!-- member -->
+  <line x1="560" y1="638" x2="595" y2="638" stroke="#1a1f36" stroke-width="1.5" opacity="0.45" marker-end="url(#arrow-ink)"/>
+  <text x="605" y="642" font-family="sans-serif" font-size="11" fill="#1a1f36">member</text>
 
-      <!-- Test -->
-      <rect x="570" y="535" width="20" height="20" fill="url(#gradTest)" stroke="#10b981" stroke-width="1" rx="2"/>
-      <text x="600" y="549" fill="#e5e7eb" font-size="11">Test</text>
+  <!-- tests -->
+  <line x1="690" y1="638" x2="725" y2="638" stroke="#3a7a5a" stroke-width="2.5" opacity="0.6" marker-end="url(#arrow-green)"/>
+  <text x="735" y="642" font-family="sans-serif" font-size="11" fill="#1a1f36">tests</text>
 
-      <!-- Package -->
-      <rect x="680" y="535" width="20" height="20" fill="none" stroke="#374151" stroke-width="2" stroke-dasharray="3,2" rx="2"/>
-      <text x="710" y="549" fill="#e5e7eb" font-size="11">Package</text>
+  <!-- context -->
+  <line x1="790" y1="638" x2="825" y2="638" stroke="#b07070" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.5" marker-end="url(#arrow-rose)"/>
+  <text x="835" y="642" font-family="sans-serif" font-size="11" fill="#1a1f36">context</text>
 
-      <!-- Context -->
-      <rect x="810" y="535" width="20" height="20" fill="#f472b6" fill-opacity="0.3" stroke="#f472b6" stroke-width="2" stroke-dasharray="3,2" rx="2"/>
-      <text x="840" y="549" fill="#e5e7eb" font-size="11">Context</text>
-    </g>
-
-    <text x="70" y="575" fill="#e5e7eb" font-size="13" font-weight="bold">Edge Relations</text>
-
-    <!-- Edge legend items -->
-    <g>
-      <!-- Inherits -->
-      <line x1="70" y1="590" x2="100" y2="590" stroke="#888" stroke-width="2.5" marker-end="url(#arrowSolid)"/>
-      <text x="110" y="595" fill="#e5e7eb" font-size="11">extends (solid)</text>
-
-      <!-- Implements -->
-      <line x1="280" y1="590" x2="310" y2="590" stroke="#888" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrowDashed)"/>
-      <text x="320" y="595" fill="#e5e7eb" font-size="11">implements (dashed)</text>
-
-      <!-- Composes -->
-      <line x1="530" y1="590" x2="560" y2="590" stroke="#888" stroke-width="2.5" marker-end="url(#arrowDiamond)"/>
-      <text x="570" y="595" fill="#e5e7eb" font-size="11">has-a (diamond)</text>
-
-      <!-- Depends -->
-      <line x1="70" y1="620" x2="100" y2="620" stroke="#888" stroke-width="2" stroke-dasharray="3,3" marker-end="url(#arrowDotted)"/>
-      <text x="110" y="625" fill="#e5e7eb" font-size="11">uses (dotted)</text>
-
-      <!-- Detail -->
-      <line x1="280" y1="620" x2="310" y2="620" stroke="#aaa" stroke-width="2" marker-end="url(#arrowDetail)"/>
-      <text x="320" y="625" fill="#e5e7eb" font-size="11">detail</text>
-
-      <!-- Tests -->
-      <line x1="450" y1="620" x2="480" y2="620" stroke="#10b981" stroke-width="2.5" marker-end="url(#arrowTests)"/>
-      <text x="490" y="625" fill="#e5e7eb" font-size="11">tests</text>
-
-      <!-- Context -->
-      <line x1="620" y1="620" x2="650" y2="620" stroke="#f472b6" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrowContext)"/>
-      <text x="660" y="625" fill="#e5e7eb" font-size="11">context</text>
-    </g>
-  </g>
-
-  <!-- Title -->
-  <text x="500" y="30" fill="#e5e7eb" font-size="18" font-weight="bold" text-anchor="middle">CooperativeCoding Node Types and Relationships</text>
+  <!-- Footer note -->
+  <text x="70" y="673" font-family="sans-serif" font-size="11" font-style="italic" fill="#8a8078">Colored top bars indicate node kind. Edge style encodes the relationship type.</text>
 </svg>
