@@ -1087,7 +1087,7 @@
                     CooperativeCoding separates these concerns. Both human and agent work on a visual canvas &mdash; a simplified UML where design elements carry documentation contracts. The agent also works on the code, implementing the canvas design and keeping canvas and code in bidirectional sync. They cooperate through a continuous sync loop: the agent can loop autonomously (implement, test, fix, repeat) while every change stays visible on the canvas. The human can intervene at any point by editing the canvas or the code.
                 </p>
                 <p>
-                    The specification is <code>language-agnostic</code> and <code>tool-agnostic</code>. It extends JSON Canvas with typed nodes, semantic edges, a status lifecycle, and sync rules. Concrete implementations require a canvas tool plugin, a language binding, and an agent integration &mdash; but the core spec defines the universal contract that all of them share.
+                    The specification is <code>language-agnostic</code> and <code>tool-agnostic</code>. It extends JSON Canvas with typed nodes, semantic edges, and sync rules. Concrete implementations require a canvas tool plugin, a language binding, a sync engine, and an agent integration &mdash; but the core spec defines the universal contract that all of them share.
                 </p>
             </div>
         </div>
@@ -1135,7 +1135,7 @@
                 <div class="principle-card card" style="border-top:3px solid #d94f30;">
                     <span class="p-number">06</span>
                     <h3>Any Entry Point</h3>
-                    <p>Sketch on a blank canvas. Describe a system in natural language and let the agent propose the design. Import existing code and let the sync engine generate the canvas. The paradigm meets you where you are.</p>
+                    <p>Sketch on a blank canvas. Describe a system in natural language and let the agent create the initial design. Import existing code and let the sync engine generate the canvas. The paradigm meets you where you are.</p>
                 </div>
 
                 <div class="principle-card card" style="border-top:3px solid #d94f30;">
@@ -1247,12 +1247,12 @@
 
                     <div class="node-kind">
                         <span class="node-kind-chip kind-method">method</span>
-                        <span class="node-kind-desc">A method or function promoted to its own detail node. Connected to its parent class via a <code>member</code> edge. Contains signature, pseudo code, and constraints.</span>
+                        <span class="node-kind-desc">A method or function as its own node on the canvas. Connected to its parent class via a <code>member</code> edge. Contains signature, pseudo code, and constraints.</span>
                     </div>
 
                     <div class="node-kind">
                         <span class="node-kind-chip kind-field">field</span>
-                        <span class="node-kind-desc">A field or property promoted to its own detail node. Used when a field carries significant design semantics &mdash; a configuration object, a dependency injection point.</span>
+                        <span class="node-kind-desc">A field or property as its own node on the canvas. Used when a field carries significant design semantics &mdash; a configuration object, a dependency injection point.</span>
                     </div>
 
                     <div class="node-kind">
@@ -1273,6 +1273,16 @@
                     <div class="node-kind">
                         <span class="node-kind-chip kind-module">module</span>
                         <span class="node-kind-desc">A single-file module or compilation unit, distinct from <code>package</code> in languages where the distinction matters.</span>
+                    </div>
+
+                    <div class="node-kind">
+                        <span class="node-kind-chip kind-module">function</span>
+                        <span class="node-kind-desc">A free-standing function or procedure that does not belong to any class. Used in languages where top-level functions are idiomatic.</span>
+                    </div>
+
+                    <div class="node-kind">
+                        <span class="node-kind-chip kind-module">constant</span>
+                        <span class="node-kind-desc">A module-level constant, configuration value, or global binding with architectural significance.</span>
                     </div>
                 </div>
 
@@ -1317,7 +1327,7 @@
                             <svg viewBox="0 0 60 20"><line x1="0" y1="10" x2="52" y2="10" stroke="#1a1f36" stroke-width="1" stroke-dasharray="2 4" opacity="0.4"/><polygon points="52,6 60,10 52,14" fill="#1a1f36" opacity="0.4"/></svg>
                         </div>
                         <span class="edge-label">calls</span>
-                        <span class="edge-desc">Runtime method invocation. Informational &mdash; not synced. Documents runtime flow.</span>
+                        <span class="edge-desc">Runtime method invocation. Produces sync requests but has no defined code construct &mdash; the agent decides what changes, if any, are needed.</span>
                     </div>
 
                     <div class="edge-relation">
@@ -1325,7 +1335,7 @@
                             <svg viewBox="0 0 60 20"><line x1="0" y1="10" x2="52" y2="10" stroke="#1a1f36" stroke-width="1.5" opacity="0.45"/><polygon points="52,6 60,10 52,14" fill="#1a1f36" opacity="0.45"/></svg>
                         </div>
                         <span class="edge-label">member</span>
-                        <span class="edge-desc">Connects a class node to a promoted method, field, or nested class.</span>
+                        <span class="edge-desc">Connects a class node to a method or field.</span>
                     </div>
 
                     <div class="edge-relation">
@@ -1342,6 +1352,22 @@
                         </div>
                         <span class="edge-label">context</span>
                         <span class="edge-desc">Links a context node to a code element. Canvas-only &mdash; design rationale and references.</span>
+                    </div>
+
+                    <div class="edge-relation">
+                        <div class="edge-line-sample">
+                            <svg viewBox="0 0 60 20"><line x1="0" y1="10" x2="52" y2="10" stroke="#8a8480" stroke-width="1.5"/><polygon points="52,6 60,10 52,14" fill="#8a8480"/></svg>
+                        </div>
+                        <span class="edge-label">contains</span>
+                        <span class="edge-desc">Links a package or module node to the elements it contains. Structural grouping.</span>
+                    </div>
+
+                    <div class="edge-relation">
+                        <div class="edge-line-sample">
+                            <svg viewBox="0 0 60 20"><line x1="0" y1="10" x2="52" y2="10" stroke="#8a8480" stroke-width="1.5" stroke-dasharray="3 2"/><polygon points="52,6 60,10 52,14" fill="#8a8480"/></svg>
+                        </div>
+                        <span class="edge-label">overrides</span>
+                        <span class="edge-desc">Indicates that a method node overrides a method in a parent class.</span>
                     </div>
                 </div>
             </div>
@@ -1364,7 +1390,7 @@
                 <div class="sync-box card">
                     <h3>What Syncs</h3>
                     <ul class="sync-list sync-yes">
-                        <li>New accepted class nodes generate source files with class skeletons</li>
+                        <li>New class nodes generate source files with class skeletons</li>
                         <li>Changed field or method lists update class definitions in code</li>
                         <li>Documentation edits propagate to docstrings and doc comments</li>
                         <li>New <code>inherits</code> edges create inheritance declarations</li>
@@ -1383,7 +1409,7 @@
                         <li>Method bodies &mdash; implementation is code's domain</li>
                         <li>Local variables and control flow within functions</li>
                         <li>Context nodes &mdash; design rationale stays on the canvas</li>
-                        <li><code>calls</code> edges &mdash; informational, not structural</li>
+                        <li><code>calls</code> edges &mdash; produce sync requests but have no defined code construct</li>
                         <li>Canvas layout positions &mdash; node arrangement is visual only</li>
                     </ul>
                 </div>
