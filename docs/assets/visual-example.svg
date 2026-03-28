@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 550" width="900" height="550">
+  <defs>
+    <pattern id="dots" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
+      <circle cx="8" cy="8" r="0.8" fill="#a09080" opacity="0.15"/>
+    </pattern>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.06"/>
+    </filter>
+    <marker id="arrow-ink" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#1a1f36" opacity="0.45"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="550" fill="#f4f0ea"/>
+  <rect width="900" height="550" fill="url(#dots)"/>
+
+  <!-- Title -->
+  <text x="450" y="38" text-anchor="middle" font-family="monospace" font-size="12" fill="#d94f30" letter-spacing="2">CANVAS EXAMPLE</text>
+
+  <!-- EDGES (drawn before nodes) -->
+
+  <!-- member: UserService -> get_user -->
+  <line x1="300" y1="105" x2="370" y2="105" stroke="#1a1f36" stroke-width="1.2" opacity="0.45" marker-end="url(#arrow-ink)"/>
+
+  <!-- member: UserService -> delete_user -->
+  <line x1="300" y1="215" x2="370" y2="215" stroke="#1a1f36" stroke-width="1.2" opacity="0.45" marker-end="url(#arrow-ink)"/>
+
+  <!-- member: UserService -> register -->
+  <line x1="300" y1="170" x2="340" y2="170" stroke="#1a1f36" stroke-width="1.2" opacity="0.45"/>
+  <line x1="340" y1="170" x2="340" y2="405" stroke="#1a1f36" stroke-width="1.2" opacity="0.45"/>
+  <line x1="340" y1="405" x2="370" y2="405" stroke="#1a1f36" stroke-width="1.2" opacity="0.45" marker-end="url(#arrow-ink)"/>
+
+  <!-- "member" label on first member edge -->
+  <rect x="293" y="88" width="44" height="16" rx="3" fill="#f4f0ea"/>
+  <text x="315" y="100" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#8a8078">member</text>
+
+  <!-- calls: register -> PasswordHasher -->
+  <line x1="640" y1="390" x2="700" y2="390" stroke="#1a1f36" stroke-width="1.2" opacity="0.45" marker-end="url(#arrow-ink)"/>
+
+  <!-- "calls" label -->
+  <rect x="644" y="375" width="36" height="16" rx="3" fill="#f4f0ea"/>
+  <text x="662" y="387" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#8a8078">calls</text>
+
+  <!-- NODES -->
+
+  <!-- UserService (sage class card) -->
+  <rect x="40" y="60" width="260" height="220" rx="10" fill="white" stroke="#8cb88c" stroke-width="2.5" filter="url(#shadow)"/>
+  <rect x="40" y="60" width="260" height="6" rx="10" fill="#8cb88c"/>
+  <rect x="40" y="63" width="260" height="3" fill="#8cb88c"/>
+  <text x="170" y="96" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="700" fill="#2d5a2d">UserService</text>
+  <text x="170" y="114" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#4a7a4a">class</text>
+  <line x1="55" y1="125" x2="285" y2="125" stroke="#8cb88c" stroke-width="1" opacity="0.3"/>
+  <text x="170" y="145" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#1a1f36">Manages user accounts:</text>
+  <text x="170" y="163" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#1a1f36">creation, lookup, updates,</text>
+  <text x="170" y="181" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#1a1f36">and deletion.</text>
+  <text x="170" y="210" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#8a8078" font-style="italic">Constraint: All operations</text>
+  <text x="170" y="226" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#8a8078" font-style="italic">require authenticated context</text>
+
+  <!-- get_user (lavender method card) -->
+  <rect x="370" y="60" width="200" height="90" rx="10" fill="white" stroke="#b898c8" stroke-width="2.5" filter="url(#shadow)"/>
+  <rect x="370" y="60" width="200" height="6" rx="10" fill="#b898c8"/>
+  <rect x="370" y="63" width="200" height="3" fill="#b898c8"/>
+  <text x="470" y="93" text-anchor="middle" font-family="sans-serif" font-size="17" font-weight="700" fill="#5a3a6a">get_user</text>
+  <text x="470" y="109" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#7a5a8a">method</text>
+  <line x1="385" y1="118" x2="555" y2="118" stroke="#b898c8" stroke-width="1" opacity="0.3"/>
+  <text x="470" y="136" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#1a1f36">Look up a user by ID</text>
+
+  <!-- delete_user (lavender method card) -->
+  <rect x="370" y="170" width="200" height="90" rx="10" fill="white" stroke="#b898c8" stroke-width="2.5" filter="url(#shadow)"/>
+  <rect x="370" y="170" width="200" height="6" rx="10" fill="#b898c8"/>
+  <rect x="370" y="173" width="200" height="3" fill="#b898c8"/>
+  <text x="470" y="203" text-anchor="middle" font-family="sans-serif" font-size="17" font-weight="700" fill="#5a3a6a">delete_user</text>
+  <text x="470" y="219" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#7a5a8a">method</text>
+  <line x1="385" y1="228" x2="555" y2="228" stroke="#b898c8" stroke-width="1" opacity="0.3"/>
+  <text x="470" y="246" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#1a1f36">Soft delete a user</text>
+
+  <!-- register (lavender method card, larger) -->
+  <rect x="370" y="280" width="270" height="250" rx="10" fill="white" stroke="#b898c8" stroke-width="2.5" filter="url(#shadow)"/>
+  <rect x="370" y="280" width="270" height="6" rx="10" fill="#b898c8"/>
+  <rect x="370" y="283" width="270" height="3" fill="#b898c8"/>
+  <text x="505" y="313" text-anchor="middle" font-family="sans-serif" font-size="17" font-weight="700" fill="#5a3a6a">register</text>
+  <text x="505" y="329" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#7a5a8a">method</text>
+  <line x1="385" y1="338" x2="625" y2="338" stroke="#b898c8" stroke-width="1" opacity="0.3"/>
+  <text x="505" y="356" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#1a1f36">Create a new user account</text>
+  <text x="505" y="372" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#1a1f36">with validated input, hashed</text>
+  <text x="505" y="388" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#1a1f36">creds, and a welcome email.</text>
+  <text x="505" y="412" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#8a8078" font-style="italic">Pseudo Code:</text>
+  <text x="505" y="428" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#8a8078">1. Validate name/email</text>
+  <text x="505" y="444" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#8a8078">2. Check for duplicates</text>
+  <text x="505" y="460" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#8a8078">3. Hash password</text>
+  <text x="505" y="476" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#8a8078">4. Create user record</text>
+  <text x="505" y="492" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#8a8078">5. Send welcome email</text>
+  <text x="505" y="508" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#8a8078">6. Return new user</text>
+
+  <!-- PasswordHasher (sage class card) -->
+  <rect x="700" y="350" width="180" height="100" rx="10" fill="white" stroke="#8cb88c" stroke-width="2.5" filter="url(#shadow)"/>
+  <rect x="700" y="350" width="180" height="6" rx="10" fill="#8cb88c"/>
+  <rect x="700" y="353" width="180" height="3" fill="#8cb88c"/>
+  <text x="790" y="388" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="700" fill="#2d5a2d">PasswordHasher</text>
+  <text x="790" y="406" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#4a7a4a">class</text>
+  <line x1="715" y1="415" x2="865" y2="415" stroke="#8cb88c" stroke-width="1" opacity="0.3"/>
+  <text x="790" y="433" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#1a1f36">Securely hash</text>
+  <text x="790" y="449" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#1a1f36">passwords</text>
+</svg>

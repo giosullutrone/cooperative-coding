@@ -16,7 +16,11 @@ docs/
 ├── _config.yml          # GitHub Pages configuration
 ├── README.md            # This file
 └── assets/
-    └── logo.svg         # CooperativeCoding logo
+    ├── logo.svg
+    ├── hero-banner.svg
+    ├── cooperation-loop.svg
+    ├── node-types.svg
+    └── visual-example.svg
 ```
 
 ## Deployment
@@ -50,23 +54,23 @@ python -m http.server 8000
 3. **Principles** — Seven collaborative design principles
 4. **Cooperation Loop** — Four phases of human-AI collaboration
 5. **Data Model** — Node kinds, edges, stereotypes
-6. **Status Lifecycle** — Node statuses and transitions
-7. **Sync** — Bidirectional sync rules
-8. **Getting Started** — Four-step introduction
-9. **Spec Documents** — Links to specification files
-10. **Footer** — License, links, attribution
+6. **Sync** — Bidirectional sync rules
+7. **Getting Started** — Four-step introduction
+8. **Spec Documents** — Links to specification files
+9. **Footer** — License, links, attribution
 
 ## Design
 
-- **Color Scheme**: Dark theme (GitHub-inspired)
-  - Background: `#0d1117`
-  - Cards: `#161b22`
-  - Borders: `#30363d`
-  - Primary Text: `#e6edf3`
-  - Secondary Text: `#8b949e`
-  - Accents: Teal `#0f9690`, Blue `#4361ee`, Pink `#f72585`
+- **Color Scheme**: Workshop Table (warm, layered)
+  - Background: `#f4f0ea` (Warm Base)
+  - Cards: `#ffffff` (white with subtle shadow)
+  - Borders: `#e2ddd5`
+  - Primary Text: `#1a1f36` (Ink)
+  - Secondary Text: `#8a8078` (Warm Gray)
+  - Accent: `#d94f30` (Terracotta)
+  - Node Types: Pastel color-coded (Sage, Sky, Lavender, Wheat, Mint, Rose, Slate)
 
-- **Typography**: Inter (via Google Fonts) with system font fallbacks
+- **Typography**: Instrument Serif (headings), Source Serif 4 (body), Instrument Sans (UI), JetBrains Mono (code)
 - **Responsive**: Mobile-friendly (tested at 320px, 768px, 1200px+)
 - **Animations**: Smooth scrolling, fade-in on scroll, hover effects
 - **No Dependencies**: Plain HTML/CSS/JS, no build tools required
@@ -101,11 +105,11 @@ All content is in the HTML. To edit:
 ### Modify Colors
 
 Search for color values in the CSS:
-- `#0d1117` — Main background
-- `#161b22` — Cards
-- `#0f9690` — Primary accent (teal)
-- `#4361ee` — Secondary accent (blue)
-- `#f72585` — Tertiary accent (pink)
+- `#f4f0ea` — Main background (Warm Base)
+- `#ffffff` — Cards
+- `#d94f30` — Primary accent (Terracotta)
+- `#1a1f36` — Primary text (Ink)
+- `#8a8078` — Secondary text (Warm Gray)
 
 ## Accessibility
 
