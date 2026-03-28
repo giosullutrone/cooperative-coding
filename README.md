@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="graphics/hero-banner.svg" alt="CooperativeCoding" width="100%">
+  <img src="docs/assets/hero-banner.svg" alt="CooperativeCoding" width="100%">
 </p>
 
 > Current agentic coding treats software as text to be generated.
@@ -16,7 +16,7 @@ The spec is language-agnostic and tool-agnostic. It can be implemented for any p
 ## How It Works
 
 <p align="center">
-  <img src="graphics/cooperation-loop.svg" alt="The Cooperation Loop" width="100%">
+  <img src="docs/assets/cooperation-loop.svg" alt="The Cooperation Loop" width="100%">
 </p>
 
 1. **Design** on a visual canvas: create classes, methods, fields as nodes with responsibilities, pseudo code, and relationships as edges.
@@ -29,7 +29,7 @@ The spec is language-agnostic and tool-agnostic. It can be implemented for any p
 ### Canvas: A UserService with its methods
 
 <p align="center">
-  <img src="graphics/visual-example.svg" alt="UserService canvas example" width="100%">
+  <img src="docs/assets/visual-example.svg" alt="UserService canvas example" width="100%">
 </p>
 
 ### Generated Python code (from canvas)

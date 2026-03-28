@@ -27,13 +27,13 @@
   <!-- ============================================ -->
   <!-- Layer 1: Loop-back edge (behind everything)  -->
   <!-- ============================================ -->
-  <!-- From Decision 2 "yes" bottom, down to bottom edge, right, up, left into code request top -->
-  <path d="M130,460 L130,495 L870,495 L870,75 L484,75"
+  <!-- From Decision 2 "yes" bottom, down, right along bottom, up far right, left along top, down into code request -->
+  <path d="M130,460 L130,500 L890,500 L890,45 L390,45 L390,58"
         fill="none" stroke="#d94f30" stroke-width="2" stroke-dasharray="8,4"
         marker-end="url(#arrow-terracotta)"/>
-  <!-- Loop-back label -->
-  <rect x="518" y="487" width="164" height="16" fill="#f4f0ea" rx="2"/>
-  <text x="600" y="498" font-family="sans-serif" font-size="11" font-style="italic" fill="#d94f30" text-anchor="middle">loop back to code request</text>
+  <!-- Loop-back label on bottom segment -->
+  <rect x="450" y="492" width="164" height="16" fill="#f4f0ea" rx="2"/>
+  <text x="532" y="503" font-family="sans-serif" font-size="11" font-style="italic" fill="#d94f30" text-anchor="middle">loop back to code request</text>
 
   <!-- ============================================ -->
   <!-- Layer 2: Connecting arrows (between boxes)   -->
