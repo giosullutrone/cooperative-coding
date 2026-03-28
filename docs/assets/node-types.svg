@@ -67,7 +67,7 @@
   <line x1="542" y1="130" x2="658" y2="130" stroke="#8a8480" stroke-width="2" stroke-dasharray="8,5" marker-end="url(#arrow-primary)"/>
 
   <!-- 6. tests: TestDog -> Dog (goes left from TestDog, curves up to Dog right edge) -->
-  <path d="M 658 270 L 620 270 Q 610 270 610 250 L 610 160 Q 610 145 542 145" stroke="#3a7a5a" stroke-width="2" fill="none" marker-end="url(#arrow-green)"/>
+  <path d="M 658 270 C 600 270 560 200 542 145" stroke="#3a7a5a" stroke-width="2" fill="none" marker-end="url(#arrow-green)"/>
 
   <!-- 7. uses: Dog -> persistence (x=510, RIGHT of bark, spaced from has-a at x=490) -->
   <path d="M 510 182 L 510 355 Q 510 370 490 370 L 460 370 Q 445 370 445 378" stroke="#b0aaa2" stroke-width="1.5" stroke-dasharray="4,4" fill="none" marker-end="url(#arrow-secondary)"/>
