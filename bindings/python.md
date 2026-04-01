@@ -40,7 +40,7 @@ The `ccoding.stereotype` field on a class node determines which Python construct
 - **`protocol`**: Methods on a protocol class are not decorated with `@abstractmethod`. Protocol uses structural subtyping: any class with matching method signatures satisfies the protocol without explicit inheritance. The canvas `implements` edge translates to explicit Protocol inheritance in code, which opts into nominal checking.
 - **`abstract`**: Methods listed on the canvas that lack a pseudo code section are generated with `@abstractmethod` and an ellipsis body (`...`). Methods with pseudo code are generated as concrete methods.
 - **`dataclass`**: Fields are generated as dataclass fields with type annotations. The field order on the canvas determines the field order in the generated dataclass (which affects `__init__` parameter order). Fields with defaults come after fields without.
-- **`enum`**: Fields become enum members. The type column in the canvas field node determines the enum value type (e.g., `str` produces a `class Foo(str, Enum):` mixin).
+- **`enum`**: Enum members are extracted as `constant` nodes with `member` edges to the enum class. Since enum members rarely have external connections, they are typically inlined into the enum class body under a `### Constants` subsection. The type column in the canvas field node determines the enum value type (e.g., `str` produces a `class Foo(str, Enum):` mixin). Private members (names starting with `_`) are excluded.
 
 Unknown stereotypes are treated as plain classes.
 
@@ -133,19 +133,39 @@ class DocumentParser(Protocol):
 
 The reference implementation uses structured markdown in canvas node text. This is not part of the core spec (node text is opaque per [Data Model, Section 8](../spec/01-data-model.md)), but is documented here for interoperability with the reference implementation.
 
+### Underscore Escaping
+
+Python identifiers frequently contain underscores (`_`) which can trigger unintended markdown formatting (e.g., `__init__` renders as bold text). The reference implementation escapes all underscores in identifier names within node content: `__init__` becomes `\_\_init\_\_`, `my_method` becomes `my\_method`. This escaping applies to method names, field names, module names, and constant names in heading text. The `node.name` field retains the unescaped Python identifier for code generation.
+
 ### 4.1 Class Node
 
-Since every method and field is its own node (Principle 2), a class node contains only the class-level information: name, responsibility, and constraints.
+A class node contains the class-level information: name, responsibility, and constraints. Members (methods, fields, constants) that have no connections outside their parent class are inlined into the class body rather than existing as separate nodes. Only members with external connections (e.g., `calls`, `overrides`, `tests` edges to/from other nodes) get their own canvas nodes.
+
+An inlined class node uses `### Fields`, `### Methods`, and `### Constants` subsections separated by horizontal rules:
 
 ```markdown
 ## DocumentParser
 
 > Responsible for parsing raw documents into structured AST nodes
 
+---
+
+### Fields
+- *config*: ParserConfig
+- *\_cache*: dict[str, AST]
+
+### Methods
+- parse(source: str) -> AST
+  > Transform raw source into a validated AST
+- validate(ast: AST, strict: bool) -> bool
+  > Check AST structure for errors
+
 ### Constraints
 - Thread-safe for concurrent parsing
 - Plugin order must be deterministic
 ```
+
+Members that DO have external connections (e.g., a method targeted by a `calls` or `overrides` edge from another class) remain as separate nodes connected via `member` edges, following the standard method/field node format.
 
 ### 4.2 Method Node
 
