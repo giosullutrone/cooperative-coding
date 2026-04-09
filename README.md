@@ -9,9 +9,9 @@ AI agents are remarkably good at implementing code that satisfies a given specif
 
 ## What is CooperativeCoding?
 
-CooperativeCoding is an open specification for human-AI collaborative software design. It defines a shared data model built on [JSON Canvas v1.0](https://jsoncanvas.org/spec/1.0/) where architectural decisions live as first-class objects: classes, interfaces, methods, fields, and their relationships. The canvas and the code stay in sync through a continuous loop, and the human maintains authority by editing the canvas at any time.
+CooperativeCoding is an open specification for human-AI collaborative software design. It defines a design contract where architectural decisions live as first-class objects: code elements carry responsibility statements and pseudo code, relationships between elements are tracked for code generation, and a continuous sync loop keeps the canvas and code aligned. The human maintains authority by editing the canvas at any time.
 
-The spec is language-agnostic and tool-agnostic. It can be implemented for any programming language (Python, TypeScript, Rust, ...) and any canvas tool (Obsidian, VS Code, Excalidraw, ...).
+The spec is language-agnostic, tool-agnostic, and format-agnostic. It can be implemented for any programming language (Python, TypeScript, Rust, ...), any canvas tool (Obsidian, VS Code, Excalidraw, ...), and any storage format (JSON, markdown, databases, ...).
 
 ## How It Works
 
@@ -19,12 +19,14 @@ The spec is language-agnostic and tool-agnostic. It can be implemented for any p
   <img src="docs/assets/cooperation-loop.svg" alt="The Cooperation Loop" width="100%">
 </p>
 
-1. **Design** on a visual canvas: create classes, methods, fields as nodes with responsibilities, pseudo code, and relationships as edges.
+1. **Design** on a visual canvas: create architectural elements with responsibilities, pseudo code, and relationships.
 2. **Sync** keeps canvas and code aligned. Canvas changes produce code requests (update the code). Code changes produce design requests (update the canvas).
-3. **The agent loops autonomously**: implement, test, fix, repeat. Every change is visible on the canvas.
-4. **The human intervenes** at any time by editing the canvas or the code. Version control provides audit, review, and rollback.
+3. **Loop** autonomously: implement, test, fix, repeat. Every change is visible on the canvas.
+4. **Intervene** at any time by editing the canvas or the code. Version control provides audit, review, and rollback.
 
 ## Visual Example
+
+> **Note:** The visuals below show one possible implementation using nodes and edges on a JSON Canvas. The spec does not prescribe this format &mdash; implementations are free to use any canvas tool, file format, and visualization approach.
 
 ### Canvas: A UserService with its methods
 
@@ -68,17 +70,19 @@ class UserService:
 ### The sync loop in action
 
 1. Human creates the `UserService` class and `register` method on the canvas with pseudo code
-2. Canvas change produces a **code request**. Agent generates the Python code above.
-3. Agent implements `register()`, discovers it needs a `validate_email()` helper
-4. Code change produces a **design request**. Agent adds a `validate_email` method node to the canvas.
+2. Canvas change produces a **code request**. The Python code above is generated.
+3. During implementation of `register()`, a `validate_email()` helper is needed
+4. Code change produces a **design request**. A `validate_email` method appears on the canvas.
 5. Human sees the new method on the canvas. The loop stabilizes.
 6. Human edits the pseudo code on the canvas to add step "7. Provision default settings"
-7. Canvas change produces a **code request**. Agent updates the implementation.
+7. Canvas change produces a **code request**. The implementation is updated.
 
-## Data Model
+## Example Data Model
+
+> **Note:** The diagram below shows one possible representation using typed nodes and edges. The spec does not prescribe specific element types, relationship types, or visualization approaches &mdash; these are defined by each implementation and its language binding.
 
 <p align="center">
-  <img src="docs/assets/node-types.svg" alt="Node types and relationships" width="100%">
+  <img src="docs/assets/node-types.svg" alt="Example node types and relationships" width="100%">
 </p>
 
 ## The Specification
@@ -86,10 +90,9 @@ class UserService:
 | Document | Description |
 |---|---|
 | [Introduction](spec/00-introduction.md) | Vision, principles, and terminology |
-| [Data Model](spec/01-data-model.md) | Canvas nodes, edges, and metadata schemas |
-| [Lifecycle](spec/02-lifecycle.md) | Sync loop, entry points, and roles |
-| [Sync](spec/03-sync.md) | Sync semantics |
-| [Language Bindings](spec/04-language-bindings.md) | Contract for language-specific mappings |
+| [Design Contract](spec/01-design-contract.md) | Identity, responsibility, pseudo code, relationships, and source mapping |
+| [Sync](spec/02-sync.md) | Sync loop, convergence, entry points, and roles |
+| [Language Bindings](spec/03-language-bindings.md) | Contract for language-specific mappings |
 
 ## Language Bindings
 

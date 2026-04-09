@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="CooperativeCoding: An open specification for human-AI collaborative software design built on JSON Canvas v1.0">
+    <meta name="description" content="CooperativeCoding: An open specification for human-AI collaborative software design">
     <meta name="theme-color" content="#faf8f5">
     <title>CooperativeCoding — Open Specification for Human-AI Collaborative Software Design</title>
 
@@ -1036,7 +1036,7 @@
                 <li><a href="#overview" class="nav-link">Overview</a></li>
                 <li><a href="#principles" class="nav-link">Principles</a></li>
                 <li><a href="#loop" class="nav-link">Loop</a></li>
-                <li><a href="#data-model" class="nav-link">Data Model</a></li>
+                <li><a href="#data-model" class="nav-link">Elements</a></li>
                 <li><a href="#sync" class="nav-link">Sync</a></li>
                 <li><a href="#getting-started" class="nav-link">Get Started</a></li>
                 <li><a href="https://github.com/giosullutrone/cooperative-coding" target="_blank" class="nav-link">GitHub</a></li>
@@ -1057,7 +1057,7 @@
             </svg>
             <h1>CooperativeCoding</h1>
             <p class="hero-subtitle">An open specification for human-AI collaborative software design</p>
-            <div class="version-badge">v1.0.0 &middot; CC-BY-4.0</div>
+            <div class="version-badge">v2.0.0 &middot; CC-BY-4.0</div>
             <div class="hero-cta">
                 <a href="https://github.com/giosullutrone/cooperative-coding/blob/main/spec/00-introduction.md" class="btn btn-filled">Read the Spec</a>
                 <a href="#getting-started" class="btn btn-outline">Get Started</a>
@@ -1078,16 +1078,16 @@
 
             <div class="overview-columns">
                 <p>
-                    CooperativeCoding is an open standard for human-agent collaborative software design. It provides a shared data model built on <a href="https://jsoncanvas.org" target="_blank">JSON Canvas v1.0</a> where architectural elements &mdash; classes, methods, fields, packages, and their relationships &mdash; are first-class objects of collaborative design stored in a <code>ccoding</code> metadata namespace.
+                    CooperativeCoding is an open standard for human-agent collaborative software design. It defines a design contract where architectural elements &mdash; classes, methods, fields, modules, and their relationships &mdash; carry responsibility statements and pseudo code as first-class design content. The canvas and the code stay in continuous bidirectional sync.
                 </p>
                 <p>
                     Code design and code implementation are different skills that benefit from different tools. Humans excel at architectural thinking &mdash; defining responsibilities, drawing boundaries, seeing the big picture. Agents excel at translating precise specifications into correct, complete code. Today, both activities happen in the same text editor, forcing the human to think at the wrong level of abstraction and the agent to guess at the right one.
                 </p>
                 <p>
-                    CooperativeCoding separates these concerns. Both human and agent work on a visual canvas &mdash; a simplified UML where design elements carry documentation contracts. The agent also works on the code, implementing the canvas design and keeping canvas and code in bidirectional sync. They cooperate through a continuous sync loop: the agent can loop autonomously (implement, test, fix, repeat) while every change stays visible on the canvas. The human can intervene at any point by editing the canvas or the code.
+                    CooperativeCoding separates these concerns. Both human and agent work on a visual canvas where design elements carry documentation contracts. The agent also works on the code, implementing the canvas design and keeping canvas and code in bidirectional sync. They cooperate through a continuous sync loop: implement, test, fix, repeat &mdash; while every change stays visible on the canvas. The human can intervene at any point by editing the canvas or the code.
                 </p>
                 <p>
-                    The specification is <code>language-agnostic</code> and <code>tool-agnostic</code>. It extends JSON Canvas with typed nodes, semantic edges, and sync rules. Concrete implementations require a canvas tool plugin, a language binding, a sync engine, and an agent integration &mdash; but the core spec defines the universal contract that all of them share.
+                    The specification is <code>language-agnostic</code>, <code>tool-agnostic</code>, and <code>format-agnostic</code>. It defines the design contract, sync semantics, and the binding interface that language-specific mappings must fulfill. Concrete implementations require a canvas tool, a language binding, a sync engine, and an agent integration &mdash; but the core spec defines the universal contract that all of them share.
                 </p>
             </div>
         </div>
@@ -1110,26 +1110,26 @@
 
                 <div class="principle-card card" style="border-top:3px solid #d94f30;">
                     <span class="p-number">02</span>
-                    <h3>Every Element is a Node</h3>
-                    <p>Every class, method, and field is its own node on the canvas, carrying full documentation: responsibility, pseudo code, signatures, and constraints. Each member exists independently, with its own identity and detail. Canvas tools may collapse or simplify nodes for readability, but the underlying data always carries the full detail.</p>
+                    <h3>Every Element Has Identity</h3>
+                    <p>Every code element that participates in the architecture has a stable identity that sync uses to link canvas representations to code constructs. Implementations are free to choose how elements are visualized: as individual nodes, as sections within a document, as collapsible tree entries, or any other representation.</p>
                 </div>
 
                 <div class="principle-card card" style="border-top:3px solid #d94f30;">
                     <span class="p-number">03</span>
-                    <h3>Node Content is the Contract</h3>
-                    <p>Each node on the canvas carries natural language content: a responsibility statement, pseudo code, type signatures, and constraints. This content is the authoritative specification for what the corresponding code should do. Clear node content leads to correct implementation; vague content leads to guesswork.</p>
+                    <h3>Design Content is the Contract</h3>
+                    <p>Each code element on the canvas carries natural language content: a responsibility statement and (for methods) pseudo code. This content is the authoritative specification for what the corresponding code should do. Clear design content leads to correct implementation; vague content leads to guesswork.</p>
                 </div>
 
                 <div class="principle-card card" style="border-top:3px solid #d94f30;">
                     <span class="p-number">04</span>
                     <h3>Bidirectional Sync</h3>
-                    <p>Canvas and code are always in sync. Every change on either side produces a sync request for the other side. The agent processes each sync request and decides what changes are needed. The human sees every change reflected on the canvas in real time. Version control provides the audit trail and rollback.</p>
+                    <p>Canvas and code are always in sync. Every change on either side produces a sync request for the other side. Each request is evaluated and the necessary changes are applied. The human sees every change reflected on the canvas. Version control provides the audit trail and rollback.</p>
                 </div>
 
                 <div class="principle-card card" style="border-top:3px solid #d94f30;">
                     <span class="p-number">05</span>
                     <h3>Visual Simplicity</h3>
-                    <p>The canvas shows a simplified UML focused on architectural thinking. A handful of node kinds, a handful of edge relations, and structured markdown for content. A place to see the shape of the system at a glance.</p>
+                    <p>The canvas shows architecture, not code. Each element carries a responsibility statement and pseudo code that let you understand what a component does without reading the implementation. A place to see the shape of the system at a glance.</p>
                 </div>
 
                 <div class="principle-card card" style="border-top:3px solid #d94f30;">
@@ -1140,8 +1140,8 @@
 
                 <div class="principle-card card" style="border-top:3px solid #d94f30;">
                     <span class="p-number">07</span>
-                    <h3>Language-Agnostic, Tool-Agnostic</h3>
-                    <p>The core concepts of CooperativeCoding (nodes, edges, relationships, the sync loop) are universal. Each programming language gets a binding, each canvas tool gets an implementation, each agent gets an integration. The core spec defines the contract; bindings fulfill it.</p>
+                    <h3>Language-Agnostic, Tool-Agnostic, Format-Agnostic</h3>
+                    <p>The core concepts of CooperativeCoding (identity, design content, relationships, the sync loop) are universal. Each programming language gets a binding, each canvas tool gets an implementation, each agent gets an integration. The core spec defines the contract; bindings and implementations fulfill it.</p>
                 </div>
             </div>
         </div>
@@ -1168,11 +1168,11 @@
                     </div>
                     <div class="loop-phase">
                         <div class="loop-phase-name implement">Implement</div>
-                        <p>The agent generates or updates source code based on canvas elements. Documentation blocks become docstrings, edges become inheritance declarations and imports, node kinds become class skeletons. The agent can loop autonomously: implement, test, fix, repeat.</p>
+                        <p>Source code is generated or updated from canvas design content. Responsibility statements become documentation, relationships become inheritance declarations and imports, design intent becomes code structure. The loop can run autonomously: implement, test, fix, repeat.</p>
                     </div>
                     <div class="loop-phase">
                         <div class="loop-phase-name sync">Sync</div>
-                        <p>Every change on either side produces a sync request for the other. Canvas changes produce code requests; code changes produce design requests. The agent processes each request and decides what changes are needed. The loop continues until both sides match.</p>
+                        <p>Every change on either side produces a sync request for the other. Canvas changes produce code requests; code changes produce design requests. Each request is evaluated and the necessary changes are applied. The loop continues until both sides match.</p>
                     </div>
                 </div>
             </div>
@@ -1185,7 +1185,7 @@
     <section id="visual-example">
         <div class="container">
             <h2 class="section-heading">Visual Example</h2>
-            <p class="section-lead">A UserService with its methods and dependencies, as it appears on a CooperativeCoding canvas.</p>
+            <p class="section-lead">A UserService with its methods and dependencies. This example shows one possible implementation using nodes and edges &mdash; the spec does not prescribe any particular format or visualization approach.</p>
 
             <img src="assets/visual-example.svg" alt="A UserService class with get_user, delete_user, and register methods, plus a PasswordHasher dependency — shown as a CooperativeCoding canvas" style="width:100%;max-width:900px;margin:2rem auto;display:block;">
 
@@ -1230,15 +1230,15 @@
          ================================================================ -->
     <section id="data-model">
         <div class="container">
-            <h2 class="section-heading">Data Model</h2>
-            <p class="section-lead">The building blocks of architectural description &mdash; a semantic layer on top of JSON Canvas v1.0.</p>
+            <h2 class="section-heading">Example: Elements &amp; Relationships</h2>
+            <p class="section-lead">The spec defines what code elements must carry (identity, responsibility, pseudo code) and that relationships must be tracked &mdash; but not how they're visualized. Below is one possible representation using typed nodes and edges.</p>
 
-            <img src="assets/node-types.svg" alt="Node types and relationships diagram showing class, interface, method, field, test, context, and package nodes with their edge relations" style="width:100%;max-width:1000px;margin:0 auto 3rem;display:block;">
+            <img src="assets/node-types.svg" alt="Example node types and relationships diagram" style="width:100%;max-width:1000px;margin:0 auto 3rem;display:block;">
 
             <div class="data-model-layout">
                 <!-- Node Kinds -->
                 <div class="data-model-col">
-                    <h3>Node Kinds</h3>
+                    <h3>Example Element Types</h3>
 
                     <div class="node-kind">
                         <span class="node-kind-chip kind-class">class</span>
@@ -1288,7 +1288,7 @@
 
                 <!-- Edge Relations -->
                 <div class="data-model-col">
-                    <h3>Edge Relations</h3>
+                    <h3>Example Relationships</h3>
 
                     <div class="edge-relation">
                         <div class="edge-line-sample">
@@ -1384,22 +1384,19 @@
     <section id="sync">
         <div class="container">
             <h2 class="section-heading">Bidirectional Sync</h2>
-            <p class="section-lead">Canvas and code are two views of the same system. The sync engine keeps them honest.</p>
+            <p class="section-lead">Canvas and code are two views of the same system. Sync keeps them aligned.</p>
 
             <div class="sync-layout">
                 <div class="sync-box card">
                     <h3>What Syncs</h3>
                     <ul class="sync-list sync-yes">
-                        <li>New class nodes generate source files with class skeletons</li>
-                        <li>Changed field or method lists update class definitions in code</li>
-                        <li>Documentation edits propagate to docstrings and doc comments</li>
-                        <li>New <code>inherits</code> edges create inheritance declarations</li>
-                        <li>New <code>implements</code> edges create protocol conformance</li>
-                        <li>New <code>composes</code> edges generate typed field declarations</li>
-                        <li>New <code>depends</code> edges generate import statements</li>
-                        <li>Code-side class creation generates canvas nodes</li>
-                        <li>Code-side documentation changes update canvas node text</li>
-                        <li>Test results flow from code to test node content</li>
+                        <li>New code elements on the canvas generate source files</li>
+                        <li>Changed design content updates documentation in code</li>
+                        <li>Responsibility and pseudo code changes propagate to docstrings</li>
+                        <li>Relationship changes update inheritance declarations and imports</li>
+                        <li>Code-side element creation updates the canvas</li>
+                        <li>Code-side documentation changes update canvas design content</li>
+                        <li>Signature changes propagate in both directions</li>
                     </ul>
                 </div>
 
@@ -1408,9 +1405,9 @@
                     <ul class="sync-list sync-no">
                         <li>Method bodies &mdash; implementation is code's domain</li>
                         <li>Local variables and control flow within functions</li>
-                        <li>Context nodes &mdash; design rationale stays on the canvas</li>
-                        <li><code>calls</code> edges &mdash; produce sync requests but have no defined code construct</li>
-                        <li>Canvas layout positions &mdash; node arrangement is visual only</li>
+                        <li>Context elements &mdash; design rationale stays on the canvas</li>
+                        <li>Canvas layout and visual arrangement</li>
+                        <li>Manually added design notes without code representation</li>
                     </ul>
                 </div>
             </div>
@@ -1429,15 +1426,15 @@
                 <div class="timeline-step" style="border-top:3px solid #d94f30;">
                     <div class="timeline-number">1</div>
                     <h3>Read the Specification</h3>
-                    <p>Start with the Introduction for the vision and principles. Then explore the Data Model, Lifecycle, Sync, and Language Bindings documents for the full technical contract.</p>
+                    <p>Start with the Introduction for the vision and principles. Then explore the Design Contract, Sync, and Language Bindings documents for the full technical contract.</p>
                     <a href="https://github.com/giosullutrone/cooperative-coding/blob/main/spec/00-introduction.md" class="step-cta">Read the Introduction &rarr;</a>
                 </div>
 
                 <div class="timeline-step" style="border-top:3px solid #d94f30;">
                     <div class="timeline-number">2</div>
                     <h3>Choose Your Canvas Tool</h3>
-                    <p>CooperativeCoding works with any canvas tool that supports JSON Canvas v1.0. The reference implementation uses Obsidian with a dedicated plugin that renders CooperativeCoding nodes and edges.</p>
-                    <a href="https://jsoncanvas.org" target="_blank" class="step-cta">Explore JSON Canvas &rarr;</a>
+                    <p>CooperativeCoding works with any canvas tool &mdash; Obsidian, VS Code, Excalidraw, or any application that can represent architectural elements visually. The spec does not prescribe a format.</p>
+                    <a href="https://github.com/giosullutrone/cooperative-coding" target="_blank" class="step-cta">View on GitHub &rarr;</a>
                 </div>
 
                 <div class="timeline-step" style="border-top:3px solid #d94f30;">
@@ -1463,7 +1460,7 @@
     <section id="spec">
         <div class="container">
             <h2 class="section-heading">Specification Documents</h2>
-            <p class="section-lead">The complete CooperativeCoding specification, organized in five core documents plus a language binding reference.</p>
+            <p class="section-lead">The complete CooperativeCoding specification, organized in four core documents plus a language binding reference.</p>
 
             <div class="docs-grid">
                 <div class="doc-card card" style="border-top:3px solid #1a1f36;">
@@ -1473,32 +1470,26 @@
                 </div>
 
                 <div class="doc-card card" style="border-top:3px solid #1a1f36;">
-                    <div class="doc-filename">01-data-model.md</div>
-                    <p>Canvas nodes, edges, and metadata schemas. Node kinds, edge relations, the <code>ccoding</code> namespace, edge labels, context nodes, and node text content rules.</p>
-                    <a href="https://github.com/giosullutrone/cooperative-coding/blob/main/spec/01-data-model.md" class="doc-link">Read &rarr;</a>
+                    <div class="doc-filename">01-design-contract.md</div>
+                    <p>What every code element must carry: identity, responsibility statements, pseudo code, relationships, source mapping, and stereotypes.</p>
+                    <a href="https://github.com/giosullutrone/cooperative-coding/blob/main/spec/01-design-contract.md" class="doc-link">Read &rarr;</a>
                 </div>
 
                 <div class="doc-card card" style="border-top:3px solid #1a1f36;">
-                    <div class="doc-filename">02-lifecycle.md</div>
-                    <p>Entry points, the sync loop, agent and human roles, and agent communication approaches. How the continuous bidirectional sync model works in practice.</p>
-                    <a href="https://github.com/giosullutrone/cooperative-coding/blob/main/spec/02-lifecycle.md" class="doc-link">Read &rarr;</a>
+                    <div class="doc-filename">02-sync.md</div>
+                    <p>The sync loop, convergence guarantee, entry points, roles, body preservation rules, state tracking, and multi-canvas support.</p>
+                    <a href="https://github.com/giosullutrone/cooperative-coding/blob/main/spec/02-sync.md" class="doc-link">Read &rarr;</a>
                 </div>
 
                 <div class="doc-card card" style="border-top:3px solid #1a1f36;">
-                    <div class="doc-filename">03-sync.md</div>
-                    <p>Bidirectional sync semantics. Canvas-to-code rules, code-to-canvas rules, state tracking via qualified names, sync triggers, and the convergence guarantee.</p>
-                    <a href="https://github.com/giosullutrone/cooperative-coding/blob/main/spec/03-sync.md" class="doc-link">Read &rarr;</a>
-                </div>
-
-                <div class="doc-card card" style="border-top:3px solid #1a1f36;">
-                    <div class="doc-filename">04-language-bindings.md</div>
-                    <p>The contract for language-specific mappings. Stereotype mapping, AST parsing, type translation, documentation format, and the three-tier compliance model (MUST, SHOULD, MAY).</p>
-                    <a href="https://github.com/giosullutrone/cooperative-coding/blob/main/spec/04-language-bindings.md" class="doc-link">Read &rarr;</a>
+                    <div class="doc-filename">03-language-bindings.md</div>
+                    <p>The contract for language-specific mappings. Stereotype mapping, source code parsing, code generation, documentation format, and phased adoption.</p>
+                    <a href="https://github.com/giosullutrone/cooperative-coding/blob/main/spec/03-language-bindings.md" class="doc-link">Read &rarr;</a>
                 </div>
 
                 <div class="doc-card card" style="border-top:3px solid #1a1f36;">
                     <div class="doc-filename">bindings/python.md</div>
-                    <p>The reference Python binding. Covers Python stereotypes, docstring conventions, type annotation mapping, <code>ccoding</code> CLI usage, and structured content conventions.</p>
+                    <p>The reference Python binding. Covers Python stereotypes, docstring conventions, type annotation mapping, and structured content conventions.</p>
                     <a href="https://github.com/giosullutrone/cooperative-coding/blob/main/bindings/python.md" class="doc-link">Read &rarr;</a>
                 </div>
             </div>
@@ -1520,7 +1511,6 @@
                     <h4>Resources</h4>
                     <a href="https://github.com/giosullutrone/cooperative-coding/blob/main/spec/00-introduction.md">Specification</a>
                     <a href="https://github.com/giosullutrone/cooperative-coding/blob/main/bindings/python.md">Python Binding</a>
-                    <a href="https://jsoncanvas.org" target="_blank">JSON Canvas v1.0</a>
                     <a href="https://github.com/giosullutrone/cooperative-coding" target="_blank">GitHub Repository</a>
                     <a href="https://github.com/giosullutrone/cooperative-coding/blob/main/CONTRIBUTING.md" target="_blank">Contributing</a>
                 </div>

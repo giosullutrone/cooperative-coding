@@ -36,7 +36,6 @@ A binding MUST define a stereotype mapping table. This table MUST include, for e
 
 The stereotype set is open. A binding defines its recognized stereotypes, but:
 
-- Implementations MUST NOT reject unknown stereotypes. Unknown stereotypes SHOULD be treated as the default construct (e.g., a plain class).
 - A binding MAY define additional stereotypes at any time. Adding a stereotype is a backwards-compatible change.
 - A binding SHOULD document the behavioral differences between stereotypes.
 

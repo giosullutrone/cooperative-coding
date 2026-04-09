@@ -47,7 +47,7 @@ Every method or function MUST carry **pseudo code**: a numbered, step-by-step de
 
 Pseudo code is deliberately not real code. It describes what happens, not how in language-specific terms. This keeps the canvas readable by humans who may not know the target language and ensures the design intent survives language changes.
 
-The agent implements against the pseudo code steps. When a human writes:
+Code is implemented against the pseudo code steps. When a human writes:
 
 ```
 1. Check cache for source hash
@@ -58,7 +58,7 @@ The agent implements against the pseudo code steps. When a human writes:
 6. Cache and return
 ```
 
-...the agent produces code that follows those steps. The pseudo code is the contract between the human's design intent and the agent's implementation.
+...the implementation follows those steps. The pseudo code is the contract between the design intent and the implementation.
 
 ### 3.3 Additional Content (OPTIONAL)
 
@@ -96,9 +96,7 @@ Code elements on the canvas MUST be mappable to their location in the source cod
 
 ### Requirements
 
-- Each code element SHOULD carry a reference to its source file, relative to the project root.
-- Source references MUST be project-relative paths. Absolute paths MUST NOT be used.
-- Implementations MUST validate that resolved paths do not escape the project root directory.
+- Each code element SHOULD carry a reference to its source file.
 - When no source mapping exists (new element on canvas), the language binding defines where the source file should be created based on the element's identity and the project's file conventions.
 
 ---
@@ -110,7 +108,6 @@ A stereotype is a language-specific subtype that refines what a code element mea
 ### Requirements
 
 - The set of valid stereotypes is an open set defined by each language binding.
-- Implementations MUST NOT reject unknown stereotype values. Unknown stereotypes SHOULD be treated as the default construct for that element type (e.g., a plain class).
 - A binding MAY define additional stereotypes at any time. Adding a stereotype is a backwards-compatible change.
 
 ---
@@ -130,5 +127,4 @@ Canvas content that carries no code identity (design rationale, reference materi
 
 A single canvas MAY contain code elements targeting different programming languages. Each element is synced using the binding for its own language.
 
-- Cross-language relationships are informational only and are NOT synced to code.
 - Implementations SHOULD make the target language of each element visible on the canvas.

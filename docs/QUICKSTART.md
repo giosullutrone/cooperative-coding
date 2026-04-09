@@ -45,11 +45,11 @@ A professional, dark-themed GitHub Pages website with:
 - Overview of CooperativeCoding
 - Seven design principles (grid cards)
 - Cooperation loop (4-phase diagram)
-- Data model (node kinds + edges)
-- Status lifecycle (state machine)
+- Elements & relationships (examples)
+- Design contract
 - Bidirectional sync rules
 - Getting started (4-step guide)
-- Spec documents (6 doc cards)
+- Spec documents (5 doc cards)
 - Footer with links
 
 ✓ **Features**

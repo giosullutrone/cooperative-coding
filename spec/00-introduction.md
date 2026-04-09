@@ -30,11 +30,11 @@ CooperativeCoding separates these concerns:
 
 This specification defines the open CooperativeCoding standard, a community contribution that any canvas tool, any programming language, and any agentic system can adopt. It is intentionally language-agnostic, tool-agnostic, and format-agnostic. The standard defines the design contract, the sync loop, and the contract that language bindings MUST fulfill. It does not prescribe how any particular tool renders elements, how any particular agent reasons about architecture, how any particular language maps its idioms, or what file format the canvas uses.
 
-Concrete implementations require three things:
+Concrete implementations require four things:
 
 1. **A canvas tool implementation**: a plugin, extension, or application that lets humans and agents work with architectural elements visually. The tool may use any format or storage mechanism (JSON files, markdown vaults, databases, custom formats) as long as it fulfills the design contract and sync semantics defined in this spec.
 2. **A language binding**: a mapping from the abstract CooperativeCoding spec to a specific programming language's idioms and conventions (e.g., Python docstrings, TypeScript JSDoc, Rust doc comments).
-3. **A sync engine**: detects changes on both sides (canvas and code), produces sync requests, and tracks state. The agent queries the sync engine to know what needs to be updated.
+3. **A sync engine**: detects changes on both sides (canvas and code), produces sync requests, and tracks state.
 4. **An agent integration**: a skill, plugin, or configuration that teaches an agentic coding tool (e.g., Claude Code, Cursor, Copilot) to work within the CooperativeCoding sync loop and principles.
 
 ---
@@ -64,7 +64,7 @@ Language bindings define additional content that elements MAY carry (constraints
 
 ### 4. Bidirectional Sync
 
-Canvas and code are always in sync. Every change on either side produces a sync request for the other side. The agent processes each sync request and decides what changes are needed, which may be nothing if the other side already matches. The human sees every change reflected on the canvas in real time.
+Canvas and code are always in sync. Every change on either side produces a sync request for the other side. The sync system processes each request and decides what changes are needed, which may be nothing if the other side already matches. The human sees every change reflected on the canvas.
 
 Version control provides the audit trail and rollback capability.
 
@@ -96,13 +96,13 @@ A construct in the source code that participates in the architecture: a class, m
 A mapping from the abstract CooperativeCoding specification to a specific programming language's idioms and conventions. A binding defines how design content maps to the language's documentation format, what stereotypes are valid, how the language's type system is represented, and how code is parsed and generated.
 
 **Stereotype**
-A language-specific subtype that refines what a code element means in a given language. For example, `protocol`, `dataclass`, and `enum` are stereotypes of a class in a Python binding, while `interface`, `type`, and `enum` serve the same role in a TypeScript binding. The set of valid stereotypes is an open set defined by each language binding. Implementations MUST NOT reject unknown stereotype values.
+A language-specific subtype that refines what a code element means in a given language. For example, `protocol`, `dataclass`, and `enum` are stereotypes of a class in a Python binding, while `interface`, `type`, and `enum` serve the same role in a TypeScript binding. The set of valid stereotypes is an open set defined by each language binding. 
 
 **Sync**
 The bidirectional process of keeping the canvas design and the source code aligned. Every change on either side produces a sync request for the other side. Canvas changes produce code requests (requests to update the code). Code changes produce design requests (requests to update the canvas).
 
 **Sync request**
-A change that the agent needs to process. Code requests update the code to match the canvas. Design requests update the canvas to match the code. The agent evaluates each request and applies the necessary changes, which may be nothing if the target side already matches.
+A change that needs to be processed. Code requests update the code to match the canvas. Design requests update the canvas to match the code. Each request is evaluated and the necessary changes are applied, which may be nothing if the target side already matches.
 
 **Qualified name**
 A stable identifier for a code element used to link canvas representations to code constructs. The format is defined by each language binding (e.g., dot-notation like `parsers.document.DocumentParser` for Python). This is the primary mechanism for identity matching during sync.
@@ -145,7 +145,7 @@ The following topics are explicitly out of scope for this specification. They ar
 
 ## Security Considerations
 
-- **Path traversal:** Source mappings that link canvas elements to code files MUST be validated to not escape the project root directory.
+- **Path traversal:** Source mappings that link canvas elements to code files SHOULD be validated to not escape the project root directory.
 - **Content sanitization:** Design content is often rendered as markdown or rich text. Implementations SHOULD guard against script injection in rendered content.
 - **Agent trust:** Agents can change both canvas and code. Implementations SHOULD provide audit trails for all changes.
 

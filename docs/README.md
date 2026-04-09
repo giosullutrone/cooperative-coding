@@ -53,7 +53,7 @@ python -m http.server 8000
 2. **Overview** — What is CooperativeCoding
 3. **Principles** — Seven collaborative design principles
 4. **Cooperation Loop** — Four phases of human-AI collaboration
-5. **Data Model** — Node kinds, edges, stereotypes
+5. **Elements & Relationships** — Example element types and relationships
 6. **Sync** — Bidirectional sync rules
 7. **Getting Started** — Four-step introduction
 8. **Spec Documents** — Links to specification files
