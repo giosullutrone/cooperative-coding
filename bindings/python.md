@@ -1,11 +1,12 @@
 # CooperativeCoding Python Language Binding
 
-*Informative appendix showing how the CooperativeCoding specification maps to Python.*
+*Reference binding showing how the CooperativeCoding specification maps to Python.*
 
 ---
 
 **Target language:** `python`
-**Spec version:** v1.0.0
+**Spec version:** v2.0.0
+**Phase:** Phase 2
 **Status:** Reference binding
 **Python version:** 3.11+
 
@@ -15,9 +16,9 @@ This binding is used by the [cooperative-coding-python](https://github.com/giosu
 
 ## 1. Overview
 
-This document is an informative (non-normative) appendix to the [CooperativeCoding specification](../spec/00-introduction.md). It describes how the abstract concepts defined in the core spec (nodes, edges, stereotypes, node content, sync rules) map to Python's type system, documentation conventions, and module structure.
+This document describes how the abstract concepts defined in the core spec (code elements, design content, relationships, sync rules) map to Python's type system, documentation conventions, and module structure.
 
-The mapping aims for zero surprise: a Python developer reading the generated code should see idiomatic Python, and a canvas user reading a node should see clean, language-neutral design documentation. The binding sits in the middle, translating between these two views.
+The mapping aims for zero surprise: a Python developer reading the generated code should see idiomatic Python, and a canvas user reading an element should see clean, language-neutral design documentation. The binding sits in the middle, translating between these two views.
 
 Everything described here reflects what the reference implementation does. Other implementations targeting Python are free to make different choices within the spec's degrees of freedom.
 
@@ -25,9 +26,9 @@ Everything described here reflects what the reference implementation does. Other
 
 ## 2. Stereotype Mapping
 
-The `ccoding.stereotype` field on a class node determines which Python construct sync generates. When no stereotype is set, the node maps to a plain class.
+The stereotype on a class element determines which Python construct sync generates. When no stereotype is set, the element maps to a plain class.
 
-| `ccoding.stereotype` | Python Construct | Import Required |
+| Stereotype | Python Construct | Import Required |
 |---|---|---|
 | *(none)* | `class Foo:` | none |
 | `protocol` | `class Foo(Protocol):` | `from typing import Protocol` |
@@ -37,10 +38,10 @@ The `ccoding.stereotype` field on a class node determines which Python construct
 
 **Behavioral notes:**
 
-- **`protocol`**: Methods on a protocol class are not decorated with `@abstractmethod`. Protocol uses structural subtyping: any class with matching method signatures satisfies the protocol without explicit inheritance. The canvas `implements` edge translates to explicit Protocol inheritance in code, which opts into nominal checking.
+- **`protocol`**: Methods on a protocol class are not decorated with `@abstractmethod`. Protocol uses structural subtyping: any class with matching method signatures satisfies the protocol without explicit inheritance. An `implements` relationship translates to explicit Protocol inheritance in code, which opts into nominal checking.
 - **`abstract`**: Methods listed on the canvas that lack a pseudo code section are generated with `@abstractmethod` and an ellipsis body (`...`). Methods with pseudo code are generated as concrete methods.
 - **`dataclass`**: Fields are generated as dataclass fields with type annotations. The field order on the canvas determines the field order in the generated dataclass (which affects `__init__` parameter order). Fields with defaults come after fields without.
-- **`enum`**: Enum members are extracted as `constant` nodes with `member` edges to the enum class. Since enum members rarely have external connections, they are typically inlined into the enum class body under a `### Constants` subsection. The type column in the canvas field node determines the enum value type (e.g., `str` produces a `class Foo(str, Enum):` mixin). Private members (names starting with `_`) are excluded.
+- **`enum`**: Enum members are represented as constants belonging to the enum class. The type of the constant determines the enum value type (e.g., `str` produces a `class Foo(str, Enum):` mixin). Private members (names starting with `_`) are excluded.
 
 Unknown stereotypes are treated as plain classes.
 
@@ -54,13 +55,13 @@ Three sections are added beyond the standard Google docstring style:
 
 - **`Responsibility:`**: appears on class and method docstrings. Describes what this element owns in the system. This is the most important section for design: it defines the boundaries.
 - **`Pseudo Code:`**: appears on method docstrings only. A numbered step-by-step description of the algorithm. Deliberately not real code: it describes what happens, not how in language-specific terms.
-- **`Collaborators:`**: appears on class docstrings only. Lists other classes this one works with and why. Derived from edges connected to the class node during sync.
+- **`Collaborators:`**: appears on class docstrings only. Lists other classes this one works with and why. Derived from relationships connected to the class during sync.
 
 These sections are designed to be safely ignored by standard Python documentation tools that do not recognize them.
 
 ### 3.1 Class Docstring
 
-A class docstring maps to the class node's content on the canvas. The first line is the one-line summary. The `Responsibility:` block defines what the class owns. `Collaborators:` captures edge-derived relationships in prose. `Attributes:` maps to the class's field nodes.
+A class docstring maps to the class element's design content on the canvas. The first line is the one-line summary. The `Responsibility:` block defines what the class owns. `Collaborators:` captures relationship-derived information in prose. `Attributes:` maps to the class's fields.
 
 ```python
 class DocumentParser(Protocol):
@@ -83,7 +84,7 @@ class DocumentParser(Protocol):
 
 ### 3.2 Method Docstring
 
-A method docstring maps to the method node's content on the canvas. The `Pseudo Code:` section is the algorithm description. Standard Google-style sections (`Args:`, `Returns:`, `Raises:`) map to the signature information in the method node.
+A method docstring maps to the method element's design content. The `Pseudo Code:` section is the algorithm description. Standard Google-style sections (`Args:`, `Returns:`, `Raises:`) map to the signature information.
 
 ```python
 def parse(self, source: str) -> AST:
@@ -129,19 +130,19 @@ class DocumentParser(Protocol):
 
 ---
 
-## 4. Node Content Format
+## 4. Canvas Content Format
 
-The reference implementation uses structured markdown in canvas node text. This is not part of the core spec (node text is opaque per [Data Model, Section 8](../spec/01-data-model.md)), but is documented here for interoperability with the reference implementation.
+The reference implementation uses structured markdown for element content on the canvas. This is not part of the core spec (design content format is up to each implementation), but is documented here for interoperability with the reference implementation.
 
 ### Underscore Escaping
 
-Python identifiers frequently contain underscores (`_`) which can trigger unintended markdown formatting (e.g., `__init__` renders as bold text). The reference implementation escapes all underscores in identifier names within node content: `__init__` becomes `\_\_init\_\_`, `my_method` becomes `my\_method`. This escaping applies to method names, field names, module names, and constant names in heading text. The `node.name` field retains the unescaped Python identifier for code generation.
+Python identifiers frequently contain underscores (`_`) which can trigger unintended markdown formatting (e.g., `__init__` renders as bold text). The reference implementation escapes all underscores in identifier names within canvas content: `__init__` becomes `\_\_init\_\_`, `my_method` becomes `my\_method`.
 
-### 4.1 Class Node
+### 4.1 Class Element
 
-A class node contains the class-level information: name, responsibility, and constraints. Members (methods, fields, constants) that have no connections outside their parent class are inlined into the class body rather than existing as separate nodes. Only members with external connections (e.g., `calls`, `overrides`, `tests` edges to/from other nodes) get their own canvas nodes.
+A class element contains the class-level information: name, responsibility, and constraints. Members (methods, fields, constants) that have no connections outside their parent class are inlined into the class body rather than existing as separate elements. Only members with external connections get their own canvas elements.
 
-An inlined class node uses `### Fields`, `### Methods`, and `### Constants` subsections separated by horizontal rules:
+An inlined class element uses `### Fields`, `### Methods`, and `### Constants` subsections:
 
 ```markdown
 ## DocumentParser
@@ -165,11 +166,9 @@ An inlined class node uses `### Fields`, `### Methods`, and `### Constants` subs
 - Plugin order must be deterministic
 ```
 
-Members that DO have external connections (e.g., a method targeted by a `calls` or `overrides` edge from another class) remain as separate nodes connected via `member` edges, following the standard method/field node format.
+### 4.2 Method Element
 
-### 4.2 Method Node
-
-A method node contains the fully qualified method name, a responsibility section, the signature broken into IN/OUT/RAISES, and numbered pseudo code.
+A method element contains the fully qualified method name, a responsibility section, the signature broken into IN/OUT/RAISES, and numbered pseudo code.
 
 ```markdown
 ## DocumentParser.parse
@@ -193,16 +192,16 @@ Transform raw source into a validated AST, applying all registered plugins in or
 ```
 
 **Variadic and special parameters:** Python-specific parameter forms are mapped as follows:
-- `*args` is represented in canvas as `*args: type` (or `*args` if untyped)
-- `**kwargs` is represented in canvas as `**kwargs: type` (or `**kwargs` if untyped)
-- Keyword-only arguments (after `*`) are represented with a `*` separator in the parameter list
-- Positional-only arguments (before `/`) are represented with a `/` separator in the parameter list
+- `*args` is represented as `*args: type` (or `*args` if untyped)
+- `**kwargs` is represented as `**kwargs: type` (or `**kwargs` if untyped)
+- Keyword-only arguments (after `*`) are represented with a `*` separator
+- Positional-only arguments (before `/`) are represented with a `/` separator
 
 Round-trip fidelity: these special forms MUST survive canvas to code to canvas without loss.
 
-### 4.3 Field Node
+### 4.3 Field Element
 
-A field node contains the fully qualified field name, a responsibility section, the type, and any constraints.
+A field element contains the fully qualified field name, a responsibility section, the type, and any constraints.
 
 ```markdown
 ## DocumentParser.config
@@ -218,9 +217,9 @@ Holds parser configuration including tokenizer settings.
 - Validated on construction
 ```
 
-### 4.4 Test Node
+### 4.4 Test Element
 
-A test node contains the test class name, what is being tested, the test methods, and results.
+A test element contains the test class name, what is being tested, the test methods, and results.
 
 ```markdown
 ## TestDocumentParser
@@ -262,7 +261,7 @@ The reference implementation uses [pytest](https://docs.pytest.org/) as the defa
 
 ### Generated Test Code
 
-Given the test node above with a `tests` edge to a `DocumentParser` class node, sync generates:
+Given a test element connected to a `DocumentParser` class, sync generates:
 
 ```python
 import pytest
@@ -299,10 +298,10 @@ class TestDocumentParser:
 
 Key observations:
 
-- The `tests` edge to `DocumentParser` produced the `from parsers.document import DocumentParser` import, derived from the target node's `ccoding.qualifiedName`.
+- The relationship to `DocumentParser` produced the `from parsers.document import DocumentParser` import, derived from the target element's qualified name.
 - Test method names carry the `test_` prefix required by pytest discovery.
-- Each test method's docstring comes from the pseudo code description in the test node.
-- Method bodies are `raise NotImplementedError`. For pytest, the reference implementation does not use `pass` or `...` because a passing test with no assertions is misleading.
+- Each test method's docstring comes from the pseudo code description in the test element.
+- Method bodies are `raise NotImplementedError`. The reference implementation does not use `pass` or `...` because a passing test with no assertions is misleading.
 - Return type annotations are `-> None` for all test methods.
 
 **Stub detection during sync:** A method body is considered a stub if it consists solely of:
@@ -317,7 +316,7 @@ Any other body content is considered implemented and MUST NOT be overwritten dur
 
 The sync reads test results from pytest's output. The reference implementation supports two result sources:
 
-- **pytest JSON report** (via the `pytest-json-report` plugin). Maps each test's `outcome` field to canvas result status.
+- **pytest JSON report** (via the `pytest-json-report` plugin).
 - **JUnit XML** (via `pytest --junitxml=results.xml`).
 
 Result status mapping:
@@ -359,74 +358,62 @@ The Python 3.10+ union syntax (`X | Y`) is preferred over `Optional[X]` and `Uni
 
 ---
 
-## 7. Edge Label Interpretation
+## 7. Relationship Interpretation
 
-For `composes` edges, the reference implementation parses the label to extract the field name:
+The reference implementation tracks the following relationships and maps them to Python code constructs:
 
-1. If the label contains `:` or ` - `, the substring before the first separator is the field name. The remainder is a descriptive comment.
-2. If the label contains no separator, the entire label is the field name.
-3. If the label is absent, the field name is derived from the target node's name (lowercased, snake_cased).
+| Relationship | Code Construct | Label Interpretation |
+|---|---|---|
+| Inheritance | `class Child(Parent):` declaration | N/A |
+| Protocol implementation | `class Impl(Protocol):` declaration | N/A |
+| Composition (has-a) | Typed field declaration | Label before `:` or ` - ` is the field name; remainder is descriptive. If no label, field name is derived from the target element name (lowercased, snake_cased). |
+| Dependency (uses) | Import statement | N/A |
+| Membership | Method/field belongs to class body | N/A |
+| Testing | Import of class under test | N/A |
 
-For all other relation types, labels are informational and not used during code generation.
+For all other relationships, labels are informational and not used during code generation.
 
 ---
 
 ## 8. Example Round-Trip
 
-This section walks through a complete cycle: a class node on the canvas, the Python code generated from it, an edit made in code, and the resulting canvas update.
+This section walks through a complete cycle: a class element on the canvas, the Python code generated from it, an edit made in code, and the resulting canvas update.
 
-### 8.1 Canvas Data (Starting Point)
+### 8.1 Canvas (Starting Point)
 
-A canvas file contains a `DocumentParser` class node and a separate method node for `parse`, connected by a `member` edge:
+A canvas contains a `DocumentParser` class element with a separate method element for `parse`. The class has stereotype `protocol`.
 
-```json
-{
-  "nodes": [
-    {
-      "id": "node-parser",
-      "type": "text",
-      "x": 100,
-      "y": 100,
-      "width": 340,
-      "height": 200,
-      "text": "## DocumentParser\n\n> Responsible for parsing raw documents into structured AST nodes\n\n### Constraints\n- Thread-safe for concurrent parsing",
-      "ccoding": {
-        "kind": "class",
-        "stereotype": "protocol",
-        "language": "python",
-        "source": "src/parsers/document.py",
-        "qualifiedName": "parsers.document.DocumentParser"
-      }
-    },
-    {
-      "id": "node-parse-method",
-      "type": "text",
-      "x": 520,
-      "y": 100,
-      "width": 340,
-      "height": 300,
-      "text": "## DocumentParser.parse\n\n### Responsibility\nTransform raw source into a validated AST, applying all registered plugins.\n\n### Signature\n- **IN:** source: `String` -- raw document text\n- **OUT:** `AST` -- parsed syntax tree\n- **RAISES:** `ParseError` -- on malformed input\n\n### Pseudo Code\n1. Check _cache for source hash\n2. If cached, return cached AST\n3. Tokenize source using config.tokenizer\n4. Build raw AST from token stream\n5. Validate final AST structure\n6. Cache and return",
-      "ccoding": {
-        "kind": "method",
-        "language": "python",
-        "source": "src/parsers/document.py",
-        "qualifiedName": "parsers.document.DocumentParser.parse"
-      }
-    }
-  ],
-  "edges": [
-    {
-      "id": "edge-member-parse",
-      "fromNode": "node-parser",
-      "toNode": "node-parse-method",
-      "fromSide": "right",
-      "toSide": "left",
-      "ccoding": {
-        "relation": "member"
-      }
-    }
-  ]
-}
+The class element's design content:
+
+```markdown
+## DocumentParser
+
+> Responsible for parsing raw documents into structured AST nodes
+
+### Constraints
+- Thread-safe for concurrent parsing
+```
+
+The method element's design content:
+
+```markdown
+## DocumentParser.parse
+
+### Responsibility
+Transform raw source into a validated AST, applying all registered plugins.
+
+### Signature
+- **IN:** source: `String` -- raw document text
+- **OUT:** `AST` -- parsed syntax tree
+- **RAISES:** `ParseError` -- on malformed input
+
+### Pseudo Code
+1. Check _cache for source hash
+2. If cached, return cached AST
+3. Tokenize source using config.tokenizer
+4. Build raw AST from token stream
+5. Validate final AST structure
+6. Cache and return
 ```
 
 ### 8.2 Generated Python Code
@@ -483,9 +470,9 @@ class DocumentParser(Protocol):
 Key observations:
 
 - The `protocol` stereotype produced `class DocumentParser(Protocol):` with the `typing.Protocol` import.
-- Canvas type `Map<String, AST>` became `dict[str, AST]` via the type hint mapping.
-- The `parse` method has the full docstring with `Responsibility:` and `Pseudo Code:` sections from the method node.
-- Method bodies are `...` (ellipsis), the protocol stub. For non-protocol classes, the reference implementation generates `raise NotImplementedError`.
+- Canvas type `String` became `str` via the type hint mapping.
+- The `parse` method has the full docstring with `Responsibility:` and `Pseudo Code:` sections.
+- Method body is `...` (ellipsis), the protocol stub. For non-protocol classes, the reference implementation generates `raise NotImplementedError`.
 
 ### 8.3 Code Edit
 
@@ -523,7 +510,7 @@ A developer adds a plugin step to the `parse` method's pseudo code and adds a ne
 
 ### 8.4 Canvas Update
 
-The code change produces a design request. Sync updates the method node on the canvas:
+The code change produces a design request. Sync updates the method element on the canvas:
 
 ```markdown
 ## DocumentParser.parse
@@ -553,4 +540,4 @@ The Python type `bool` was translated back to the canvas type `Boolean`, and `Fa
 
 ## 9. Reference Implementation
 
-The full working implementation is available at [cooperative-coding-python](https://github.com/giosullutrone/cooperative-coding-python). The repository contains the sync logic, code parser, code generator, and docstring mapping logic that this appendix describes.
+The full working implementation is available at [cooperative-coding-python](https://github.com/giosullutrone/cooperative-coding-python). The repository contains the sync logic, code parser, code generator, and docstring mapping logic that this binding describes.

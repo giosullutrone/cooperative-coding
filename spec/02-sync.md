@@ -1,0 +1,179 @@
+# CooperativeCoding Specification: Sync
+
+**Version 2.0.0**
+
+---
+
+## 1. Overview
+
+The [Design Contract](01-design-contract.md) defines what every code element must carry. This document defines the sync rules: what happens when the canvas changes, what happens when code changes, and how the two sides stay aligned.
+
+Sync is bidirectional. Canvas changes update code. Code changes update the canvas. Every change on either side always produces a sync request for the other side. The agent evaluates each request and applies the necessary changes, which may be none if the other side already matches. When a sync request produces no changes, no further sync requests are generated, and the loop stabilizes.
+
+The rules in this document are intentionally abstract. They define *what* must happen, not *how* an implementation achieves it.
+
+---
+
+## 2. The Sync Loop
+
+Once a session is active, regardless of which entry point started it, the system operates as a continuous sync loop:
+
+```
+    Canvas change ──> code request ──> agent updates code
+                                              |
+                                        agent changed code?
+                                              |
+                                    no: done
+                                    yes: design request ──> agent updates canvas
+                                                                  |
+                                                            agent changed canvas?
+                                                                  |
+                                                        no: done
+                                                        yes: code request ──> ... (loop continues)
+```
+
+Every change on either side produces a sync request. The agent processes it and may produce changes on the other side, which in turn produce new sync requests. The loop continues until the agent determines no further changes are needed. Changes made by sync itself that don't alter the target side MUST NOT produce new sync requests.
+
+### 2.1 What Produces Sync Requests
+
+**From the canvas (code requests):** Any canvas change by the human or the agent produces a request to update the code. Examples:
+- Creating a new code element
+- Editing design content (responsibility, pseudo code, signatures, constraints)
+- Adding or removing relationships (inheritance, composition, dependencies)
+- Deleting an element or relationship
+
+**From the code (design requests):** Any code change by the human, the agent, or external sources produces a request to update the canvas. Examples:
+- Implementing a new class, method, or field
+- Changing a method signature or type annotation
+- Adding or removing inheritance, imports, or typed fields
+- Refactoring, renaming, or deleting code elements
+- External changes (pulls, merges, teammate commits)
+
+**From the user (user requests):** The human asks the agent to do something explicitly. Examples:
+- "Fix this crash"
+- "Add error handling to this method"
+- "Write tests for UserService"
+- "Refactor this class into two"
+- "Help me write the pseudo code for this method"
+
+The agent makes changes on whichever side makes sense, and those changes flow through the normal sync loop.
+
+---
+
+## 3. Canvas to Code
+
+When the canvas changes, a code request is produced. The agent evaluates the request and updates the corresponding source code to match.
+
+The general rule: every canvas change produces a code request. Each element maps to a code construct, and each relationship maps to language-specific code, as defined by the active language binding. The agent decides what code changes are needed.
+
+Sync MUST NOT overwrite method bodies. Design content maps to documentation and signatures in code; the implementation inside method bodies is the code's domain.
+
+### 3.1 Change Propagation
+
+When the agent updates code from a code request, it MUST consider the full impact of the change. For example, if a method signature changes, the agent MUST also update code that calls that method. If the ripple effects require architectural changes, the agent updates the canvas, which produces further code requests through the normal sync loop.
+
+---
+
+## 4. Code to Canvas
+
+When source code changes, a design request is produced. The agent evaluates the request and updates the corresponding canvas elements to match.
+
+The general rule: every code change produces a design request. The agent evaluates it and decides what canvas changes are needed, which may be none for changes that are purely implementation details (local variables, control flow, performance optimizations within method bodies).
+
+Sync MUST NOT overwrite canvas content that has no corresponding code representation (e.g., manually added design notes within an element).
+
+### 4.1 Test Results
+
+Test results are runtime data, not architectural changes. When sync detects updated test results, it MUST update the relevant canvas content. The format of the results is defined by the active language binding.
+
+---
+
+## 5. Convergence
+
+The sync loop stabilizes because each sync request brings the two sides closer to alignment. When a code request updates the code to match the canvas, the resulting design request finds the canvas already matches the code, and the agent determines no further changes are needed. The loop terminates.
+
+Implementations MUST ensure that the sync loop converges. If the agent's response to a sync request always brings the two sides closer to agreement (rather than introducing new divergence), the loop will terminate. An implementation where the agent oscillates between two states is a bug.
+
+---
+
+## 6. State Tracking
+
+Implementations MUST maintain a mapping between canvas elements and code elements so that sync requests can be evaluated. The element's identity (see [Design Contract, Section 2](01-design-contract.md)) is the primary key for this mapping. Implementations MAY use version control, content hashing, file watchers, or any other mechanism for detecting changes and tracking state.
+
+When no prior mapping exists (first sync or new project), sync SHOULD perform a reconciliation pass: match canvas elements to code elements by identity and flag any unmatched elements for human attention.
+
+---
+
+## 7. Sync Triggers
+
+Sync is continuous: every change on either side produces a sync request. Implementations define the mechanism for detecting changes (file watchers, save hooks, version control hooks, polling, etc.). Implementations SHOULD also support a manual sync command for cases where automatic detection misses a change or the user wants to force a full reconciliation.
+
+---
+
+## 8. Multiple Canvases
+
+A project MAY have multiple canvases representing different architectural views. If the same code element appears on multiple canvases, sync MUST keep all canvas representations consistent: a code change MUST update all canvas elements that map to the same identity. Implementations SHOULD warn users when the same element appears on multiple canvases.
+
+---
+
+## 9. Entry Points
+
+CooperativeCoding supports three entry points. Each starts from a different place but converges on the same continuous sync loop. Implementations SHOULD support all three entry points, though MAY prioritize based on their primary use case.
+
+### 9.1 From Blank Canvas
+
+The human opens an empty canvas and begins creating the architecture by hand: code elements, relationships, and design content (responsibilities, pseudo code, signatures, constraints). Each canvas change produces a sync request. The agent implements the code to match.
+
+### 9.2 From Natural Language
+
+The human describes a system in natural language. The agent creates elements and relationships on the canvas. These canvas changes produce sync requests, and the agent implements the code. The human sees the architecture appear on the canvas and can edit, restructure, or remove anything at any time.
+
+### 9.3 From Existing Code
+
+The human points the tool at source files. The code is parsed and canvas elements are generated to represent the existing architecture. From this point, the canvas and code are linked and the sync loop begins.
+
+---
+
+## 10. Roles
+
+### 10.1 The Agent's Role
+
+The agent processes sync requests and user requests. It can:
+
+- **Make design changes.** The agent can create, edit, or delete elements and relationships on the canvas. These changes produce code requests, which the agent processes by updating the code to match.
+- **Make code changes.** The agent can implement, refactor, fix, or test code. These changes produce design requests, which the agent processes by updating the canvas to match.
+- **Loop autonomously.** Design changes trigger code updates, which may trigger canvas updates, which may trigger further code updates. The agent continues processing sync requests until design and code stabilize (no further changes needed). Each iteration is visible on the canvas, and the human can intervene at any point.
+- **Respond to user requests.** The human can ask the agent to do anything. The agent decides whether to change code, canvas, or both, and the sync loop handles the rest.
+
+### 10.2 The Human's Role
+
+The human maintains design authority through direct action:
+
+- **Edit the canvas at any time.** Canvas changes produce code requests. The agent updates the code to match. If the agent made a canvas change the human disagrees with, the human edits it, and the sync loop propagates the correction.
+- **Edit code at any time.** Code changes produce design requests. The agent updates the canvas to match. The human sees the architectural impact of every code change.
+- **Review via version control.** The change history provides a full audit trail of all canvas and code changes, who made them, and when. The human can review diffs, revert changes, and use branches for experimental work.
+- **Request agent assistance.** The human can ask the agent for help with anything: writing pseudo code, analyzing the design, fixing bugs, writing tests, refactoring.
+
+---
+
+## 11. Agent Communication Protocol
+
+The spec does not mandate a specific communication mechanism between agents and the canvas. Valid approaches include:
+- **Direct file I/O:** The agent reads and writes canvas files directly.
+- **Canvas tool API:** The canvas tool exposes an API (HTTP, IPC, or plugin SDK) that the agent calls.
+- **CLI mediation:** A CLI tool accepts structured input and modifies the canvas.
+- **Prompt-based:** The agent outputs structured descriptions of changes, and a harness applies them to the canvas.
+
+All approaches MUST result in valid canvas state that fulfills the design contract.
+
+---
+
+## 12. Multi-User Environments
+
+The core spec uses "the human" for simplicity. In teams, multiple humans share the canvas. The sync model does not change: every change on either side produces a sync request for the other side, regardless of who made it.
+
+Implementations targeting multi-user environments MAY extend the system to carry user identity for audit and attribution purposes. The spec does not prescribe a user identity format.
+
+Implementations MAY restrict which users can edit which elements or which parts of the codebase. The spec does not define a permission model. Role-based access, approval workflows, and team boundaries are organizational concerns that belong to implementations.
+
+For multi-team projects, multiple canvases provide a natural boundary: each team owns its canvas, cross-team dependencies are visible as relationships or context elements.
