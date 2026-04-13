@@ -5,7 +5,7 @@
 ---
 
 **Target language:** `python`
-**Spec version:** v2.0.0
+**Spec version:** 2.0.0
 **Phase:** Phase 2
 **Status:** Reference binding
 **Python version:** 3.11+
@@ -19,6 +19,8 @@ This binding is used by the [cooperative-coding-python](https://github.com/giosu
 This document describes how the abstract concepts defined in the core spec (code elements, design content, relationships, sync rules) map to Python's type system, documentation conventions, and module structure.
 
 The mapping aims for zero surprise: a Python developer reading the generated code should see idiomatic Python, and a canvas user reading an element should see clean, language-neutral design documentation. The binding sits in the middle, translating between these two views.
+
+Python treats a source file as a first-class module element. Module-level constants and free-standing functions belong to that module. Implementations MAY inline free-standing functions into a module overview when they have no external relationships, or materialize them as separate function elements when they do, but the qualified name and source mapping MUST still round-trip.
 
 Everything described here reflects what the reference implementation does. Other implementations targeting Python are free to make different choices within the spec's degrees of freedom.
 
@@ -43,7 +45,7 @@ The stereotype on a class element determines which Python construct sync generat
 - **`dataclass`**: Fields are generated as dataclass fields with type annotations. The field order on the canvas determines the field order in the generated dataclass (which affects `__init__` parameter order). Fields with defaults come after fields without.
 - **`enum`**: Enum members are represented as constants belonging to the enum class. The type of the constant determines the enum value type (e.g., `str` produces a `class Foo(str, Enum):` mixin). Private members (names starting with `_`) are excluded.
 
-Unknown stereotypes are treated as plain classes.
+Unknown stereotypes MUST be preserved in design data and UI. The reference Python implementation falls back to plain-class code generation until an explicit mapping is added; it does not reject the element.
 
 ---
 
@@ -59,7 +61,31 @@ Three sections are added beyond the standard Google docstring style:
 
 These sections are designed to be safely ignored by standard Python documentation tools that do not recognize them.
 
-### 3.1 Class Docstring
+### 3.1 Module Docstring
+
+A module docstring maps to the module element's design content on the canvas. It carries the module-level responsibility and any high-level notes about what the file owns. Free-standing functions inside the module use standard function docstrings with CooperativeCoding sections in the same style as methods.
+
+```python
+"""Utility functions for parser configuration.
+
+Responsibility:
+    Own the module-level helpers for loading, validating, and normalizing
+    parser configuration before class-level parsing begins.
+"""
+
+
+def load_config(path: str) -> ParserConfig:
+    """Load parser configuration from disk.
+
+    Responsibility:
+        Read, validate, and return parser configuration from the supplied path.
+
+    Raises:
+        ConfigError: If the file cannot be parsed.
+    """
+```
+
+### 3.2 Class Docstring
 
 A class docstring maps to the class element's design content on the canvas. The first line is the one-line summary. The `Responsibility:` block defines what the class owns. `Collaborators:` captures relationship-derived information in prose. `Attributes:` maps to the class's fields.
 
@@ -82,7 +108,7 @@ class DocumentParser(Protocol):
     """
 ```
 
-### 3.2 Method Docstring
+### 3.3 Method Docstring
 
 A method docstring maps to the method element's design content. The `Pseudo Code:` section is the algorithm description. Standard Google-style sections (`Args:`, `Returns:`, `Raises:`) map to the signature information.
 
@@ -114,7 +140,7 @@ def parse(self, source: str) -> AST:
     """
 ```
 
-### 3.3 Field Documentation
+### 3.4 Field Documentation
 
 Field-level design information maps to a comment block above the field annotation in Python code:
 
@@ -138,7 +164,33 @@ The reference implementation uses structured markdown for element content on the
 
 Python identifiers frequently contain underscores (`_`) which can trigger unintended markdown formatting (e.g., `__init__` renders as bold text). The reference implementation escapes all underscores in identifier names within canvas content: `__init__` becomes `\_\_init\_\_`, `my_method` becomes `my\_method`.
 
-### 4.1 Class Element
+### 4.1 Module Element
+
+A module element represents one Python source file. It carries the module's qualified name, module-level responsibility, imports, constants, and any free-standing functions that belong to that file.
+
+For object-oriented modules, the reference implementation uses a module overview element plus one child class element per exported class. For functional modules, the module element is self-contained and includes the free-standing functions inline.
+
+```markdown
+## parsers.config
+
+### Responsibility
+Own configuration loading, validation, and normalization helpers.
+
+### Imports
+- pathlib.Path
+- yaml.safe_load
+
+### Constants
+- DEFAULT_TIMEOUT: Integer = 30
+
+### Functions
+- load_config(path: String) -> ParserConfig
+  > Read and validate parser configuration from disk
+- merge_overrides(base: ParserConfig, overrides: Map<String, Any>) -> ParserConfig
+  > Apply runtime overrides to a base configuration
+```
+
+### 4.2 Class Element
 
 A class element contains the class-level information: name, responsibility, and constraints. Members (methods, fields, constants) that have no connections outside their parent class are inlined into the class body rather than existing as separate elements. Only members with external connections get their own canvas elements.
 
@@ -166,7 +218,7 @@ An inlined class element uses `### Fields`, `### Methods`, and `### Constants` s
 - Plugin order must be deterministic
 ```
 
-### 4.2 Method Element
+### 4.3 Method Element
 
 A method element contains the fully qualified method name, a responsibility section, the signature broken into IN/OUT/RAISES, and numbered pseudo code.
 
@@ -199,7 +251,7 @@ Transform raw source into a validated AST, applying all registered plugins in or
 
 Round-trip fidelity: these special forms MUST survive canvas to code to canvas without loss.
 
-### 4.3 Field Element
+### 4.4 Field Element
 
 A field element contains the fully qualified field name, a responsibility section, the type, and any constraints.
 
@@ -217,7 +269,7 @@ Holds parser configuration including tokenizer settings.
 - Validated on construction
 ```
 
-### 4.4 Test Element
+### 4.5 Test Element
 
 A test element contains the test class name, what is being tested, the test methods, and results.
 

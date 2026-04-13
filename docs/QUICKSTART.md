@@ -38,7 +38,7 @@ npx http-server docs
 
 ## What You Get
 
-A professional, dark-themed GitHub Pages website with:
+A professional, warm light-themed GitHub Pages website with:
 
 ✓ **10 Main Sections**
 - Hero with animated background
@@ -57,14 +57,14 @@ A professional, dark-themed GitHub Pages website with:
 - Smooth scroll anchors
 - Fade-in animations on scroll
 - Responsive design (mobile + desktop)
-- Dark theme (GitHub-inspired)
+- Warm "Workshop Table" visual system
 - Inline CSS/JS (no build tools needed)
 - High performance
 - Accessible (WCAG AA)
 
 ✓ **No Dependencies**
 - Pure HTML/CSS/JavaScript
-- Google Fonts only (for Inter typeface)
+- Google Fonts only (Instrument Serif, Source Serif 4, Instrument Sans, JetBrains Mono)
 - Works offline after initial load
 - ~60KB total (index.html)
 
@@ -73,11 +73,11 @@ A professional, dark-themed GitHub Pages website with:
 ### Change Colors
 Edit these lines in `<style>` section:
 ```css
---primary: #0f9690;    /* Teal */
---secondary: #4361ee;  /* Blue */
---accent: #f72585;     /* Pink */
---bg: #0d1117;         /* Dark background */
---card: #161b22;       /* Card background */
+--warm-base: #f4f0ea;       /* Main background */
+--paper: #ffffff;           /* Cards */
+--ink: #1a1f36;             /* Primary text */
+--warm-gray: #8a8078;       /* Secondary text */
+--terracotta: #d94f30;      /* Accent */
 ```
 
 ### Update Links
@@ -142,8 +142,8 @@ Insert before `</body>`:
 <script async src="https://cdn.example.com/analytics.js"></script>
 ```
 
-### 3. Dark/Light Mode Toggle
-The site is dark-only by default. To add a toggle, edit the CSS `theme` variables and add a JavaScript handler.
+### 3. Theme Toggle
+The site currently ships as a warm light theme. To add a light/dark toggle, introduce a second variable set and swap them with a JavaScript handler.
 
 ### 4. Cache Busting
 All assets are inline, so no cache-busting needed. But if you add external resources, use:
@@ -167,7 +167,7 @@ Check that you're opening from the correct path. If using GitHub Pages, links sh
 ```
 
 ### Fonts Not Loading
-Google Fonts requires internet. For offline use, download Inter and host locally.
+Google Fonts requires internet. For offline use, download the current font families and host them locally.
 
 ### Images Not Showing
 All SVG is embedded. If you add external images:

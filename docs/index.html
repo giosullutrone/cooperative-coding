@@ -1057,7 +1057,7 @@
             </svg>
             <h1>CooperativeCoding</h1>
             <p class="hero-subtitle">An open specification for human-AI collaborative software design</p>
-            <div class="version-badge">v2.0.0 &middot; CC-BY-4.0</div>
+            <div class="version-badge">2.0.0 &middot; CC-BY-4.0</div>
             <div class="hero-cta">
                 <a href="https://github.com/giosullutrone/cooperative-coding/blob/main/spec/00-introduction.md" class="btn btn-filled">Read the Spec</a>
                 <a href="#getting-started" class="btn btn-outline">Get Started</a>
@@ -1373,7 +1373,7 @@
             </div>
 
             <div class="stereotype-note">
-                <strong>Stereotypes</strong> extend node semantics with language-specific subtypes. The set is open and extensible: <code>protocol</code>, <code>dataclass</code>, <code>enum</code>, <code>abstract</code>, <code>singleton</code>, <code>mixin</code>, and any others your language binding defines. Unknown stereotypes are preserved and displayed as-is &mdash; implementations must not reject them.
+                <strong>Stereotypes</strong> extend node semantics with language-specific subtypes. The set is open and extensible: <code>protocol</code>, <code>dataclass</code>, <code>enum</code>, <code>abstract</code>, <code>singleton</code>, <code>mixin</code>, and any others your language binding defines. Unknown stereotypes are preserved and displayed as-is; bindings may fall back to a default construct, but implementations must not reject them.
             </div>
         </div>
     </section>
@@ -1390,7 +1390,7 @@
                 <div class="sync-box card">
                     <h3>What Syncs</h3>
                     <ul class="sync-list sync-yes">
-                        <li>New code elements on the canvas generate source files</li>
+                        <li>New code elements on the canvas generate or update source code using the binding's file-organization strategy</li>
                         <li>Changed design content updates documentation in code</li>
                         <li>Responsibility and pseudo code changes propagate to docstrings</li>
                         <li>Relationship changes update inheritance declarations and imports</li>
